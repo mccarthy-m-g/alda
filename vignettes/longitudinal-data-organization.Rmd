@@ -1,0 +1,106 @@
+---
+title: "Longitudinal data organization"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{longitudinal-data-organization}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+#| message: false
+library(alda)
+library(dplyr)
+library(tidyr)
+```
+
+## Longitudinal data formats
+
+Longitudinal data can be organized into two distinct formats:
+
+- A **person-level**, **wide**, or **multivariate**, format where each person has only one row of data and multiple columns containing data from each measurement occasion.
+
+```{r}
+glimpse(deviant_tolerance_pl)
+```
+
+- A **person-period**, **long**, or **univariate**, format where each person has one row of data for each measurement occasion. 
+
+```{r}
+glimpse(deviant_tolerance_pp)
+```
+
+Most R functions expect data to be in the person-period format for visualization and analysis, but it's easy to convert a longitudinal data set from one format to the other.
+
+### Converting between formats
+
+To convert a person-level data set to person-period format use `dplyr::pivot_longer()`:
+
+```{r}
+pivot_longer(
+  deviant_tolerance_pl,
+  cols = starts_with("tolerance_"),
+  names_to = "age",
+  names_pattern = "([[:digit:]]+)",
+  names_transform = as.integer,
+  values_to = "tolerance"
+)
+```
+
+To convert a person-period data set to person-level format use `dplyr::pivot_wider()`:
+
+```{r}
+pivot_wider(
+  deviant_tolerance_pp,
+  names_from = age,
+  names_prefix = "tolerance_",
+  values_from = tolerance
+)
+```
+
+## Adding discrete time indicators to person-period data
+
+To add discrete time indicators to a person-period data set first create a temporary copy of the time variable and a column of ones, then use `dplyr::pivot_wider()`:
+
+```{r}
+deviant_tolerance_pp |>
+  mutate(
+    temp_age = age,
+    temp_dummy = 1
+  ) |>
+  pivot_wider(
+    names_from = temp_age,
+    names_prefix = "age_",
+    values_from = temp_dummy,
+    values_fill = 0
+  )
+```
+
+## Adding contiguous periods to person-level survival data
+
+To add contiguous periods to person-level data first create a person-period data frame with sequences of contiguous periods for each person up to their last observation with `dplyr::reframe()`, then join the person-level data to this with `dplyr::left_join()`:
+
+```{r}
+first_sex |>
+  reframe(grade = 1:max(grade), .by = id) |>
+  left_join(first_sex, by = "id", suffix = c("", ".y")) |>
+  select(-ends_with(".y"))
+```
+
+<!--
+Alternatively, use a sequence of `tidyr::complete()` and `tidyr::fill()` while grouping by ID: 
+
+```{r}
+first_sex |>
+  group_by(id) |>
+  complete(grade = 1:max(grade)) |>
+  fill(everything(), .direction = "up")
+```
+-->

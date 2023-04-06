@@ -1,0 +1,51 @@
+url: https://mccarthy-m-g.github.io/alda/
+
+development:
+  mode: auto
+
+template:
+  bootstrap: 5
+
+reference:
+- title: Data for longitudinal mixed effects modelling
+  desc:
+  contents:
+  - deviant_tolerance
+  - alcohol_use_1
+  - reading_scores
+  - dropout_wages
+  - depression_unemployment
+  - antidepressants
+  - berkeley
+  - externalizing_behaviour
+  - cognitive_growth
+  - opposites_naming
+
+- title: Data for longitudinal structural equation modelling
+  desc:
+  contents:
+  - alcohol_use_2
+
+- title: Data for survival analysis
+  desc:
+  contents:
+  - teachers
+  - cocaine_relapse_1
+  - first_sex
+  - suicide_ideation
+  - congresswomen
+  - tenure
+  - first_depression_1
+  - first_arrest
+  - math_dropout
+  - honking
+  - alcohol_relapse
+  - judges
+  - first_depression_2
+  - health_workers
+  - rearrest
+  - first_cocaine
+  - cocaine_relapse_2
+  - psychiatric_discharge
+  - physicians
+  - monkeys
