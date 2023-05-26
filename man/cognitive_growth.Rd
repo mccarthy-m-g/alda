@@ -25,6 +25,6 @@ cognitive_growth
 }
 \description{
 Data from Tivnan (1980) measuring changes in cognitive growth over a
-three-week period in a sample of 17 firstand second-graders.
+three-week period in a sample of 17 first and second-graders.
 }
 \keyword{datasets}

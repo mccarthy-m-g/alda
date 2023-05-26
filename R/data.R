@@ -247,7 +247,7 @@ NULL
 #' Cognitive growth in children
 #'
 #' Data from Tivnan (1980) measuring changes in cognitive growth over a
-#' three-week period in a sample of 17 firstand second-graders.
+#' three-week period in a sample of 17 first and second-graders.
 #'
 #' @format
 #' A person-period data frame with `r nrow(cognitive_growth)` rows and
