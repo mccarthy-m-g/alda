@@ -1,0 +1,256 @@
+---
+title: "Chapter 8: Modeling change using covariance structure analysis"
+---
+
+::: {.alert .alert-warning}
+This chapter is under construction.
+:::
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(alda)
+library(dplyr)
+library(tidyr)
+library(lavaan)
+library(tidySEM)
+```
+
+Note: Covariance Structure Analysis is just another name for structural equation modelling (SEM).
+
+## 8.1 The General Covariance Structure Model
+
+## 8.2 The Basics of Latent Growth Modeling
+
+Table 8.1, page 282:
+
+```{r}
+alcohol_use_2_wide <- alcohol_use_2 |>
+  pivot_wider(names_from = time, values_from = c(alcohol_use, peer_pressure))
+
+alcohol_use_2_wide
+
+# Means
+alcohol_use_2_wide |>
+  summarise(across(female:peer_pressure_2, mean)) |>
+  glimpse()
+
+# Covariances
+cov(select(alcohol_use_2_wide, -c(id, female)))
+```
+
+Table 8.2, page 289, Model A:
+
+```{r}
+# Model A: Unconditional model
+model_A <- ("
+  # Intercept and slope with fixed coefficients
+  intercept =~ 1*alcohol_use_0 + 1*alcohol_use_1 + 1*alcohol_use_2
+  slope     =~ 0*alcohol_use_0 + .75*alcohol_use_1 + 1.75*alcohol_use_2
+")
+
+model_A_fit <- growth(
+  model_A, data = alcohol_use_2_wide, estimator = "ml", mimic = "Mplus"
+)
+
+summary(model_A_fit)
+fitMeasures(model_A_fit, c("chisq", "df", "pvalue", "cfi", "rmsea"))
+```
+
+Figure 8.2, Model A:
+
+```{r}
+lay <- get_layout(
+  NA, "intercept", NA,  "slope", NA,
+  "alcohol_use_0", NA,  "alcohol_use_1", NA, "alcohol_use_2",
+  rows = 2
+)
+
+graph_sem(model_A_fit, layout = lay)
+```
+
+Table 8.2, page 289, Model B:
+
+```{r}
+# Model B: Adding female as a time-invariant predictor
+model_B <- ("
+  # Intercept and slope with fixed coefficients
+  intercept =~ 1*alcohol_use_0 + 1*alcohol_use_1 + 1*alcohol_use_2
+  slope =~ 0*alcohol_use_0 + .75*alcohol_use_1 + 1.75*alcohol_use_2
+  
+  # Regressions
+  intercept ~ female
+  slope ~ female
+")
+
+model_B_fit <- growth(
+  model_B, data = alcohol_use_2_wide, estimator = "ml", mimic = "Mplus"
+)
+
+summary(model_B_fit)
+fitMeasures(model_B_fit, c("chisq", "df", "pvalue", "cfi", "rmsea"))
+```
+
+Comparison with baseline model for Model B:
+
+```{r}
+# Baseline for Model B (not shown in table)
+model_B_baseline <- ("
+  # Intercept and slope with fixed coefficients
+  intercept =~ 1*alcohol_use_0 + 1*alcohol_use_1 + 1*alcohol_use_2
+  slope =~ 0*alcohol_use_0 + .75*alcohol_use_1 + 1.75*alcohol_use_2
+  
+  # Regressions
+  intercept ~ 0*female
+  slope ~ 0*female
+  
+  alcohol_use_0 ~ 0*1
+  alcohol_use_1 ~ 0*1
+  alcohol_use_2 ~ 0*1
+")
+
+model_B_baseline_fit <- growth(
+  model_B_baseline, data = alcohol_use_2_wide, estimator = "ml", mimic = "Mplus"
+)
+
+anova(model_B_baseline_fit, model_B_fit)
+```
+
+Figure 8.2, Model B:
+
+```{r}
+lay <- get_layout(
+  NA, NA, "female", NA, NA,
+  NA, "intercept", NA,  "slope", NA,
+  "alcohol_use_0", NA,  "alcohol_use_1", NA, "alcohol_use_2",
+  rows = 3
+)
+
+graph_sem(model_B_fit, layout = lay)
+```
+
+Table 8.2, page 289, Model C:
+
+```{r}
+# Model C: Model B but with slope fixed to zero
+model_C <- ("
+  # Intercept and slope with fixed coefficients
+  intercept =~ 1*alcohol_use_0 + 1*alcohol_use_1 + 1*alcohol_use_2
+  slope =~ 0*alcohol_use_0 + .75*alcohol_use_1 + 1.75*alcohol_use_2
+  
+  # Regressions
+  intercept ~ female
+  slope ~ 0*female
+")
+
+model_C_fit <- growth(
+  model_C, data = alcohol_use_2_wide, estimator = "ml", mimic = "Mplus"
+)
+
+summary(model_C_fit)
+fitMeasures(model_C_fit, c("chisq", "df", "pvalue", "cfi", "rmsea"))
+```
+
+Figure 8.2, Model C (same as Model B but with `slope ~ 0*female`):
+
+```{r}
+graph_sem(model_C_fit, layout = lay)
+```
+
+Table 8.2, page 289, Model D:
+
+```{r}
+# Model D: Adding peer_pressure as a time-varying predictor
+model_D <- ("
+  # Intercept and slope with fixed coefficients
+  alc_intercept =~ 1*alcohol_use_0 + 1*alcohol_use_1 + 1*alcohol_use_2
+  alc_slope =~ 0*alcohol_use_0 + .75*alcohol_use_1 + 1.75*alcohol_use_2
+  
+  peer_intercept =~ 1*peer_pressure_0 + 1*peer_pressure_1 + 1*peer_pressure_2
+  peer_slope =~ 0*peer_pressure_0 + .75*peer_pressure_1 + 1.75*peer_pressure_2
+  
+  # Regressions
+  alc_intercept ~ start(.8)*peer_intercept + start(.08)*peer_slope
+  alc_slope ~ start(-.1)*peer_intercept + start(.6)*peer_slope
+  
+  # Time-varying covariances
+  alcohol_use_0 ~~ peer_pressure_0
+  alcohol_use_1 ~~ peer_pressure_1
+  alcohol_use_2 ~~ peer_pressure_2
+  
+  # Fix intercepts to zero
+  alcohol_use_0 ~ 0*1
+  alcohol_use_1 ~ 0*1
+  alcohol_use_2 ~ 0*1
+  peer_pressure_0 ~ 0*1
+  peer_pressure_1 ~ 0*1
+  peer_pressure_2 ~ 0*1
+
+")
+
+model_D_fit <- growth(
+  model_D, data = alcohol_use_2_wide, estimator = "ml", mimic = "Mplus"
+)
+
+summary(model_D_fit)
+fitMeasures(model_D_fit, c("chisq", "df", "pvalue", "cfi", "rmsea"))
+```
+
+Comparison with baseline model for Model D:
+
+```{r}
+# Baseline for Model D (not shown in table)
+model_D_baseline <- ("
+  # Intercepts and slopes with fixed coefficients
+  alc_intercept =~ 1*alcohol_use_0 + 1*alcohol_use_1 + 1*alcohol_use_2
+  alc_slope =~ 0*alcohol_use_0 + .75*alcohol_use_1 + 1.75*alcohol_use_2
+  
+  peer_intercept =~ 1*peer_pressure_0 + 1*peer_pressure_1 + 1*peer_pressure_2
+  peer_slope =~ 0*peer_pressure_0 + .75*peer_pressure_1 + 1.75*peer_pressure_2
+  
+  # Regressions
+  alc_intercept ~ 0*peer_intercept + 0*peer_slope
+  alc_slope ~ 0*peer_intercept + 0*peer_slope
+  
+  # Time-varying covariances
+  alcohol_use_0 ~~ peer_pressure_0
+  alcohol_use_1 ~~ peer_pressure_1
+  alcohol_use_2 ~~ peer_pressure_2
+  
+  alcohol_use_0 ~ 0*1
+  alcohol_use_1 ~ 0*1
+  alcohol_use_2 ~ 0*1
+  peer_pressure_0 ~ 0*1
+  peer_pressure_1 ~ 0*1
+  peer_pressure_2 ~ 0*1
+")
+
+model_D_baseline_fit <- growth(
+  model_D_baseline, data = alcohol_use_2_wide, estimator = "ml", mimic = "Mplus"
+)
+
+anova(model_D_baseline_fit, model_D_fit)
+```
+
+Figure 8.2, Model D:
+
+```{r}
+lay <- get_layout(
+  "peer_pressure_0", NA,  "peer_pressure_1", NA, "peer_pressure_2",
+  NA, "peer_intercept", NA,  "peer_slope", NA,
+  NA, "alc_intercept", NA,  "alc_slope", NA,
+  "alcohol_use_0", NA,  "alcohol_use_1", NA, "alcohol_use_2",
+  rows = 4
+)
+
+graph_sem(model_D_fit, layout = lay)
+```
+
+## 8.3 Cross-Domain Analysis of Change
+
+## 8.4 Extensions of Latent Growth Modeling
