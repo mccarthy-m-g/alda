@@ -1,0 +1,19 @@
+---
+title: "Chapter 12: Extending the discrete-time hazard model"
+---
+
+::: {.alert .alert-warning}
+This chapter is under construction.
+:::
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(alda)
+```
+

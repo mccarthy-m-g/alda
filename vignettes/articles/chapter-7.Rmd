@@ -1,0 +1,86 @@
+---
+title: "Chapter-7: Examining the Multilevel Model’s Error Covariance Structure"
+---
+
+::: {.alert .alert-warning}
+This chapter is under construction.
+:::
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(alda)
+library(dplyr)
+library(tidyr)
+library(glmmTMB)
+```
+
+## 7.1 The "Standard" Specification of the Multilevel Model for Change
+
+Table 7.1:
+
+```{r}
+opposites_naming |>
+  select(-time) |>
+  pivot_wider(
+    names_from = wave,
+    values_from = opposites_naming_score,
+    names_prefix = "opp_"
+  ) |>
+  relocate(baseline_cognitive_score, .after = everything()) |>
+  head(10)
+```
+
+Table 7.2, page 246:
+
+```{r}
+mucog <- mean(opposites_naming$baseline_cognitive_score)
+
+opposites_fit_A <- glmmTMB(
+  opposites_naming_score ~
+    time * I(baseline_cognitive_score - mucog) + (time | id),
+  data = opposites_naming,
+  REML = TRUE
+)
+
+summary(opposites_fit_A)
+```
+
+## 7.2 Using the Composite Model to Understand Assumptions about the Error Covariance Matrix
+
+## 7.3 Postulating an Alternative Error Covariance Structure
+
+Table 7.3, page 258-259:
+
+```{r}
+
+```
+
+Table 7.4, page 265:
+
+```{r}
+summary(opposites_fit_A)
+
+# Toeplitz
+opposites_fit_B <- update(
+  opposites_fit_A,
+  . ~ . - (time | id) + toep(time + 0 | id),
+  dispformula = ~ 0
+)
+
+summary(opposites_fit_B)
+
+# Unstructured
+opposites_fit_C <- update(
+  opposites_fit_A,
+  . ~ . - (time | id) + us(time + 0 | id),
+  dispformula = ~ 0
+)
+
+summary(opposites_fit_C)
+```

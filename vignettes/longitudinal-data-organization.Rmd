@@ -85,22 +85,22 @@ deviant_tolerance_pp |>
 
 ## Adding contiguous periods to person-level survival data
 
-To add contiguous periods to person-level data first create a person-period data frame with sequences of contiguous periods for each person up to their last observation with `dplyr::reframe()`, then join the person-level data to this with `dplyr::left_join()`:
+To add contiguous periods to person-level data use `dplyr::reframe()`:
 
 ```{r}
 first_sex |>
-  reframe(grade = 1:max(grade), .by = id) |>
-  left_join(first_sex, by = "id", suffix = c("", ".y")) |>
-  select(-ends_with(".y"))
-```
-
-<!--
-Alternatively, use a sequence of `tidyr::complete()` and `tidyr::fill()` while grouping by ID: 
-
-```{r}
-first_sex |>
+  # In order to add the event indicator, the time variable needs a different
+  # name in the person-level data from the name we want to use in `reframe()`.
+  # This is a temporary variable so it doesn't matter what the name is.
+  rename(grades = grade) |>
   group_by(id) |>
-  complete(grade = 1:max(grade)) |>
-  fill(everything(), .direction = "up")
+  reframe(
+    grade = 1:max(grades),
+    event = if_else(grade == grades & censor == 0, 1, 0),
+    # To keep predictors from the person-level data, simply list them. If there
+    # are many predictors it might be more convenient to use
+    # `dplyr::left_join()` after `reframe()`.
+    parental_transition,
+    parental_antisociality
+  )
 ```
--->

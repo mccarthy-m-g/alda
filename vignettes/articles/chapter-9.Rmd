@@ -1,0 +1,48 @@
+---
+title: "Chapter 9: "
+---
+
+::: {.alert .alert-warning}
+This chapter is under construction.
+:::
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+ggplot2::theme_set(ggplot2::theme_bw())
+ggplot2::theme_update(
+  panel.grid.major = ggplot2::element_blank(),
+  panel.grid.minor = ggplot2::element_blank()
+)
+```
+
+```{r setup}
+library(alda)
+library(dplyr)
+library(ggplot2)
+```
+
+## 9.1 Should You Conduct a Survival Analysis? The "Whether" and "When" Test
+
+```{r}
+alcohol_relapse
+teachers
+suicide_ideation
+```
+
+## 9.2 Framing a Research Question about Event Occurrence
+
+## 9.3 Censoring: How Complete Are the Data on Event Occurrence?
+
+Figure 9.1:
+
+```{r}
+ggplot(teachers, aes(x = years)) +
+  geom_bar() +
+  geom_text(aes(label = after_stat(count)), stat = "count", vjust = -.5) +
+  scale_x_continuous(breaks = 1:12) +
+  coord_cartesian(ylim = c(0, 550)) +
+  facet_wrap(vars(censor), nrow = 2, labeller = label_both)
+```
