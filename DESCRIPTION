@@ -25,6 +25,7 @@ Suggests:
 Config/Needs/website:
     purrr,
     ggplot2,
+    ggh4x,
     scales,
     patchwork,
     gt,
