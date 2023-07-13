@@ -14,11 +14,12 @@ A person-period data frame with 36997 rows and
 \item{\code{censor}}{Censoring status.}
 \item{\code{interview_age}}{Age at time of interview.}
 \item{\code{female}}{Binary indicator for whether the adult is a female.}
-\item{\code{nsibs}}{Number of siblings.}
+\item{\code{siblings}}{Number of siblings.}
 \item{\code{bigfamily}}{Binary indicator for whether the adult has five or more siblings.}
 \item{\code{period}}{Age each record corresponds to.}
-\item{\code{depress}}{Binary indicator for whether the adult experienced a depressive episode.}
-\item{\code{pd}}{Binary indicator for whether the adult's parents divorced at this or any previous age.}
+\item{\code{depressive_episode}}{Binary indicator for whether the adult experienced a depressive episode.}
+\item{\code{parental_divorce}}{Binary indicator for whether the adult's parents divorced at this or any previous age.}
+\item{\code{parental_divorce_now}}{Binary indicator for whether the adult's parents divorced during the current period.}
 }
 }
 \source{
