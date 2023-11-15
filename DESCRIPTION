@@ -23,22 +23,27 @@ Suggests:
     dplyr,
     tidyr
 Config/Needs/website:
-    purrr,
-    ggplot2,
-    ggh4x,
-    scales,
-    patchwork,
-    gt,
-    corrr,
-    lme4,
-    glmmTMB,
-    lavaan,
-    tidySEM,
-    survival,
     broom,
     broom.mixed,
+    corrr,
+    dplyr,
+    easystats,
+    ggh4x,
+    ggplot2,
+    glmmTMB,
+    gt,
+    lavaan,
+    lme4,
     modelbased,
-    performance
+    muhaz,
+    patchwork,
+    performance,
+    purrr,
+    scales,
+    stringr,
+    survival,
+    tidyr,
+    tidySEM
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
