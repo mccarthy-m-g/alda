@@ -34,6 +34,7 @@ Config/Needs/website:
     gt,
     lavaan,
     lme4,
+    Matrix,
     modelbased,
     muhaz,
     patchwork,
