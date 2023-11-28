@@ -153,16 +153,17 @@ tenure <- tidy_data$tenure_orig |>
 
 first_depression_1 <- tidy_data$depression_pp |>
   rename(
-    depress = event,
+    depressive_episode = event,
     interview_age = age,
-    censor_age = censage
+    censor_age = censage,
+    siblings = nsibs,
+    parental_divorce = pd,
+    parental_divorce_now = pdnow
   ) |>
   select(-(censor_age:aged), -(sibs12:sibs9plus), -(one:age_18cub))
 
 first_arrest <- tidy_data$firstarrest_pp |>
-  rename(
-    abused_black = ablack
-  )
+  select(-starts_with("d"), -ablack)
 
 math_dropout <- tidy_data$mathdropout_pp |>
   rename(
@@ -170,7 +171,13 @@ math_dropout <- tidy_data$mathdropout_pp |>
     term = period,
     last_term = lastpd
   ) |>
-  select(-c(one, ltime))
+  select(
+    -c(one, ltime, fltime),
+    -starts_with("hs"),
+    -starts_with("coll"),
+    -starts_with("fhs"),
+    -starts_with("fcoll")
+  )
 
 # Chapter 13 ------------------------------------------------------------------
 

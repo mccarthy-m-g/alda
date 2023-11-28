@@ -1,0 +1,196 @@
+---
+title: "Chapter 2: Exploring longitudinal data on change"
+---
+
+::: {.alert .alert-warning}
+This chapter is under construction.
+:::
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+ggplot2::theme_set(ggplot2::theme_bw())
+ggplot2::theme_update(
+  panel.grid.major = ggplot2::element_blank(),
+  panel.grid.minor = ggplot2::element_blank()
+)
+```
+
+```{r setup}
+library(alda)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(ggplot2)
+library(lme4)
+library(corrr)
+library(broom)
+```
+
+## 2.1 Creating a longitudinal data set
+
+Figure 2.1, page 18:
+
+```{r}
+# Person-level data set
+deviant_tolerance_pl
+
+# Person-period data set
+deviant_tolerance_pp
+```
+
+Table 2.1, page 20:
+
+```{r}
+deviant_tolerance_pl |>
+  select(starts_with("tolerance")) |>
+  correlate(diagonal = 1) |>
+  shave() |>
+  fashion()
+```
+
+## 2.2 Descriptive analysis of individual change over time
+
+Figure 2.2, page 25:
+
+```{r}
+figure_2.2 <- deviant_tolerance_pp |>
+  ggplot(aes(x = age, y = tolerance)) +
+    geom_point() +
+    coord_cartesian(ylim = c(0, 4)) +
+    facet_wrap(vars(id))
+
+figure_2.2
+```
+
+Figure 2.3, page 27:
+
+```{r}
+figure_2.2 + stat_smooth(method = "loess", se = FALSE, span = .9)
+```
+
+Table 2.2, page 30:
+
+```{r}
+deviant_tolerance_fit <- lmList(
+  tolerance ~ I(age - 11) | id,
+  pool = FALSE,
+  data = deviant_tolerance_pp
+)
+
+summary(deviant_tolerance_fit)
+```
+
+Figure 2.5, page 32:
+
+```{r}
+figure_2.2 + stat_smooth(method = "lm", se = FALSE)
+```
+
+## 2.3 Exploring differences in change across people
+
+Figure 2.6, page 34:
+
+```{r}
+ggplot(mapping = aes(x = age, y = tolerance)) +
+  {
+    map(
+      c("loess", "lm"),
+      \(.x) {
+        list(
+          stat_smooth(
+            data = mutate(deviant_tolerance_pp, method = .x),
+            method = .x, se = FALSE, span = .9, linewidth = 2
+          ),
+          stat_smooth(
+            aes(group = id),
+            data = mutate(deviant_tolerance_pp, method = .x),
+            method = .x, se = FALSE, span = .9, linewidth = 1/4
+          )
+        )
+      }
+    )
+  } +
+  coord_cartesian(ylim = c(0, 4)) +
+  facet_wrap(vars(method), labeller = label_both)
+```
+
+Table 2.3, page 37:
+
+```{r}
+deviant_tolerance_tidy <- map_dfr(deviant_tolerance_fit, tidy, .id = "id")
+
+deviant_tolerance_tidy |>
+  group_by(term) |>
+  summarise(
+    mean = mean(estimate),
+    sd = sd(estimate)
+  )
+
+deviant_tolerance_tidy |>
+  select(id, term, estimate) |>
+  pivot_wider(names_from = term, values_from = estimate) |>
+  select(-id) |>
+  correlate() |>
+  stretch(na.rm = TRUE, remove.dups = TRUE)
+```
+
+Figure 2.7, page 38:
+
+```{r}
+# The list of linear models can be updated and refit to a subset of observations
+# like so:
+tolerance_fit_males <- update(deviant_tolerance_fit, subset = male == 1)
+tolerance_fit_females <- update(deviant_tolerance_fit, subset = male == 0)
+tolerance_fit_low_exp <- update(deviant_tolerance_fit, subset = exposure < 1.145)
+tolerance_fit_high_exp <- update(deviant_tolerance_fit, subset = exposure >= 1.145)
+
+# The data needs to be wrangled to have different subset groupings for plotting:
+deviant_tolerance_pp |>
+  mutate(
+    male = as.character(male),
+    exposure = if_else(exposure < 1.145, "low", "high")
+  ) |>
+  pivot_longer(cols = c(male, exposure)) |>
+  mutate(
+    subset = paste0(name, ": ", value),
+    subset = factor(
+      subset,
+      levels = c(paste0("male: ", 0:1), paste0("exposure: ", c("low", "high")))
+    )
+  ) |>
+  ggplot(aes(x = age, y = tolerance)) +
+    geom_smooth(method = "lm", se = FALSE, linewidth = 2) +
+    geom_smooth(aes(group = id), method = "lm", se = FALSE, linewidth = .25) +
+    coord_cartesian(ylim = c(0, 4)) +
+    facet_wrap(vars(subset))
+```
+
+Figure 2.8, page 40:
+
+```{r}
+deviant_tolerance_tidy <- deviant_tolerance_tidy |>
+  # FIXME: I should encode the variable types in the package so I don't need
+  # to add code like this anywhere.
+  mutate(id = as.double(id)) |>
+  left_join(select(deviant_tolerance_pl, id, male, exposure)) |>
+  mutate(male = factor(male))
+
+# Correlations shown on plots
+deviant_tolerance_tidy |>
+  group_by(term) |>
+  summarise(
+    male_cor = cor(estimate, as.numeric(male)),
+    exposure_cor = cor(estimate, exposure)
+  )
+
+ggplot(deviant_tolerance_tidy, aes(x = male, y = estimate)) +
+  geom_point() +
+  facet_wrap(vars(term))
+
+ggplot(deviant_tolerance_tidy, aes(x = exposure, y = estimate)) +
+  geom_point() +
+  facet_wrap(vars(term))
+```

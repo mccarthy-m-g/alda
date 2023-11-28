@@ -491,11 +491,12 @@ NULL
 #'   \item{`censor`}{Censoring status.}
 #'   \item{`interview_age`}{Age at time of interview.}
 #'   \item{`female`}{Binary indicator for whether the adult is a female.}
-#'   \item{`nsibs`}{Number of siblings.}
+#'   \item{`siblings`}{Number of siblings.}
 #'   \item{`bigfamily`}{Binary indicator for whether the adult has five or more siblings.}
 #'   \item{`period`}{Age each record corresponds to.}
-#'   \item{`depress`}{Binary indicator for whether the adult experienced a depressive episode.}
-#'   \item{`pd`}{Binary indicator for whether the adult's parents divorced at this or any previous age.}
+#'   \item{`depressive_episode`}{Binary indicator for whether the adult experienced a depressive episode.}
+#'   \item{`parental_divorce`}{Binary indicator for whether the adult's parents divorced at this or any previous age.}
+#'   \item{`parental_divorce_now`}{Binary indicator for whether the adult's parents divorced during the current period.}
 #' }
 #' @source
 #' Wheaton, B., Roszell, P., & Hall, K. (1997). The impact of twenty childhood
@@ -521,8 +522,6 @@ NULL
 #'   \item{`censor`}{Censoring status.}
 #'   \item{`abused`}{Binary indicator for whether the adolescent was abused.}
 #'   \item{`black`}{Binary indicator for whether the adolescent is black.}
-#'   \item{`abused_black`}{Binary indicator for whether the adolescent was abused and is black.}
-#'   \item{`d8-d18`}{Discrete time indicators for each age.}
 #'   \item{`period`}{Age each record corresponds to.}
 #'   \item{`event`}{Binary indicator for whether the adolescent was arrested.}
 #' }
@@ -550,8 +549,6 @@ NULL
 #'   \item{`last_term`}{The term a student stopped enrolling in mathematics courses.}
 #'   \item{`woman`}{Binary indicators for whether the student identified as a woman.}
 #'   \item{`censor`}{Censoring status.}
-#'   \item{`hs11-hs12`}{Discrete time indicators for each term of high school.}
-#'   \item{`coll1-coll3`}{Discrete time indicators for each term of college.}
 #'   \item{`term`}{Term each record corresponds to.}
 #'   \item{`event`}{Binary indicator for whether the student stopped enrolling in mathematics courses at a given term.}
 #' }

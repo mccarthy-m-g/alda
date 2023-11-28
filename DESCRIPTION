@@ -22,6 +22,28 @@ Suggests:
     rmarkdown,
     dplyr,
     tidyr
+Config/Needs/website:
+    broom,
+    broom.mixed,
+    corrr,
+    dplyr,
+    easystats,
+    ggh4x,
+    ggplot2,
+    glmmTMB,
+    gt,
+    lavaan,
+    lme4,
+    modelbased,
+    muhaz,
+    patchwork,
+    performance,
+    purrr,
+    scales,
+    stringr,
+    survival,
+    tidyr,
+    tidySEM
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
