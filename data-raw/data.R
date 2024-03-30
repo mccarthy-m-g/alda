@@ -235,6 +235,7 @@ cocaine_relapse_2 <- tidy_data$relapse_days |>
     cols = starts_with("mood"),
     names_to = "followup",
     names_pattern = "([[:digit:]]+)",
+    names_transform = list(followup = as.integer),
     values_to = "mood"
   )
 
