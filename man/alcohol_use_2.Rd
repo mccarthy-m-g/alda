@@ -15,11 +15,6 @@ A person-period data frame with 3366 rows and
 \item{\code{alcohol_use}}{Natural logarithm of the averaged scores of three six-point items measuring frequency of beer, wine, and liquor consumption, respectively.}
 \item{\code{peer_pressure}}{Natural logarithm of a six-point item measuring frequency friends offered alcoholic drinks during the past month.}
 }
-#' @note
-Barnes, Farrell, and Banerjee (1994) report a sample of only 699 adolescents;
-however, they note that this was an ongoing longitudinal study which likely
-explains the sample size discrepancy with the data used by Singer and Willett
-(2003).
 }
 \source{
 Barnes, G. M., Farrell, M. P., & Banerjee, S. (1994). Family influences on
@@ -35,5 +30,11 @@ Data from Barnes, Farrell, and Banerjee (1994) measuring the relation between
 changes in alcohol use and changes in peer pressure to use alcohol in a
 sample of 1122 Black and White adolescents tracked from the beginning of
 seventh grade through the end of eighth grade.
+}
+\note{
+Barnes, Farrell, and Banerjee (1994) report a sample of only 699 adolescents;
+however, they note that this was an ongoing longitudinal study, which likely
+explains the sample size discrepancy with the data used by Singer and Willett
+(2003).
 }
 \keyword{datasets}
