@@ -758,8 +758,8 @@ NULL
 #'
 #' \describe{
 #'   \item{`id`}{Participant ID.}
-#'   \item{`days`}{Number of days until relapse to cocaine use. Relapse was defined as 4 or more days of cocaine use during the week preceding an interview.}
-#'   \item{`censor`}{Censoring status.}
+#'   \item{`days`}{Number of days until relapse to cocaine use or censoring. Relapse was defined as 4 or more days of cocaine use during the week preceding an interview. Study dropouts and lost participants were coded as relapsing to cocaine use, with the number of days until relapse coded as occurring the week after the last follow-up interview attended.}
+#'   \item{`censor`}{Censoring status (0 = relapsed, 1 = censored).}
 #'   \item{`needle`}{Binary indicator for whether cocaine was ever used intravenously.}
 #'   \item{`base_mood`}{Total score on the positive mood subscales (Activity and Happiness) of the Mood Questionnaire (Ryman, Biersner, & LaRocco, 1974), taken at an intake interview during the last week of treatment. Each item used a five point Likert score (ranging from 0 = not at all, to 4 = extremely).}
 #'   \item{`followup`}{Week of follow-up interview.}
