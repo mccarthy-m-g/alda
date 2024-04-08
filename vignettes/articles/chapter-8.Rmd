@@ -11,6 +11,11 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+ggplot2::theme_set(ggplot2::theme_bw())
+ggplot2::theme_update(
+  panel.grid.major = ggplot2::element_blank(),
+  panel.grid.minor = ggplot2::element_blank()
+)
 ```
 
 ```{r setup}
