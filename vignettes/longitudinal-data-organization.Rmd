@@ -31,7 +31,7 @@ Longitudinal data can be organized into two distinct formats:
 glimpse(deviant_tolerance_pl)
 ```
 
-- A **person-period**, **long**, or **univariate**, format where each person has one row of data for each measurement occasion. 
+- A **person-period**, **long**, or **univariate**, format where each person has one row of data for each measurement occasion.
 
 ```{r}
 glimpse(deviant_tolerance_pp)
