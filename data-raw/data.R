@@ -10,7 +10,15 @@ library(janitor)
 sas_data  <- list.files("data-raw/data/raw", full.names = TRUE)
 filenames <- list.files("data-raw/data/raw") |> path_ext_remove()
 sas_data  <- set_names(sas_data, filenames)
-tidy_data <- map(sas_data, \(.x) .x |> read_sas() |> clean_names())
+tidy_data <- sas_data |>
+  map(
+    \(.x) {
+      .x |>
+        read_sas() |>
+        clean_names() |>
+        mutate(across(any_of("id"), as.factor))
+    }
+  )
 
 # Chapter 2 -------------------------------------------------------------------
 
