@@ -6,6 +6,7 @@ development:
 template:
   bootstrap: 5
 
+# Reference page
 reference:
 - title: Data for longitudinal mixed effects modelling
   desc:
@@ -49,3 +50,48 @@ reference:
   - psychiatric_discharge
   - physicians
   - monkeys
+
+navbar:
+  structure:
+    left:  [reference, articles, examples, news]
+  components:
+    # Use custom article menus so textbook examples can have their own menu.
+    articles:
+      text: Tips & Tricks
+      menu:
+      - text: Longitudinal data organization
+        href: articles/longitudinal-data-organization.html
+    examples:
+      text: Textbook examples
+      menu:
+      - text: Longitudinal mixed effects modelling
+      - text: Chapter 2
+        href: articles/chapter-2.html
+      - text: Chapter 4
+        href: articles/chapter-4.html
+      - text: Chapter 5
+        href: articles/chapter-5.html
+      - text: Chapter 6
+        href: articles/chapter-6.html
+      - text: Chapter 7
+        href: articles/chapter-7.html
+      - text: -------
+      - text: Longitudinal structural equation modelling
+      - text: Chapter 8
+        href: articles/chapter-8.html
+      - text: -------
+      - text: Survival analysis
+      - text: Chapter 9
+        href: articles/chapter-9.html
+      - text: Chapter 10
+        href: articles/chapter-10.html
+      - text: Chapter 11
+        href: articles/chapter-11.html
+      - text: Chapter 12
+        href: articles/chapter-12.html
+      - text: Chapter 13
+        href: articles/chapter-13.html
+      - text: Chapter 14
+        href: articles/chapter-14.html
+      - text: Chapter 15
+        href: articles/chapter-15.html

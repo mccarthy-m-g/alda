@@ -1,0 +1,331 @@
+---
+title: "Chapter 11: Fitting basic discrete-time hazard models"
+---
+
+::: {.alert .alert-warning}
+This chapter is under construction.
+:::
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+ggplot2::theme_set(ggplot2::theme_bw())
+ggplot2::theme_update(
+  panel.grid.major = ggplot2::element_blank(),
+  panel.grid.minor = ggplot2::element_blank()
+)
+```
+
+```{r setup}
+library(alda)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(ggplot2)
+library(survival)
+library(broom)
+```
+
+## 11.1 Toward a Statistical Model for DiscreteTime Hazard
+
+Several examples in this chapter rely on the following:
+
+```{r}
+first_sex_fit <- survfit(Surv(grade, 1 - censor) ~ 1, data = first_sex)
+
+first_sex_pt <- c(0, 1) |>
+  map_dfr(
+    \(.x) {
+      first_sex_fit_subset <- update(
+        first_sex_fit, subset = (parental_transition == .x)
+      )
+      
+      first_sex_fit_subset |>
+        survfit0(start.time = 6) |>
+        tidy() |>
+        rename(survival_probability = estimate) |>
+        mutate(
+          hazard_probability = n.event / n.risk,
+          odds = hazard_probability / (1 - hazard_probability),
+          log_odds = log(odds)
+        ) |>
+        select(-starts_with("conf"), -std.error) |>
+        rename(grade = time) |>
+        pivot_longer(
+          cols = c(survival_probability, hazard_probability, odds, log_odds),
+          values_to = "estimate"
+        ) |>
+        # The figure doesn't include data for grade 6 in the hazard function.
+        filter(
+          !(name %in% c("hazard_probability", "odds", "log_odds") & grade == 6)
+        )
+    },
+    .id = "parental_transition"
+  )
+```
+
+Figure 11.1, page 359:
+
+```{r}
+first_sex_pt |>
+  filter(name %in% c("survival_probability", "hazard_probability")) |>
+  ggplot(aes(x = grade, y = estimate, colour = parental_transition)) +
+    geom_hline(
+      aes(yintercept = .5),
+      data = tibble(name = "survival_probability"),
+      alpha = .25,
+      linetype = 2
+    ) +
+    geom_line() +
+    scale_x_continuous(breaks = 6:12) +
+    coord_cartesian(xlim = c(6, 12)) +
+    facet_wrap(vars(name), ncol = 1, scales = "free_y") +
+    ggh4x::facetted_pos_scales(
+      y = list(
+        name == "hazard_probability" ~ scale_y_continuous(limits = c(0, .5)),
+        name == "survival_probability" ~
+          scale_y_continuous(breaks = c(0, .5, 1), limits = c(0, 1))
+      )
+    )
+```
+
+Table 11.1, page 360:
+
+```{r}
+# First two sections of the table
+first_sex_pt |>
+  filter(grade != 6, !(name %in% c("odds", "log_odds"))) |>
+  pivot_wider(names_from = name, values_from = estimate) |>
+  select(everything(), -n.censor, hazard_probability, survival_probability)
+
+# Last section
+first_sex_fit |>
+  tidy() |>
+  rename(survival_probability = estimate) |>
+  mutate(
+    hazard_probability = n.event / n.risk,
+    .before = survival_probability
+  ) |>
+  select(-starts_with("conf"), -std.error, -n.censor) |>
+  rename(grade = time)
+```
+
+Figure 11.2, page 363:
+
+```{r}
+first_sex_pt |>
+  filter(name %in% c("hazard_probability", "odds", "log_odds")) |>
+  mutate(
+    name = factor(name, levels = c("hazard_probability", "odds", "log_odds"))
+  ) |>
+  ggplot(aes(x = grade, y = estimate, colour = parental_transition)) +
+    geom_line() +
+    scale_x_continuous(breaks = 6:12) +
+    coord_cartesian(xlim = c(6, 12)) +
+    facet_wrap(vars(name), ncol = 1, scales = "free_y") +
+    ggh4x::facetted_pos_scales(
+      y = list(
+        name %in% c("hazard_probability", "odds") ~
+          scale_y_continuous(limits = c(0, 1)),
+        name == "log_odds" ~ scale_y_continuous(limits = c(-4, 0))
+      )
+    )
+```
+
+Figure 11.3, page 366:
+
+```{r}
+# Transform to person-period format.
+first_sex_pp <- first_sex |>
+  rename(grades = grade) |>
+  reframe(
+    grade = 7:max(grades),
+    event = if_else(grade == grades & censor == 0, 1, 0),
+    parental_transition,
+    parental_antisociality,
+    .by = id
+  )
+
+# Fit models for each panel.
+first_sex_fit_11.3a <- glm(
+  event ~ parental_transition, family = "binomial", data = first_sex_pp
+)
+first_sex_fit_11.3b <- update(first_sex_fit_11.3a, . ~ . + grade)
+first_sex_fit_11.3c <- update(first_sex_fit_11.3a, . ~ . + factor(grade))
+
+# Plot:
+map_df(
+  list(a = first_sex_fit_11.3a, b = first_sex_fit_11.3b, c = first_sex_fit_11.3c),
+  \(.x) augment(.x, newdata = first_sex_pp),
+  .id = "model"
+) |>
+  ggplot(aes(x = grade, y = .fitted, colour = factor(parental_transition))) +
+  geom_line() +
+  geom_point(
+    aes(y = estimate),
+    data = first_sex_pt |>
+      mutate(parental_transition = as.numeric(parental_transition) - 1) |>
+      filter(name == "log_odds")
+  ) +
+  coord_cartesian(ylim = c(-4, 0)) +
+  facet_wrap(vars(model), ncol = 1, labeller = label_both) +
+  labs(
+    y = "logit(hazard)",
+    colour = "parental_transition"
+  )
+```
+
+## 11.2 A Formal Representation of the Population Discrete-Time Hazard Model
+
+Figure 11.4, page 374:
+
+```{r}
+# Panel A:
+first_sex_fit_11.3c |>
+  augment(newdata = first_sex_pp) |>
+  ggplot(aes(x = grade, y = .fitted, colour = factor(parental_transition))) +
+  geom_line() +
+  coord_cartesian(ylim = c(-4, 0))
+
+# Panel B:
+first_sex_fit_11.4b <- update(
+  first_sex_fit_11.3c,
+  . ~ . + parental_transition * factor(grade)
+)
+
+first_sex_fit_11.4b |>
+  augment(newdata = first_sex_pp) |>
+  ggplot(aes(x = grade, y = exp(.fitted), colour = factor(parental_transition))) +
+  geom_line() +
+  coord_cartesian(ylim = c(0, 1))
+
+# Panel C:
+first_sex_fit_11.4b |>
+  augment(newdata = first_sex_pp, type.predict = "response") |>
+  ggplot(aes(x = grade, y = .fitted, colour = factor(parental_transition))) +
+  geom_line()
+```
+
+## 11.3 Fitting a Discrete-Time Hazard Model to Data
+
+Figure 11.5:
+
+```{r}
+
+```
+
+Table 11.3, page 386:
+
+```{r}
+model_A <- glm(
+  event ~ factor(grade) - 1, family = "binomial", data = first_sex_pp
+)
+model_B <- update(model_A, . ~ . + parental_transition)
+model_C <- update(model_A, . ~ . + parental_antisociality)
+model_D <- update(model_B, . ~ . + parental_antisociality)
+
+anova(model_B)
+anova(model_C)
+# Deviance tests are sequential so the order of terms matters. To test
+# parental_transition and parental_antisociality, the model needs to be
+# fit twice, once with each as the last term.
+anova(update(model_C, . ~ . + parental_transition))
+anova(model_D)
+```
+
+## 11.4 Interpreting Parameter Estimates
+
+Table 11.4, page 388:
+
+```{r}
+model_A |>
+  tidy() |>
+  select(term, estimate) |>
+  mutate(
+    odds = exp(estimate),
+    hazard = 1 / (1 + exp(-estimate))
+  )
+```
+
+## 11.5 Displaying Fitted Hazard and Survivor Functions
+
+Table 11.5, page 392:
+
+```{r}
+model_B_tidy <- model_B |>
+  augment(
+    newdata = expand_grid(grade = 7:12, parental_transition = 0:1)
+  ) |>
+  mutate(
+    hazard = 1 / (1 + exp(-.fitted)),
+    survival = cumprod(1 - hazard),
+    .by = parental_transition
+  )
+
+model_B_tidy
+```
+
+Figure 11.6, page 393:
+
+```{r}
+# FIXME: should use survfit0() for the survival panel so time starts at 6.
+model_B_tidy |>
+  pivot_longer(cols = .fitted:survival) |>
+  ggplot(aes(x = grade, y = value, colour = factor(parental_transition))) +
+  geom_line() +
+  facet_wrap(vars(name), ncol = 1, scales = "free_y")
+```
+
+Figure 11.7, page 395:
+
+```{r}
+prototypical_males <- tibble(
+  id = rep(1:6, times = length(7:12)),
+  expand_grid(
+    grade = 7:12,
+    parental_transition = c(0, 1),
+    parental_antisociality = -1:1
+  )
+)
+
+prototypical_first_sex <- tibble(
+  log_odds = predict(
+    model_D,
+    prototypical_males
+  ),
+  hazard = 1 / (1 + exp(-log_odds))
+)
+
+grade_six <- tibble(
+  id = 1:6,
+  grade = 6,
+  expand_grid(
+    parental_transition = c(0, 1),
+    parental_antisociality = -1:1
+  ),
+  log_odds = NA,
+  hazard = NA,
+  survival = 1
+)
+
+prototypical_males |>
+  bind_cols(prototypical_first_sex) |>
+  mutate(survival = cumprod(1 - hazard), .by = id) |>
+  add_row(grade_six) |>
+  pivot_longer(cols = c(hazard, survival)) |>
+  ggplot(aes(x = grade, y = value, group = id)) +
+    geom_line(
+      aes(
+        colour = factor(parental_antisociality),
+        linetype = factor(parental_transition)
+      )
+    ) +
+    scale_colour_grey(start = 0, end = 0.75) +
+    facet_wrap(
+      vars(name),
+      ncol = 1,
+      scales = "free_y"
+    )
+```

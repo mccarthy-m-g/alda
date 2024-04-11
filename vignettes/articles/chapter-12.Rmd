@@ -1,0 +1,446 @@
+---
+title: "Chapter 12: Extending the discrete-time hazard model"
+---
+
+::: {.alert .alert-warning}
+This chapter is under construction.
+:::
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+ggplot2::theme_set(ggplot2::theme_bw())
+ggplot2::theme_update(
+  panel.grid.major = ggplot2::element_blank(),
+  panel.grid.minor = ggplot2::element_blank()
+)
+```
+
+```{r setup}
+library(alda)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(broom)
+library(ggplot2)
+```
+
+## 12.1 Alternative Specifications for the "Main Effect of TIME"
+
+Table 12.2, page 413:
+
+```{r}
+# Convert to person-period format
+tenure_pp <- tenure |>
+  reframe(
+    year = 1:max(years),
+    event = if_else(year == years & censor == 0, 1, 0),
+    .by = id
+  ) |>
+  mutate(
+    temp_year = year,
+    temp_dummy = 1
+  ) |>
+  pivot_wider(
+    names_from = temp_year,
+    names_prefix = "year_",
+    values_from = temp_dummy,
+    values_fill = 0
+  )
+
+# Fit models
+tenure_fit_general <- glm(
+  event ~ factor(year), family = "binomial", data = tenure_pp
+)
+
+tenure_fit_constant <- glm(
+  event ~ 1, family = "binomial", data = tenure_pp
+)
+
+tenure_fit_linear    <- update(tenure_fit_constant, . ~ year)
+tenure_fit_quadratic <- update(tenure_fit_linear, . ~ . + I(year^2))
+tenure_fit_cubic     <- update(tenure_fit_quadratic, . ~ . + I(year^3))
+tenure_fit_order_4   <- update(tenure_fit_cubic, . ~ . + I(year^4))
+tenure_fit_order_5   <- update(tenure_fit_order_4, . ~ . + I(year^5))
+
+# Compare
+anova(
+  tenure_fit_constant,
+  tenure_fit_linear,
+  tenure_fit_quadratic,
+  tenure_fit_cubic,
+  tenure_fit_order_4,
+  tenure_fit_order_5
+)
+```
+
+Figure 12.1, page 414:
+
+```{r}
+tenure_fit_trajectories <- map_df(
+  list(
+    constant = tenure_fit_constant,
+    linear = tenure_fit_linear,
+    quadratic = tenure_fit_quadratic,
+    cubic = tenure_fit_cubic,
+    general = tenure_fit_general
+  ),
+  \(.x) {
+    augment(.x, newdata = tibble(year = 1:9)) 
+  },
+  .id = "model"
+)
+
+tenure_fit_trajectories |>
+  mutate(
+    model = factor(
+      model, levels = c("constant", "linear", "quadratic", "cubic", "general")
+    ),
+    hazard = if_else(
+      model %in% c("quadratic", "general"), 1 / (1 + exp(-.fitted)), NA
+    ),
+    survival = if_else(
+      model %in% c("quadratic", "general"), cumprod(1 - hazard), NA
+    ),
+    .by = model
+  ) |>
+  rename(logit_hazard = .fitted) |>
+  pivot_longer(cols = logit_hazard:survival, names_to = "estimate") |>
+  mutate(estimate = factor(
+    estimate, levels = c("logit_hazard", "hazard", "survival"))
+  ) |>
+  ggplot(aes(x = year, y = value, colour = model)) +
+    geom_line() +
+    scale_color_brewer(type = "qual", palette = "Dark2") +
+    scale_x_continuous(breaks = 1:9) +
+    facet_wrap(vars(estimate), scales = "free_y", labeller = label_both)
+```
+
+## 12.2 Using the Complementary Log-Log Link to Specify a Discrete-Time Hazard Model
+
+Figure 12.2:
+
+```{r}
+
+```
+
+Figure 12.3, page 423:
+
+```{r}
+first_sex_pp <- first_sex |>
+  rename(grades = grade) |>
+  reframe(
+    grade = 7:max(grades),
+    event = if_else(grade == grades & censor == 0, 1, 0),
+    parental_transition,
+    parental_antisociality,
+    .by = id
+  )
+
+# The nested map_() is used here so we can get an ID column for both the
+# link function and the subset.
+map_dfr(
+  list(logit = "logit", cloglog = "cloglog"),
+  \(.x) {
+    map_dfr(
+      list(`0` = 0, `1` = 1),
+      \(.y) {
+        first_sex_fit <- glm(
+          event ~ factor(grade),
+          family = binomial(link = .x),
+          data = first_sex_pp,
+          subset = c(parental_transition == .y)
+        )
+        
+        augment(first_sex_fit, newdata = tibble(grade = 7:12))
+      },
+      .id = "parental_transition"
+    )
+  },
+  .id = "link"
+) |>
+  ggplot(
+    aes(x = grade, y = .fitted, colour = parental_transition, linetype = link)
+  ) +
+    geom_line()
+
+```
+
+Table 12.3, page 424:
+
+```{r}
+map_dfr(
+  list(cloglog = "cloglog", logit = "logit"),
+  \(.x) {
+    first_sex_fit <- glm(
+      event ~ -1 + factor(grade) + parental_transition,
+      family = binomial(link = .x),
+      data = first_sex_pp
+    )
+    
+    first_sex_fit |>
+      tidy() |>
+      select(term, estimate) |>
+      mutate(
+        base_hazard = case_when(
+          .x == "logit" & term != "parental_transition" ~
+            1 / (1 + exp(-estimate)),
+          .x == "cloglog" & term != "parental_transition" ~
+            1 - exp(-exp(estimate))
+        )
+      )
+  },
+  .id = "link"
+) |>
+  pivot_wider(names_from = link, values_from = c(estimate, base_hazard))
+```
+
+## 12.3 Time-Varying Predictors
+
+Figure 12.4, page 432:
+
+```{r}
+first_depression_fit <- glm(
+  depressive_episode ~ poly(I(period - 18), 3, raw = TRUE) + parental_divorce,
+  family = binomial(link = "logit"),
+  data = first_depression_1
+)
+
+# When a predictor enters the model as part of a matrix of covariates, such as
+# with stats::poly(), it is represented in augment() as a matrix column. A simple
+# workaround to get the predictor on its original scale as a vector is to pass
+# the original data to augment().
+first_depression_predictions <- first_depression_fit |>
+  augment(data = first_depression_1) |>
+  mutate(hazard = 1 / (1 + exp(-.fitted)))
+
+# Proportions of the risk set at each age who experienced an initial depressive
+# episode at that age, as function of their parental divorce status at that age.
+first_depression_proportions <- first_depression_1 |>
+  group_by(period, parental_divorce) |>
+  summarise(
+    total = n(),
+    event = sum(depressive_episode),
+    proportion = event / total,
+    proportion = if_else(proportion == 0, NA, proportion),
+    logit = log(proportion / (1 - proportion))
+  )
+
+# Top plot
+ggplot(mapping = aes(x = period, colour = factor(parental_divorce))) +
+  geom_line(
+    aes(y = hazard), data = first_depression_predictions
+  ) +
+  geom_point(
+    aes(y = proportion), data = first_depression_proportions
+  ) +
+  scale_x_continuous(breaks = seq(0, 40, by = 5), limits = c(0, 40)) +
+  scale_y_continuous(limits = c(0, 0.06))
+
+# Bottom plot
+ggplot(mapping = aes(x = period, colour = factor(parental_divorce))) +
+  geom_line(
+    aes(y = .fitted), data = first_depression_predictions
+  ) +
+  geom_point(
+    aes(y = logit), data = first_depression_proportions
+  ) +
+  scale_x_continuous(breaks = seq(0, 40, by = 5), limits = c(0, 40)) +
+  scale_y_continuous(breaks = seq(-8, -2, by = 1), limits = c(-8, -2))
+```
+
+Figure 12.5, page 437:
+
+```{r}
+first_depression_fit_2 <- update(first_depression_fit, . ~ . + female)
+
+first_depression_fit_2 |>
+  augment(
+    newdata = expand_grid(
+      period = 4:39, parental_divorce = c(0, 1), female = c(0, 1)
+    )
+  ) |>
+  mutate(
+    female = factor(female),
+    parental_divorce = factor(parental_divorce),
+    hazard = 1 / (1 + exp(-.fitted)),
+    survival = cumprod(1 - hazard),
+    .by = c(female, parental_divorce)
+  ) |>
+  pivot_longer(cols = c(hazard, survival), names_to = "estimate") |>
+  ggplot(aes(x = period, y = value, linetype = female, colour = parental_divorce)) +
+    geom_line() +
+    facet_wrap(vars(estimate), ncol = 1, scales = "free_y") +
+    scale_x_continuous(breaks = seq(0, 40, by = 5), limits = c(0, 40))  +
+    ggh4x::facetted_pos_scales(
+      y = list(
+        estimate == "hazard" ~ scale_y_continuous(limits = c(0, .04)),
+        estimate == "survival" ~ scale_y_continuous(limits = c(0, 1))
+      )
+    )
+```
+
+## 12.4 The Linear Additivity Assumption: Uncovering Violations and Simple Solutions
+
+Figure 12.6, page 445:
+
+```{r}
+# Raw
+first_arrest |>
+  group_by(period, abused, black) |>
+  summarise(
+    total = n(),
+    event = sum(event),
+    proportion = event / total,
+    proportion = if_else(proportion == 0, NA, proportion),
+    logit = log(proportion / (1 - proportion))
+  ) |>
+  ungroup() |>
+  mutate(across(c(abused, black), factor)) |>
+  na.omit() |>
+  ggplot(aes(x = period, y = logit, colour = abused, group = abused)) +
+    geom_line() +
+    scale_x_continuous(breaks = 7:19, limits = c(7, 19)) +
+    scale_y_continuous(limits = c(-7, -2)) +
+    facet_wrap(vars(black), labeller = label_both)
+
+# Model
+first_arrest_fit <- glm(
+  event ~ factor(period) + abused + black + abused:black,
+  family = binomial(link = "logit"),
+  data = first_arrest
+)
+
+first_arrest_fit |>
+  augment(
+    newdata = expand_grid(period = 8:18, abused = c(0, 1), black = c(0, 1))
+  ) |>
+  ggplot(
+    aes(
+      x = period, y = .fitted, colour = factor(abused), linetype = factor(black)
+    )
+  ) +
+  geom_line() +
+  scale_x_continuous(breaks = 7:19, limits = c(7, 19)) +
+  scale_y_continuous(limits = c(-8, -2))
+```
+
+Table 12.4, page 449:
+
+```{r}
+model_A <- update(first_depression_fit_2, . ~ . + siblings)
+model_B <- update(
+  first_depression_fit_2, 
+  . ~ . +
+    between(siblings, 1, 2) +
+    between(siblings, 3, 4) +
+    between(siblings, 5, 6) +
+    between(siblings, 7, 8) +
+    between(siblings, 9, Inf)
+)
+model_C <- update(first_depression_fit_2, . ~ . + bigfamily)
+
+tidy(model_A)
+tidy(model_B)
+tidy(model_C)
+```
+
+## 12.5 The proportionality assumption: Uncovering violations and simple solutions
+
+Figure 12.8, page 458:
+
+```{r}
+# Raw
+math_dropout |>
+  group_by(term, woman) |>
+  summarise(
+    total = n(),
+    event = sum(event),
+    proportion = event / total,
+    proportion = if_else(proportion == 0, NA, proportion),
+    logit = log(proportion / (1 - proportion))
+  ) |>
+  ungroup() |>
+  mutate(across(c(woman), factor)) |>
+  na.omit() |>
+  ggplot(aes(x = term, y = logit, colour = woman)) +
+    geom_line()
+
+# Models
+model_A <- glm(
+  event ~ -1 + factor(term) + woman,
+  family = binomial(link = "logit"),
+  data = math_dropout
+)
+model_B <- glm(
+  event ~ -1 + factor(term) + factor(term):woman,
+  family = binomial(link = "logit"),
+  data = math_dropout
+)
+model_C <- update(model_A, . ~ . + woman:I(term - 1))
+
+map_df(
+  list(model_A = model_A, model_B = model_B, model_C = model_C),
+  \(.x) {
+    .x |>
+      augment(newdata = expand_grid(term = 1:5, woman = c(0, 1))) |>
+      mutate(hazard = 1 / (1 + exp(-.fitted)))
+  },
+  .id = "model"
+) |>
+  ggplot(aes(x = term, y = hazard, colour = factor(woman))) +
+    geom_line() +
+    facet_wrap(vars(model))
+```
+
+Table 12.5, page 459:
+
+```{r}
+tidy(model_A)
+tidy(model_B)
+tidy(model_C)
+```
+
+## 12.6 The No Unobserved Heterogeneity Assumption: No Simple Solution
+
+## 12.7 Residual Analysis
+
+Table 12.6, page 465:
+
+```{r}
+first_sex_fit <- glm(
+  event ~ -1 + factor(grade) + parental_transition + parental_antisociality,
+  family = binomial(link = "logit"),
+  data = first_sex_pp
+)
+
+first_sex_fit |>
+  augment(data = first_sex_pp, type.residuals = "deviance") |>
+  select(id:parental_antisociality, .resid) |>
+  filter(id %in% c(22, 112, 166, 89, 102, 87, 67, 212)) |>
+  pivot_wider(
+    id_cols = id,
+    names_from = grade,
+    names_prefix = "grade_",
+    values_from = .resid
+  )
+```
+
+Figure 12.8, page 467:
+
+```{r}
+first_sex_fit |>
+  augment(data = first_sex_pp, type.residuals = "deviance") |>
+  ggplot(aes(x = id, y = .resid)) +
+    geom_point() +
+    geom_hline(yintercept = 0)
+
+first_sex_fit |>
+  augment(data = first_sex_pp, type.residuals = "deviance") |>
+  group_by(id) |>
+  summarise(ss.deviance = sum(.resid^2)) |>
+  ggplot(aes(x = id, y = ss.deviance)) +
+    geom_point()
+```

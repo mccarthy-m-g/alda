@@ -1,0 +1,382 @@
+---
+title: "Chapter 6: Modeling Discontinuous and Nonlinear Change"
+---
+
+::: {.alert .alert-warning}
+This chapter is under construction.
+:::
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+ggplot2::theme_set(ggplot2::theme_bw())
+ggplot2::theme_update(
+  panel.grid.major = ggplot2::element_blank(),
+  panel.grid.minor = ggplot2::element_blank()
+)
+```
+
+```{r setup}
+library(alda)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(ggplot2)
+library(scales)
+library(lme4)
+```
+
+## 6.1 Discontinuous Individual Change
+
+Table 6.1, page 192:
+
+```{r}
+dropout_wages |>
+  filter(id %in% c(206,2365,4384)) |>
+  select(id, log_wages, experience, ged, postsecondary_education) |>
+  mutate(ged_x_experience = ged * experience)
+```
+
+Table 6.2, page 203:
+
+```{r}
+wages_fit_A <- lmer(
+  log_wages ~
+    experience +
+    I(highest_grade - 9) +
+    experience:black +
+    I(unemployment_rate - 7) +
+    (1 + experience | id),
+  data = dropout_wages,
+  REML = FALSE
+)
+
+deviance(wages_fit_A)
+
+wages_fit_B <- update(
+  wages_fit_A,
+  . ~ . - (1 + experience | id) + ged + (1 + experience + ged | id),
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+deviance(wages_fit_B)
+
+wages_fit_C <- update(
+  wages_fit_A,
+  . ~ . + ged,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+deviance(wages_fit_C)
+
+wages_fit_D <- update(
+  wages_fit_A,
+  . ~ 
+    . - 
+    (1 + experience | id) + 
+    postsecondary_education + 
+    (1 + experience + postsecondary_education | id),
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+deviance(wages_fit_D)
+
+wages_fit_E <- update(
+  wages_fit_A,
+  . ~ . + postsecondary_education
+)
+
+deviance(wages_fit_E)
+
+wages_fit_F <- update(
+  wages_fit_A,
+  . ~ 
+    . -
+    (1 + experience | id) + 
+    ged + 
+    postsecondary_education + 
+    (1 + experience + ged + postsecondary_education | id),
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+deviance(wages_fit_F)
+
+wages_fit_G <- update(
+  wages_fit_F,
+  . ~
+    . - 
+    (1 + experience + ged + postsecondary_education | id) +
+    (1 + experience + ged | id)
+)
+
+deviance(wages_fit_G)
+
+wages_fit_H <- update(
+  wages_fit_F,
+  . ~
+    . - 
+    (1 + experience + ged + postsecondary_education | id) +
+    (1 + experience + postsecondary_education | id)
+)
+
+deviance(wages_fit_H)
+
+# FIXME: Singular
+wages_fit_I <- update(
+  wages_fit_A,
+  . ~ 
+    . -
+    (1 + experience | id) +
+    ged +
+    experience:ged +
+    (1 + experience + ged + experience:ged | id)
+)
+
+deviance(wages_fit_I)
+
+wages_fit_J <- update(
+  wages_fit_I,
+  . ~ 
+    . -
+    (1 + experience + ged + experience:ged | id) +
+    (1 + experience + ged | id)
+)
+
+deviance(wages_fit_J)
+
+anova(wages_fit_A, wages_fit_B, wages_fit_D)
+anova(wages_fit_B, wages_fit_C, wages_fit_F, wages_fit_I)
+anova(wages_fit_D, wages_fit_E, wages_fit_F)
+anova(wages_fit_F, wages_fit_G, wages_fit_H)
+anova(wages_fit_I, wages_fit_J)
+```
+
+Table 6.3, page 205:
+
+```{r}
+summary(wages_fit_F)
+```
+
+Figure 6.3:
+
+```{r}
+prototypical_dropouts <- tibble(
+  experience = rep(c(0, 3, 3, 12), times = 4),
+  highest_grade = rep(c(9, 12), each = 4, times = 2),
+  black = rep(c(FALSE, TRUE), each = 8),
+  ged = rep(c(0, 0, 1, 1), times = 4),
+  unemployment_rate = 7
+) |>
+  mutate(postsecondary_education = ifelse(ged == 0, 0, experience - 3))
+
+prototypical_dropout_scores <- tibble(
+  log_wages = predict(
+    wages_fit_F,
+    prototypical_dropouts,
+    re.form = NA
+  )
+)
+
+prototypical_dropouts |>
+  bind_cols(prototypical_dropout_scores) |>
+  ggplot(aes(x = experience, y = log_wages, colour = as.logical(black))) +
+    geom_line() +
+    scale_x_continuous(breaks = seq(0, 10, by = 2)) +
+    coord_cartesian(xlim = c(0, 10), ylim = c(1.6, 2.4)) +
+    facet_wrap(vars(highest_grade))
+```
+
+## 6.2 Using Transformations to Model Nonlinear Individual Change
+
+Figure 6.4, page 209:
+
+```{r}
+alcohol_fit <- lmer(
+  alcohol_use ~ 
+    I(age - 14) * peer_alcohol_use + child_of_alcoholic + (1 + I(age - 14) | id),
+  data = alcohol_use_1,
+  REML = FALSE
+)
+
+prototypical_alcohol_users <- tibble(
+  age = rep(seq(14, 16, by = .25), times = 4),
+  child_of_alcoholic = rep(c(0, 1), each = 9, times = 2),
+  peer_alcohol_use = rep(c(.655, 1.381), each = 18)
+)
+
+prototypical_alcohol_use <- tibble(
+  alcohol_use = predict(
+    alcohol_fit,
+    prototypical_alcohol_users,
+    re.form = NA
+  )
+)
+
+prototypical_alcohol_users |>
+  bind_cols(prototypical_alcohol_use) |>
+  mutate(alcohol_use = alcohol_use^2) |>
+  ggplot(aes(x = age, y = alcohol_use, colour = factor(peer_alcohol_use))) +
+    geom_line() +
+    facet_wrap(vars(child_of_alcoholic)) +
+    coord_cartesian(xlim = c(13, 17), ylim = c(0, 3))
+
+```
+
+Figure 6.6, page 212:
+
+```{r}
+ ggplot(berkeley, aes(x = age, y = iq)) +
+  geom_point(data = \(.x) mutate(.x, group = "1: untransformed")) +
+  geom_point(data = \(.x) mutate(.x, iq = iq^(2.3), group = "2: iq^(2.3)")) +
+  geom_point(data = \(.x) mutate(.x, age = age^(1/2.3), group = "3: age^(1/2.3)")) +
+  facet_wrap(vars(group), scales = "free")
+```
+
+## 6.3 Representing Individual Change Using a Polynomial Function of TIME
+
+Figure 6.7, page 218:
+
+```{r}
+# Polynomial formulas for plotting:
+linear <- formula(y ~ x)
+quadratic <- formula(y ~ x + I(x^2))
+cubic <- formula(y ~ x + I(x^2) + I(x^3))
+quartic <- formula(y ~ x + I(x^2) + I(x^3) + I(x^4))
+
+# We need to pmap() over geoms to get facets with unique subsets of data and
+# smooths since there's no aesthetic mappings for geom_smooth() formulas.
+participant_params <- list(
+  list(1, 6, 11, 25, 34, 36, 40, 26),
+  LETTERS[1:8],
+  list(quadratic, quadratic, linear, linear, cubic, quartic, cubic, quartic)
+)
+
+ggplot(mapping = aes(x = grade, y = externalizing_behaviour)) +
+  {
+    pmap(
+      participant_params,
+      \(.x, .y, .z) {
+        # Subset data to a given id and add a case variable for faceting.
+        participant_data <- externalizing_behaviour |>
+          filter(id == .x) |>
+          mutate(participant = .y)
+        
+        # Rather than adding the geoms together with + they need to be returned
+        # as a list of geoms to be added to the plot from within pmap().
+        list(
+          geom_point(data = participant_data),
+          geom_smooth(
+            data = participant_data,
+            method = "lm", formula = quartic, se = FALSE,
+            linewidth = .25, linetype = 2
+          ),
+          geom_smooth(
+            data = participant_data,
+            method = "lm", formula = .z, se = FALSE, linewidth = .5
+          )
+        )
+      }
+    )
+  } +
+  scale_x_continuous(breaks = 0:7) +
+  coord_cartesian(xlim = c(0, 7)) +
+  facet_wrap(vars(participant), nrow = 2)
+```
+
+Table 6.5, page 221:
+
+```{r}
+behaviour_fit_A <- lmer(
+  externalizing_behaviour ~ 1 + (1 | id),
+  data = externalizing_behaviour,
+  REML = FALSE
+)
+
+summary(behaviour_fit_A)
+
+behaviour_fit_B <- lmer(
+  externalizing_behaviour ~ time + (1 + time | id),
+  data = externalizing_behaviour,
+  REML = FALSE
+)
+
+summary(behaviour_fit_B)
+
+behaviour_fit_C <- lmer(
+  externalizing_behaviour ~
+    poly(time, 2, raw = TRUE) + (1 + poly(time, 2, raw = TRUE) | id),
+  data = externalizing_behaviour,
+  REML = FALSE
+)
+
+summary(behaviour_fit_C)
+
+# Singular
+behaviour_fit_D <- lmer(
+  externalizing_behaviour ~
+    poly(time, 3, raw = TRUE) + (1 + poly(time, 3, raw = TRUE) | id),
+  data = externalizing_behaviour,
+  REML = FALSE
+)
+
+summary(behaviour_fit_D)
+```
+
+## 6.4 Truly Nonlinear Trajectories
+
+Figure 6.8, page 227:
+
+```{r}
+cognitive_growth |>
+  filter(id %in% c(1, 4, 6, 7, 8, 11, 12, 15)) |>
+  ggplot(aes(x = game, y = nmoves)) +
+  geom_point() +
+  coord_cartesian(xlim = c(0, 30), ylim = c(0, 25)) +
+  facet_wrap(vars(id), ncol = 4, labeller = label_both)
+```
+
+Help wanted for Table 6.6, page 231, see: <https://github.com/mccarthy-m-g/alda/issues/3>
+
+<!--
+$$
+\begin{alignat}{3}
+&\text{Level 1:}& \qquad
+  Y_{ij} &= 1 + \frac{19}{1 + \Pi_{0i} e^{-(\Pi_{1i} t_{ij})}} + \epsilon_{ij} \\
+  
+&\text{Level 2:} \\\\
+&\qquad\text{(A)}&
+  \Pi_{0i} &= \gamma_{00} + \zeta_{0i} \\&&
+  \Pi_{1i} &= \gamma_{10} + \zeta_{1i} \\\\
+
+&\qquad\text{(B)}&
+  \Pi_{0i} &= \gamma_{00} + \gamma_{01}(\mathrm{READ}_i - \overline{\mathrm{READ}}) +
+              \zeta_{0i} \\&&
+  \Pi_{1i} &= \gamma_{10} + \gamma_{11}(\mathrm{READ}_i - \overline{\mathrm{READ}}) + 
+              \zeta_{1i}
+\end{alignat}
+$$
+-->
+
+<!--
+Table 6.6, page 231 with formulas used in website examples models: <https://stats.oarc.ucla.edu/sas/examples/alda/chapter6/applied-longitudinal-data-analysis-modeling-change-and-event-occurrenceby-judith-d-singer-and-john-b-willett-chapter-6-modeling-discontinuous-and-nonlinear-c/>. Note: These seem to be the models that were actually used in the table, but I don't understand how these were attained given the equations in the textbook.
+
+$$
+\begin{alignat}{3}
+&\text{Model A:}& \qquad
+  Y_{ij} &= 1 + \frac{19}{1 + \gamma_{00} * e^{-(\gamma_{10} + u_1) t + u_0}} +
+            \epsilon_{ij} \\\\
+
+&\text{Model B:}& \qquad
+  Y_{ij} &= 1 + \frac{19}{1 + \gamma_{00} * e^{-((\gamma_{10} + u_1) t +
+            \gamma_{01}x + \gamma_{11}xt + u_0)}} + \epsilon_{ij}
+\end{alignat}
+$$
+-->
+
+Figure 6.10, page 232:
+
+```{r}
+# TODO after resolving the equations and code for Models A and B.
+```

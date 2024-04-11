@@ -311,9 +311,9 @@ NULL
 #'   \item{`alcohol_use`}{Natural logarithm of the averaged scores of three six-point items measuring frequency of beer, wine, and liquor consumption, respectively.}
 #'   \item{`peer_pressure`}{Natural logarithm of a six-point item measuring frequency friends offered alcoholic drinks during the past month.}
 #' }
-#' #' @note
+#' @note
 #' Barnes, Farrell, and Banerjee (1994) report a sample of only 699 adolescents;
-#' however, they note that this was an ongoing longitudinal study which likely
+#' however, they note that this was an ongoing longitudinal study, which likely
 #' explains the sample size discrepancy with the data used by Singer and Willett
 #' (2003).
 #' @source
@@ -491,11 +491,12 @@ NULL
 #'   \item{`censor`}{Censoring status.}
 #'   \item{`interview_age`}{Age at time of interview.}
 #'   \item{`female`}{Binary indicator for whether the adult is a female.}
-#'   \item{`nsibs`}{Number of siblings.}
+#'   \item{`siblings`}{Number of siblings.}
 #'   \item{`bigfamily`}{Binary indicator for whether the adult has five or more siblings.}
 #'   \item{`period`}{Age each record corresponds to.}
-#'   \item{`depress`}{Binary indicator for whether the adult experienced a depressive episode.}
-#'   \item{`pd`}{Binary indicator for whether the adult's parents divorced at this or any previous age.}
+#'   \item{`depressive_episode`}{Binary indicator for whether the adult experienced a depressive episode.}
+#'   \item{`parental_divorce`}{Binary indicator for whether the adult's parents divorced at this or any previous age.}
+#'   \item{`parental_divorce_now`}{Binary indicator for whether the adult's parents divorced during the current period.}
 #' }
 #' @source
 #' Wheaton, B., Roszell, P., & Hall, K. (1997). The impact of twenty childhood
@@ -521,8 +522,6 @@ NULL
 #'   \item{`censor`}{Censoring status.}
 #'   \item{`abused`}{Binary indicator for whether the adolescent was abused.}
 #'   \item{`black`}{Binary indicator for whether the adolescent is black.}
-#'   \item{`abused_black`}{Binary indicator for whether the adolescent was abused and is black.}
-#'   \item{`d8-d18`}{Discrete time indicators for each age.}
 #'   \item{`period`}{Age each record corresponds to.}
 #'   \item{`event`}{Binary indicator for whether the adolescent was arrested.}
 #' }
@@ -550,8 +549,6 @@ NULL
 #'   \item{`last_term`}{The term a student stopped enrolling in mathematics courses.}
 #'   \item{`woman`}{Binary indicators for whether the student identified as a woman.}
 #'   \item{`censor`}{Censoring status.}
-#'   \item{`hs11-hs12`}{Discrete time indicators for each term of high school.}
-#'   \item{`coll1-coll3`}{Discrete time indicators for each term of college.}
 #'   \item{`term`}{Term each record corresponds to.}
 #'   \item{`event`}{Binary indicator for whether the student stopped enrolling in mathematics courses at a given term.}
 #' }
@@ -746,10 +743,14 @@ NULL
 
 #' Days to cocaine relapse after abstinence
 #'
-#' Data from Hall and colleagues (1990) measuring the relation between the
-#' number of days of relapse to cocaine use and several predictors that might
-#' be associated relapse in a sample of 104 newly abstinent cocaine users.
-#' Former addicts were followed for up to 12 weeks or until relapse.
+#' A subset of unpublished data from Hall, Havassy, and Wasserman (1990)
+#' measuring the relation between the number of days until relapse to cocaine
+#' use and several predictors that might be associated with relapse in a sample
+#' of 104 newly abstinent cocaine users who recently completed an
+#' abstinence-oriented treatment program. Former cocaine users were followed for
+#' up to 12 weeks post-treatment or until they used cocaine for 7 consecutive
+#' days. Self-reported abstinence was confirmed at each interview by the absence
+#' of cocaine in urine specimens.
 #'
 #' @format
 #' A person-period data frame with `r nrow(cocaine_relapse_2)` rows and
@@ -757,18 +758,30 @@ NULL
 #'
 #' \describe{
 #'   \item{`id`}{Participant ID.}
-#'   \item{`days`}{Number of days of relapse to cocaine use.}
-#'   \item{`censor`}{Censoring status.}
+#'   \item{`days`}{Number of days until relapse to cocaine use or censoring. Relapse was defined as 4 or more days of cocaine use during the week preceding an interview. Study dropouts and lost participants were coded as relapsing to cocaine use, with the number of days until relapse coded as occurring the week after the last follow-up interview attended.}
+#'   \item{`censor`}{Censoring status (0 = relapsed, 1 = censored).}
 #'   \item{`needle`}{Binary indicator for whether cocaine was ever used intravenously.}
-#'   \item{`base_mood`}{Positive mood score on a standardized question at an intake interview taken during the last week of treatment.}
+#'   \item{`base_mood`}{Total score on the positive mood subscales (Activity and Happiness) of the Mood Questionnaire (Ryman, Biersner, & LaRocco, 1974), taken at an intake interview during the last week of treatment. Each item used a five point Likert score (ranging from 0 = not at all, to 4 = extremely).}
 #'   \item{`followup`}{Week of follow-up interview.}
-#'   \item{`mood`}{Positive mood score on a standardized question.}
+#'   \item{`mood`}{Total score on the positive mood subscales (Activity and Happiness) of the Mood Questionnaire (Ryman, Biersner, & LaRocco, 1974), taken during follow-up interviews each week post-treatment. Each item used a five point Likert score (ranging from 0 = not at all, to 4 = extremely).}
 #' }
+#' @note
+#' Hall, Havassy, and Wasserman (1990) measured time to relapse in weeks, not
+#' days; however, to use these data to illustrate imputation strategies, Singer
+#' and Willett (2003) converted the weekly relapse information into days, then
+#' jittered these event times, effectively converting them from discrete-time to
+#' continuous-time. Additionally, Hall, Havassy, and Wasserman (1990) do not
+#' report following cocaine users in their study, thus, this appears to be
+#' unpublished data.
 #' @source
 #' Hall, S. M., Havassy, B. E., & Wasserman, D. A. (1990). Commitment to
 #' abstinence and acute stress in relapse to alcohol, opiates, and nicotine.
 #' Journal of Consulting and Clinical Psychology, 58, 175–181.
 #' <https://doi.org/10.1037//0022-006x.58.2.175>
+#' @references
+#' Ryman, D. H., Biersner, R. J., & La Rocco, J. M. (1974). Reliabilities and
+#' validities of the Mood Questionnaire. Psychological Reports, 35, 479-484.
+#' <https://doi.org/10.2466/pr0.1974.35.1.479>
 "cocaine_relapse_2"
 
 #' Days to psychiatric hospital discharge

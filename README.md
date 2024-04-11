@@ -4,7 +4,7 @@
 [![R-CMD-check](https://github.com/mccarthy-m-g/alda/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mccarthy-m-g/alda/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
   
-This package contains 31 data sets provided by Singer and Willet (2003) with their book, Applied longitudinal data analysis: Modeling change and event occurrence, that are suitable for longitudinal mixed effects modelling, longitudinal structural equation modelling, and survival analysis. All the data sets in this package are real data from real studies; however, most were modified by Singer and Willet (2003) for the illustration of statistical methods, so they may not match the results of the original studies. Additionally, the early intervention data used throughout Chapter 3 is not included in this package because it is not openly available.
+This package contains 31 data sets provided by Singer and Willet (2003) with their book, *Applied longitudinal data analysis: Modeling change and event occurrence*, that are suitable for longitudinal mixed effects modelling, longitudinal structural equation modelling, and survival analysis. All the data sets in this package are real data from real studies; however, most were modified by Singer and Willet (2003) for the illustration of statistical methods, so they may not match the results of the original studies. Additionally, the early intervention data used throughout Chapter 3 is not included in this package because it is not openly available.
 
 There are ten data sets for longitudinal mixed effects modelling:
 
@@ -36,15 +36,37 @@ There are twenty data sets for survival analysis:
 - `?math_dropout`: Math course history (Chapter 12)
 - `?honking`: Time to horn honking (Chapter 13)
 - `?alcohol_relapse`: Weeks to alcohol relapse after treatment (Chapter 13)
-- `?judges`: Supreme Court justice tenure (Chapter 13)
+- `?judges`: Supreme Court justice tenure (Chapters 13 and 15)
 - `?first_depression_2`: Age of first depression (Chapter 13)
 - `?health_workers`: Length of health worker employment (Chapter 13)
-- `?rearrest`: Days to inmate recidivism (Chapter 14)
+- `?rearrest`: Days to inmate recidivism (Chapters 14 and 15)
 - `?first_cocaine`: Age of first cocaine use (Chapter 15)
 - `?cocaine_relapse_2`: Days to cocaine relapse after abstinence (Chapter 15)
 - `?psychiatric_discharge`: Days to psychiatric hospital discharge (Chapter 15)
 - `?physicians`: Physician career history (Chapter 15)
 - `?monkeys`: Piagetian monkeys (Chapter 15)
+
+## Vignettes and articles
+
+There is one vignette with tips and tricks for working with longitudinal data:
+
+- `vignette("longitudinal-data-organization")`
+
+There are fourteen articles on the package documentation website demonstrating how to recreate examples from the textbook in R:
+
+- [Chapter 2](articles/chapter-2.html): Exploring longitudinal data on change
+- [Chapter 4](articles/chapter-4.html): Doing data analysis with the multilevel model for change
+- [Chapter 5](articles/chapter-5.html): Treating time more flexibly
+- [Chapter 6](articles/chapter-6.html): Modeling discontinuous and nonlinear change
+- [Chapter 7](articles/chapter-7.html): Examining the multilevel model’s error covariance structure
+- [Chapter 8](articles/chapter-8.html): Modeling change using covariance structure analysis
+- [Chapter 9](articles/chapter-9.html): A framework for investigating event occurrence
+- [Chapter 10](articles/chapter-10.html): Describing discrete-time event occurrence data
+- [Chapter 11](articles/chapter-11.html): Fitting basic discrete-time hazard models
+- [Chapter 12](articles/chapter-12.html): Extending the discrete-time hazard model
+- [Chapter 13](articles/chapter-13.html): Describing continuous-time event occurrence data
+- [Chapter 14](articles/chapter-14.html): Fitting the Cox regression model
+- [Chapter 15](articles/chapter-15.html): Extending the Cox regression model
 
 ## Documentation
 

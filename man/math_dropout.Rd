@@ -6,15 +6,13 @@
 \title{Math course History}
 \format{
 A person-period data frame with 9558 rows and
-17 columns:
+6 columns:
 
 \describe{
 \item{\code{id}}{Participant ID.}
 \item{\code{last_term}}{The term a student stopped enrolling in mathematics courses.}
 \item{\code{woman}}{Binary indicators for whether the student identified as a woman.}
 \item{\code{censor}}{Censoring status.}
-\item{\code{hs11-hs12}}{Discrete time indicators for each term of high school.}
-\item{\code{coll1-coll3}}{Discrete time indicators for each term of college.}
 \item{\code{term}}{Term each record corresponds to.}
 \item{\code{event}}{Binary indicator for whether the student stopped enrolling in mathematics courses at a given term.}
 }

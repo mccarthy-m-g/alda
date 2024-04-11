@@ -1,0 +1,866 @@
+---
+title: "Chapter 15: Extending the Cox regression model"
+---
+
+::: {.alert .alert-warning}
+This chapter is under construction.
+:::
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+ggplot2::theme_set(ggplot2::theme_bw())
+ggplot2::theme_update(
+  panel.grid.major = ggplot2::element_blank(),
+  panel.grid.minor = ggplot2::element_blank()
+)
+```
+
+```{r setup}
+library(alda)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(slider)
+library(vctrs)
+library(ggplot2)
+library(patchwork)
+library(survival)
+library(muhaz)
+library(broom)
+```
+
+## 15.1 Time-Varying Predictors
+
+Table 15.1, page 548:
+
+```{r}
+# TODO: Clean up code and make table
+model_A <- coxph(
+  Surv(used_cocaine_age, 1 - censor) ~
+    birthyr + early_marijuana_use + early_drug_use,
+  data = first_cocaine
+)
+
+# Model B ----
+first_cocaine_pp <- first_cocaine |>
+  group_by(id) |>
+  reframe(
+    # {survival} uses the counting process method for time-varying predictors,
+    # so we need to construct intervals for the ages at which different events
+    # occurred. These intervals are left-censored, so we start with the end
+    # time; we also only require unique intervals, so duplicate ages should be
+    # removed.
+    age_end = sort(unique(c(used_cocaine_age, used_marijuana_age, used_drugs_age))),
+    age_start = lag(age_end, default = 0),
+    # Time-varying predictors should be lagged so that they describe an individual's
+    # status in the immediately prior year.
+    used_cocaine = if_else(
+      age_end == used_cocaine_age & censor == 0, true = 1, false = 0, missing = 0
+    ),
+    used_marijuana = if_else(
+      age_end > used_marijuana_age, true = 1, false = 0, missing = 0
+    ),
+    used_drugs = if_else(
+      age_end > used_drugs_age, true = 1, false = 0, missing = 0
+    ),
+    # Keep time-invariant predictors from the person-level data
+    birthyr
+  ) |>
+  relocate(age_start, .before = age_end)
+
+model_B <- coxph(
+  Surv(age_start, age_end, used_cocaine) ~
+    birthyr + used_marijuana + used_drugs,
+  data = first_cocaine_pp,
+  ties = "efron"
+)
+
+## This method with tmerge() also works
+tmerge(
+  first_cocaine, first_cocaine,
+  id = id,
+  used_cocaine = event(used_cocaine_age, 1 - censor),
+  used_marijuana = tdc(used_marijuana_age),
+  used_drugs = tdc(used_drugs_age),
+  options = list(
+    tstartname = "age_start",
+    tstopname = "age_end"
+  )
+) |> as_tibble() |> arrange(id)
+
+coxph(
+  Surv(age_start, age_end, used_cocaine) ~
+    birthyr + used_marijuana + used_drugs,
+  data = tmerge(
+    first_cocaine, first_cocaine,
+    id = id,
+    used_cocaine = event(used_cocaine_age, 1 - censor),
+    used_marijuana = tdc(used_marijuana_age),
+    used_drugs = tdc(used_drugs_age),
+    options = list(
+      tstartname = "age_start",
+      tstopname = "age_end"
+    )
+  ),
+  ties = "efron"
+) |>
+  summary()
+
+# Model C and D ----
+first_cocaine_pp_C <- first_cocaine |>
+  group_by(id) |>
+  reframe(
+    age_end = sort(
+      unique(
+        c(
+          used_cocaine_age,
+          used_marijuana_age,
+          used_drugs_age,
+          sold_marijuana_age,
+          sold_drugs_age
+        )
+      )
+    ),
+    age_start = lag(age_end, default = 0),
+    # Time-varying predictors should be lagged so that they describe an individual's
+    # status in the immediately prior year.
+    used_cocaine = if_else(
+      age_end == used_cocaine_age & censor == 0, true = 1, false = 0, missing = 0
+    ),
+    used_marijuana = if_else(
+      age_end > used_marijuana_age, true = 1, false = 0, missing = 0
+    ),
+    used_drugs = if_else(
+      age_end > used_drugs_age, true = 1, false = 0, missing = 0
+    ),
+    sold_marijuana = if_else(
+      age_end > sold_marijuana_age, true = 1, false = 0, missing = 0
+    ),
+    sold_drugs = if_else(
+      age_end > sold_drugs_age, true = 1, false = 0, missing = 0
+    ),
+    # Keep time-invariant predictors from the person-level data
+    birthyr,
+    early_marijuana_use,
+    early_drug_use,
+    rural
+  ) |>
+  relocate(age_start, .before = age_end)
+
+first_cocaine_model_C <- coxph(
+  Surv(age_start, age_end, used_cocaine) ~
+    birthyr + used_marijuana + used_drugs + sold_marijuana + sold_drugs,
+  data = first_cocaine_pp_C,
+  ties = "efron"
+)
+
+model_D <- update(first_cocaine_model_C, . ~ . + early_marijuana_use + early_drug_use)
+```
+
+### 15.1.3 Imputation Strategies for Time-Varying Predictors
+
+In Section 15.1.3 Singer and Willet (2003) discuss imputation strategies for time-varying predictors using a subset of unpublished data from Hall, Havassy, and Wasserman (1990), who measured the relation between the number of days until relapse to cocaine use and several predictors that might be associated with relapse in a sample of 104 newly abstinent cocaine users who recently completed an abstinence-oriented treatment program. Former cocaine users were followed for up to 12 weeks post-treatment or until they used cocaine for 7 consecutive days. Self-reported abstinence was confirmed at each interview by the absence of cocaine in urine specimens.
+
+For this example we use the `cocaine_relapse_2` data set, a person-period data frame with 1248 rows and 7 columns:
+
+- `id`: Participant ID.
+- `days`: Number of days until relapse to cocaine use or censoring. Relapse was defined as 4 or more days of cocaine use during the week preceding an interview. Study dropouts and lost participants were coded as relapsing to cocaine use, with the number of days until relapse coded as occurring the week after the last follow-up interview attended.
+- `censor`: Censoring status (0 = relapsed, 1 = censored).
+- `needle`: Binary indicator for whether cocaine was ever used intravenously.
+- `base_mood`: Total score on the positive mood subscales (Activity and Happiness) of the Mood Questionnaire (Ryman, Biersner, & LaRocco, 1974), taken at an intake interview during the last week of treatment. Each item used a five point Likert score (ranging from 0 = not at all, to 4 = extremely).
+- `followup`: Week of follow-up interview.
+-`mood`: Total score on the positive mood subscales (Activity and Happiness) of the Mood Questionnaire (Ryman, Biersner, & LaRocco, 1974), taken during follow-up interviews each week post-treatment. Each item used a five point Likert score (ranging from 0 = not at all, to 4 = extremely).
+
+```{r}
+glimpse(cocaine_relapse_2)
+```
+
+Because time to relapse was measured in days but follow-up interviews were conducted only once a week, the cocaine relapse data in its current form fails to meet the data requirement for time-varying predictors: For each unique event time in `days` we do not know the time-varying `mood` scores---for everyone still at risk at---at each of those moments. Thus, in order to meet this data requirement we must generate predictor histories that provide near-daily `mood` scores for each participant. 
+
+In the proceeding steps we will develop three Cox regression models fitted to the cocaine relapse data to illustrate and compare different imputation strategies for time-varying predictors. Each includes the number of `days` until relapse to cocaine use as the outcome variable; the time-invariant predictor `needle`; and a different time-varying variable representing the predictor for total score on the positive mood subscales of the Mood Questionnaire (Ryman, Biersner, & LaRocco, 1974), for which we will explore the following popular imputation strategies suggested by Singer and Willet (2003):
+
+1. Carry forward each mood score until the next one is available.
+2. Interpolate between adjacent mood scores.
+3. Compute a moving average based on the most recent and several past mood scores.
+
+#### Exploratory Data Analysis
+
+We begin by exploring the time-invariant variables in the `cocaine_relapse_2` data. Because it will be convenient for one of the Cox regression models fitted later on, we will do so using a person-level version of the `cocaine_relapse_2` data. 
+
+```{r}
+cocaine_relapse_2_pl <- cocaine_relapse_2 |>
+  pivot_wider(
+    names_from = followup,
+    names_prefix = "mood_",
+    values_from = mood
+  )
+
+glimpse(cocaine_relapse_2_pl)
+```
+
+A total of 62 newly abstinent cocaine users (59.6%) relapsed to cocaine use within 12 weeks of completing the abstinence-oriented treatment program.
+
+```{r}
+cocaine_relapse_2_pl |>
+  group_by(relapsed = 1 - censor) |>
+  summarise(count = n()) |>
+  mutate(proportion = count / sum(count))
+```
+
+Most of those users relapsed early-on during the follow-up period.
+
+```{r}
+ggplot(cocaine_relapse_2_pl, aes(x = days)) +
+  geom_histogram(binwidth = 7) +
+  scale_x_continuous(breaks = c(0, 1:12 * 7)) +
+  facet_wrap(vars(relapsed = 1 - censor), labeller = label_both)
+```
+
+Across the sample there were 38 unique event times.
+
+```{r}
+# We will use these event times later on during the imputation procedure for
+# Model B. It is important they are sorted in ascending order for this
+# procedure, so we do so here for convenience while creating the object.
+event_times <- cocaine_relapse_2_pl |>
+  filter(1 - censor == 1) |>
+  pull(days) |>
+  unique() |>
+  sort()
+
+censor_times <- cocaine_relapse_2_pl |>
+  filter(censor == 1) |>
+  pull(days) |>
+  unique()
+
+event_times |>
+  discard(\(.x) .x %in% censor_times) |>
+  length()
+```
+
+A total of 69 participants (66.3%) reported having previously used cocaine intravenously.
+
+```{r}
+cocaine_relapse_2_pl |>
+  group_by(needle) |>
+  summarise(count = n()) |>
+  mutate(proportion = count / sum(count))
+```
+
+#### Model A: Time-Invariant Baseline
+
+**Model A** uses the time-invariant predictor assessing the respondent’s mood score just before release from treatment.
+
+```{r}
+model_A <- coxph(
+  Surv(days, 1 - censor) ~ needle + base_mood, 
+  data = cocaine_relapse_2_pl,
+  ties = "efron"
+)
+
+summary(model_A)
+```
+
+#### Model B: 
+
+For **Model B** we return to the person-period version of the `cocaine_relapse_2` data and explore the first imputation strategy suggested by Singer and Willet (2003): Carrying forward each mood score until the next one is available. For this procedure we will also lag the mood score predictor by one week---associating, for example, the first followup with baseline mood scores, the second followup with the first followup's mood scores, and so forth. <!-- TODO, explain why lag is used: "As Allison (2010) points out, however, the direction of causality here is ambiguous, because a person cannot work when he is in jail. One way of addressing this problem is to use instead a lagged value of employment, from the previous week for example." ([Fox and Weisberg, p. 11](zotero://select/library/items/V5DMHDX8)) ([pdf](zotero://open-pdf/library/items/2KQMEBUS?page=11&annotation=35HDG864)) -->
+
+```{r}
+cocaine_relapse_2_prevweek <- cocaine_relapse_2 |>
+  group_by(id) |>
+  mutate(
+    mood_previous_week = lag(mood, default = unique(base_mood)),
+    mood_previous_week_fill = vec_fill_missing(
+      mood_previous_week, direction = "down"
+    )
+  )
+
+cocaine_relapse_2_prevweek
+```
+
+Next, to prepare the `cocaine_relapse_2_prevweek` data for modelling, we want to transform it into a data set that has the number of days until relapse in a **counting process** or (start, stop) format, which is a person-period format where:
+
+- Each row of the transformed data set represents an "at-risk" time interval (`day_start`, `day_end`], which is open on the left and closed on the right.
+- The `event` variable for each row is 1 if the time interval ends with an event and 0 otherwise.
+- Variable values for each row are the values that apply over that time interval.
+
+The start and end points for each time interval are determined by the vector of unique `event_times`, which we defined earlier. For censored data, the end point of the final time interval is determined by the time of censorship---which is not included in the vector of unique event times---so it needs to be handled separately.
+
+Transforming the `cocaine_relapse_2_prevweek` data into a counting process format is a two-step process. First we create the counting process structure, with columns for participant ID, start time, stop time, and event status for each record. We also add a `week` variable indicating the week that each record occurred in, which will be important for the second step in the process. Note that this step could done using either the person-period or person-level versions of the `cocaine_relapse_2` data however, for readability we use the person-level data below. The same result can be obtained using the person-period data by wrapping the calls to `days` and `censor` with `unique()`.
+
+```{r}
+cocaine_relapse_2_prevweek_cp <- cocaine_relapse_2_pl |>
+  group_by(id) |>
+  reframe(
+    # For censored data the final day should be a participant's days value, so
+    # we need to concatenate their days to the vector of event times. The call
+    # to unique() around the vector removes the duplicate for uncensored data in
+    # the final time interval.
+    day_end = unique(c(event_times[event_times <= days], days)),
+    day_start = lag(day_end, default = 0),
+    event = if_else(day_end == days & censor == 0, true = 1, false = 0),
+    week = floor(day_end / 7) + 1
+  ) |>
+  relocate(day_start, .after = id)
+
+cocaine_relapse_2_prevweek_cp
+```
+
+Second, we join the `cocaine_relapse_2_prevweek` data to the counting process structure by `id` and `week`, giving us the counting process formatted data with each time-varying predictor's values occurring at the appropriate time interval for each participant. Finally, to match the text, we will rename our mood score variable to `week_mood`.
+
+```{r}
+cocaine_relapse_2_prevweek_cp <- cocaine_relapse_2_prevweek_cp |>
+  left_join(
+    cocaine_relapse_2_prevweek,
+    by = join_by(id == id, week == followup)
+  ) |>
+  rename(week_mood = mood_previous_week_fill)
+
+cocaine_relapse_2_prevweek_cp
+```
+
+::: {.alert .alert-note}
+The **survival** package also comes with two utility functions, `survSplit()` and `tmerge()`, that can be used to transform data into a counting process format. For further discussion, see `vignette("timedep", package="survival")`.
+:::
+
+Now we can fit Model B.
+
+```{r}
+model_B <- coxph(
+  Surv(day_start, day_end, event) ~ needle + week_mood, 
+  data = cocaine_relapse_2_prevweek_cp,
+  ties = "efron"
+)
+
+summary(model_B)
+```
+
+#### Model C:
+
+For **Model C** we will also start with the lagged weekly mood scores, however, we will use a different imputation strategy: Interpolating between adjacent mood scores. Although Singer and Willet (2003) suggest "resisting the temptation to design sophisticated imputation algorithms," their approach to interpolating between adjacent mood scores was somewhat complex. Consequently, we need to create our own function to suit the purpose, rather than using existing functions like `zoo::na.approx()` or `imputeTS::na_ma()`.
+
+Singer and Willet (2003) do not describe their approach in the text, but their algorithm appears to be based on the following rules:
+
+1. Trailing `NA`s should be imputed consecutively using the most recent
+   non-missing mood score.
+2. Internal `NA`s should be imputed using the mean between adjacent non-missing
+   mood scores. For consecutive internal `NA`s, following the first imputed mood
+   score in the sequence, every `NA` thereafter should be imputed using the
+   mean of the previous `NA` value's imputed mood score and the next non-missing
+   mood score.
+3. Imputed mood scores should be rounded to the nearest integer.
+
+```{r}
+na_adjacent <- function(x) {
+  # The while loop is used here to allow us to carry forward imputed mood scores
+  # for consecutive internal NAs.
+  x_avg <- x
+  while (any(is.na(x_avg[2:length(x)]))) {
+    x_avg <- pslide_dbl(
+      list(
+        x_avg,
+        vec_fill_missing(x_avg, direction = "down"),
+        vec_fill_missing(x_avg, direction = "up")
+      ),
+      \(.x, .x_fill_down, .x_fill_up) {
+        case_when(
+          # Rule 1:
+          all(is.na(.x[3:length(.x)])) ~ .x_fill_down[2],
+          # Rule 2:
+          !is.na(.x[1]) & is.na(.x[2]) ~ mean(c(.x_fill_up[1], .x_fill_up[2])),
+          TRUE ~ .x[2]
+        )
+      },
+      .before = 1,
+      .after = Inf,
+      .complete = TRUE
+    )
+    
+    # Rule 3. We are not using round() here because it goes to the even digit when
+    # rounding off a 5, rather than always going upward.
+    x_avg <- if_else(x_avg %% 1 < .5, floor(x_avg), ceiling(x_avg))
+    
+    x_avg[1] <- x[1]
+  }
+  
+  x_avg
+}
+```
+
+Now we can impute the lagged weekly mood scores using the `na_adjacent()` function.
+
+```{r}
+cocaine_relapse_2_adjacent <- cocaine_relapse_2_prevweek |>
+  group_by(id) |>
+  mutate(
+    # It's important to include the final follow-up when imputing between
+    # adjacent mood scores, otherwise cases where the second last score is an
+    # internal NA will fill down instead of using the mean between adjacent mood
+    # scores. However, afterwards the final follow-up can be dropped.
+    mood_adjacent_lag = na_adjacent(c(mood_previous_week, last(mood)))[-13],
+    # We also want the non-lagged mood scores for later, which we impute using
+    # similar logic.
+    mood_adjacent = na_adjacent(c(first(mood_previous_week), mood))[-1]
+  )
+
+# Here is a small preview of the difference between the imputation strategies
+# for Models B and C:
+cocaine_relapse_2_adjacent |>
+  filter(id == 544) |>
+  select(id, followup, mood_previous_week:mood_adjacent_lag)
+```
+
+Next, to prepare the `cocaine_relapse_2_adjacent` data for modelling, we will again transform it into counting process format; however, for Model C each "at-risk" time interval will be one day long. Following Singer and Willet (2003), we will construct a `day_mood` variable by linearly interpolating between adjacent weekly values to yield daily values, and then assigning to each given day the mood value we imputed for the immediate prior day.
+
+```{r}
+cocaine_relapse_2_adjacent_cp <- cocaine_relapse_2_adjacent |>
+  group_by(id, followup) |>
+  reframe(
+    day_end = (followup - 1) * 7 + 1:7,
+    day_start = day_end - 1,
+    days = unique(days),
+    censor = unique(censor),
+    event = if_else(
+      day_end == days & censor == 0,
+      true = 1, false = 0
+    ),
+    needle = unique(needle),
+    mood_day = approx(c(mood_adjacent_lag, mood_adjacent), n = 8)[[2]][1:7],
+  ) |>
+  relocate(day_start, day_end, days, .after = id) |>
+  filter(day_end <= days)
+
+cocaine_relapse_2_adjacent_cp
+```
+
+Now we can fit Model C.
+
+```{r}
+model_C <- coxph(
+  Surv(day_start, day_end, event) ~ needle + mood_day, 
+  data = cocaine_relapse_2_adjacent_cp,
+  ties = "efron"
+)
+
+summary(model_C)
+```
+
+Table 15.2, page 555:
+
+```{r}
+# TODO
+```
+
+## 15.2 Nonproportional Hazards Models via Stratification
+
+Figure 15.2, page 559:
+
+```{r}
+# FIXME: The upper limit of the data doesn't match the textbook.
+survfit(Surv(used_cocaine_age, 1 - censor) ~ rural, data = first_cocaine) |>
+  tidy() |>
+  mutate(
+    strata = stringr::str_remove(strata, "rural="),
+    cumulative_hazard = -log(estimate),
+    log_cumulative_hazard = log(cumulative_hazard)
+  ) |>
+  rename(rural = strata) |>
+  ggplot(aes(x = time, y = log_cumulative_hazard, linetype = rural)) +
+    geom_line() +
+    coord_cartesian(ylim = c(-6, -1))
+```
+
+Table 15.3, page 560:
+
+```{r}
+# first_cocaine_model_C from earlier is the first model
+first_cocaine_model_C
+
+first_cocaine_model_stratified <- update(
+  first_cocaine_model_C, . ~ . + strata(rural)
+)
+
+first_cocaine_model_nonrural <- update(
+  first_cocaine_model_C, subset = rural == 0
+)
+
+first_cocaine_model_rural <- update(
+  first_cocaine_model_C, subset = rural == 1
+)
+
+# TODO: Make table.
+```
+
+## 15.3 Nonproportional Hazards Models via Interactions with Time
+
+Table 15.4 page 566:
+
+```{r}
+# TODO
+psychiatric_discharge
+```
+
+Figure 15.3 page 567:
+
+```{r}
+# FIXME: The upper limit of the data doesn't match the textbook.
+survfit(Surv(days, 1 - censor) ~ treatment_plan, data = psychiatric_discharge) |>
+  tidy() |>
+  mutate(
+    strata = stringr::str_remove(strata, "treatment_plan="),
+    cumulative_hazard = -log(estimate),
+    log_cumulative_hazard = log(cumulative_hazard)
+  ) |>
+  rename(treatment_plan = strata) |>
+  ggplot(aes(x = time, y = log_cumulative_hazard, linetype = treatment_plan)) +
+    geom_hline(yintercept = 0, linewidth = .25, linetype = 3) +
+    geom_line() +
+    coord_cartesian(xlim = c(0, 77), ylim = c(-4, 2))
+
+# TODO: Bottom panel
+```
+
+## 15.4 Regression Diagnostics
+
+Figure 15.4 page 573:
+
+```{r}
+rearrest <- rearrest |>
+  mutate(rank_time = rank(months, ties.method = "average"), .after = "months")
+
+rearrest_null_model <- coxph(Surv(months, 1 - censor) ~ 1, data = rearrest)
+
+rearrest_full_model <- update(
+  rearrest_null_model, . ~ . + person_crime + property_crime + age
+)
+
+rearrest_models <- list(
+  null = rearrest_null_model,
+  full = rearrest_full_model
+)
+
+rearrest_fits <- rearrest_models |>
+  map(
+    \(.x) {
+      map_df(
+        list(martingale = "martingale", deviance = "deviance"),
+        \(.y) augment(
+          .x, data = rearrest, type.predict = "lp", type.residuals = .y
+        ),
+        .id = ".resid_type"
+      )
+    }
+  ) |>
+  list_rbind(names_to = "model") |>
+  mutate(
+    model = factor(model, levels = c("null", "full")),
+    censored = as.logical(censor)
+  )
+
+rearrest_fits |>
+  filter(.resid_type == "martingale") |>
+  ggplot(aes(x = age, y = .resid)) +
+    geom_hline(yintercept = 0, linewidth = .25, linetype = 3) +
+    geom_point(aes(shape = censored)) +
+    scale_shape_manual(values = c(16, 3)) +
+    geom_smooth(se = FALSE) +
+    facet_wrap(vars(model), ncol = 1, labeller = label_both) +
+    coord_cartesian(ylim = c(-3, 1))
+```
+
+Figure 15.5 page 577:
+
+```{r}
+stem(resid(rearrest_full_model, type = "deviance"), scale = 2)
+
+rearrest_fits |>
+  filter(model == "full" & .resid_type == "deviance") |>
+  ggplot(aes(x = .fitted, y = .resid)) +
+    geom_hline(yintercept = 0, linewidth = .25, linetype = 3) +
+    geom_point(aes(shape = censored)) +
+    scale_shape_manual(values = c(16, 3)) +
+    scale_x_continuous(breaks = -3:3) +
+    scale_y_continuous(breaks = -3:3) +
+    coord_cartesian(xlim = c(-3, 3), ylim = c(-3, 3))
+```
+
+Figure 15.6 page 580:
+
+```{r}
+# augment.coxph is bugged and won't return the .resid column when using
+# `newdata`, likely related to this issue: https://github.com/tidymodels/broom/issues/937
+# So this code doesn't work:
+# augment(
+#   rearrest_full_model,
+#   newdata = filter(rearrest, censor == 0),
+#   type.predict = "lp",
+#   type.residuals = "schoenfeld"
+# )
+# Likewise, `data` can't be used because it expects the full dataset; thus, it
+# will error out even when using the filtered data.
+
+# However, updating the model first does work:
+# Schoenfeld residuals only pertain to those who experience the event, so we need
+# to update the model before retrieving them, and only use a subset of the data
+# when getting predictions.
+rearrest_full_model |>
+  update(subset = censor == 0) |>
+  augment(
+    data = filter(rearrest, censor == 0),
+    type.predict = "lp",
+    type.residuals = "schoenfeld"
+  ) |>
+  mutate(.resid = as.data.frame(.resid)) |>
+  unnest_wider(col = .resid, names_sep = "_") |>
+  pivot_longer(
+    cols = starts_with(".resid"),
+    names_to = "predictor",
+    values_to = ".resid"
+  ) |>
+  mutate(
+    predictor = stringr::str_remove(predictor, ".resid_"),
+    predictor = factor(
+      predictor, levels = c("person_crime", "property_crime", "age")
+    )
+  ) |>
+  ggplot(aes(x = rank_time, y = .resid)) +
+    geom_hline(yintercept = 0, linewidth = .25, linetype = 3) +
+    geom_point() +
+    scale_shape_manual(values = c(16, 3)) +
+    geom_smooth(se = FALSE, span = 1) +
+    facet_wrap(
+      vars(predictor), ncol = 1, scales = "free_y", labeller = label_both
+    ) +
+    scale_x_continuous(n.breaks = 8) +
+    ggh4x::facetted_pos_scales(
+      y = list(
+        predictor == "person_crime" ~ scale_y_continuous(limits = c(-.5, 1)),
+        predictor == "property_crime" ~ scale_y_continuous(
+          n.breaks = 7, limits = c(-1, .2)
+        ),
+        predictor == "age" ~ scale_y_continuous(limits = c(-10, 20))
+      )
+    ) +
+    coord_cartesian(xlim = c(0, 175))
+```
+
+Figure 15.7 page 583:
+
+```{r}
+# TODO: set y-axis scales to match textbook.
+rearrest_full_model |>
+  augment(
+    data = rearrest,
+    type.predict = "lp",
+    type.residuals = "score"
+  ) |>
+  mutate(.resid = as.data.frame(.resid)) |>
+  unnest_wider(col = .resid, names_sep = "_") |>
+  pivot_longer(
+    cols = starts_with(".resid"),
+    names_to = "predictor",
+    values_to = ".resid"
+  ) |>
+  mutate(
+    predictor = stringr::str_remove(predictor, ".resid_"),
+    predictor = factor(
+      predictor, levels = c("person_crime", "property_crime", "age")
+    ),
+    censored = as.logical(censor)
+  ) |>
+  ggplot(aes(x = rank_time, y = .resid)) +
+    geom_hline(yintercept = 0, linewidth = .25, linetype = 3) +
+    geom_point(aes(shape = censored)) +
+    scale_shape_manual(values = c(16, 3)) +
+    facet_wrap(
+      vars(predictor), ncol = 1, scales = "free_y", labeller = label_both
+    )
+```
+
+## 15.5 Competing Risks
+
+Figure 15.8 page 589:
+
+```{r}
+judges_null_models <- list(
+  dead = survfit(Surv(tenure, dead) ~ 1, data = judges),
+  retired = survfit(Surv(tenure, retired) ~ 1, data = judges)
+)
+
+judges_null_models_tidy <- map(
+  judges_null_models,
+  \(.x) {
+    .x |>
+      survfit0() |>
+      tidy() |>
+      mutate(cumulative_hazard = -log(estimate)) |>
+      select(time, survival = estimate, cumulative_hazard) |>
+      pivot_longer(
+        cols = c(survival, cumulative_hazard),
+        names_to = "statistic",
+        values_to = "estimate"
+      )
+  }
+)
+
+# Estimate and tidy smoothed hazards
+judges_kernel_smoothed_hazards_tidy <- map(
+  list(
+    judges_dead = judges$dead,
+    judges_retired = judges$retired
+  ),
+  \(event) {
+    kernel_smoothed_hazard <- muhaz(
+      judges$tenure,
+      event,
+      min.time = min(judges$tenure[event == 0]) + 6,
+      max.time = max(judges$tenure[event == 0]) - 6,
+      bw.grid = 6,
+      bw.method = "global",
+      b.cor = "none",
+      kern = "epanechnikov"
+    )
+    
+    kernel_smoothed_hazard |>
+      tidy() |>
+      mutate(statistic = "hazard")
+  }
+)
+
+# Combine estimates
+estimates_tidy <- map2_df(
+  judges_null_models_tidy, judges_kernel_smoothed_hazards_tidy,
+  \(.x, .y) {
+    bind_rows(.x, .y) |>
+      mutate(statistic = factor(
+        statistic, levels = c("survival", "cumulative_hazard", "hazard"))
+      )
+  },
+  .id = "event"
+)
+
+ggplot(estimates_tidy, aes(x = time, y = estimate, linetype = event)) +
+  geom_step(data = \(.x) filter(.x, statistic != "hazard")) +
+  geom_line(data = \(.x) filter(.x, statistic == "hazard")) +
+  facet_wrap(vars(statistic), ncol = 1, scales = "free_y")
+```
+
+Table 15.7 page 592:
+
+```{r}
+judges_model_A <- coxph(
+  Surv(tenure, dead) ~ appointment_age + appointment_year,
+  data = judges
+)
+
+judges_model_B <- coxph(
+  Surv(tenure, retired) ~ appointment_age + appointment_year,
+  data = judges
+)
+
+judges_model_C <- coxph(
+  Surv(tenure, left_appointment) ~ appointment_age + appointment_year,
+  data = judges
+)
+
+# TODO: Make table.
+```
+
+## 15.6 Late Entry into the Risk Set
+
+Table 15.8 page 601:
+
+```{r}
+# Model A ----
+
+# First we need to transform to a counting process format.
+physicians_event_times_A <- physicians |>
+  filter(1 - censor == 1) |>
+  pull(exit) |>
+  unique() |>
+  sort()
+
+# We'll use survSplit() this time around.
+physicians_cp_A <- physicians |>
+  mutate(event = 1 - censor) |>
+  survSplit(
+    Surv(entry, exit, event) ~ .,
+    data = _,
+    cut = physicians_event_times_A,
+    end = "exit"
+  ) |>
+  as_tibble()
+
+# The warning message here can be ignored.
+physicians_model_A <- coxph(
+  Surv(entry, exit, event) ~ part_time + age + age:exit,
+  data = physicians_cp_A
+)
+
+# Model B ----
+physicians_event_times_B <- physicians |>
+  filter(1 - censor == 1 & entry == 0) |>
+  pull(exit) |>
+  unique() |>
+  sort()
+
+physicians_cp_B <- physicians |>
+  filter(entry == 0) |>
+  mutate(event = 1 - censor) |>
+  survSplit(
+    Surv(entry, exit, event) ~ .,
+    data = _,
+    cut = physicians_event_times_B,
+    end = "exit"
+  ) |>
+  as_tibble()
+
+physicians_model_B <- coxph(
+  Surv(entry, exit, event) ~ part_time + age + age:exit,
+  data = physicians_cp_B
+)
+
+# Model C ----
+physicians_cp_C <- physicians |>
+  mutate(
+    event = 1 - censor,
+    entry = 0
+  ) |>
+  survSplit(
+    Surv(entry, exit, event) ~ .,
+    data = _,
+    cut = physicians_event_times_A,
+    end = "exit"
+  ) |>
+  as_tibble()
+
+physicians_model_C <- coxph(
+  Surv(entry, exit, event) ~ part_time + age + age:exit,
+  data = physicians_cp_C
+)
+
+# TODO: Make table and clean up code.
+```
+
+### 15.6.2 Using Late Entrants to Introduce Alternative Metrics for Clocking Time
+
+Table 15.9 page 604:
+
+```{r}
+monkeys_model_A <- coxph(
+  Surv(sessions, 1 - censor) ~ initial_age + birth_weight + female,
+  data = monkeys
+)
+
+monkeys_model_B <- update(monkeys_model_A, Surv(end_age, 1 - censor) ~ .)
+
+# The warning message here can be ignored.
+monkeys_model_C <- update(
+  monkeys_model_A, Surv(initial_age, end_age, 1 - censor) ~ .
+)
+
+# TODO: Make table.
+```

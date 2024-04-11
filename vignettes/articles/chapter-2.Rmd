@@ -1,0 +1,522 @@
+---
+title: "Chapter 2: Exploring longitudinal data on change"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE
+)
+ggplot2::theme_set(ggplot2::theme_bw())
+ggplot2::theme_update(
+  panel.grid.major = ggplot2::element_blank(),
+  panel.grid.minor = ggplot2::element_blank()
+)
+```
+
+```{r setup}
+library(alda)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(ggplot2)
+library(scales)
+library(patchwork)
+library(lme4)
+library(corrr)
+library(broom)
+```
+
+## 2.1 Creating a longitudinal data set
+
+In Section 2.1 Singer and Willet (2003) introduce two distinct formats of data organization for longitudinal data---the **person-level** format and the **person-period** format---using a subset of data from the National Youth Survey (NYS) measuring the development of tolerance towards deviant behaviour in adolescents over time in relation to self-reported sex and exposure to deviant peers (Raudenbush & Chan, 1992). Adolescents' tolerance towards deviant behaviour was based on a 9-item scale measuring attitudes tolerant of deviant behaviour. The scale was administered each year from age 11 to 15 and so is a **time-varying variable**. However, adolescents' self-reported sex and exposure to deviant peers were only recorded at the beginning of the study period and so are **time-invariant variables**.
+
+For this example we illustrate the difference between the two formats using the `deviant_tolerance_pl` and `deviant_tolerance_pp` data sets, which correspond to the adolescent tolerance of deviant behaviour data organized in the person-level and person-period formats, respectively. 
+
+### The Person-Level Data Set
+
+In the person-level format (also known as **wide** or **multivariate** format), each person has only one row of data and multiple columns containing data from each measurement occasion for any time-varying variables. This is demonstrated in the `deviant_tolerance_pl` data set, a person-level data frame with 16 rows and 8 columns:
+
+- `id`: Participant ID.
+- `tolerance_11`, `tolerance_12`, `tolerance_13`, `tolerance_14`, `tolerance_15`: Average score across a 9-item scale assessing attitudes favourable to deviant behaviour at ages 11, 12, 13, 14, and 15. Each item used a four point scale (1 = very wrong, 2 = wrong, 3 = a little bit wrong, 4 = not wrong at all).
+- `male`: Binary indicator for whether the adolescent is a male.
+- `exposure`: Average score across a 9-item scale assessing level of exposure to deviant peers. Each item used a five point Likert score (ranging from 0 = none, to 4 = all).
+
+```{r}
+deviant_tolerance_pl
+```
+
+Although the person-level format is common in cross-sectional research, it has four disadvantages that make it ill-suited for longitudinal data analysis:
+
+1. It restricts data analysis to examining *rank order* wave-to-wave relationships, leading to non-informative summaries that do not tell us *how* each person changes over time, nor even the *direction* of change.
+2. It omits an explicit time-indicator variable, rendering time *unavailable* for data analysis.
+3. It requires adding an additional variable to the data set for each unique measurement occasion, making it inefficient or useless when the number or spacing of measurement occasions varies across individuals.
+4. It requires adding an additional *set* of columns for each time-varying predictor (one column per measurement occasion), rendering it unable to easily handle the presence of time-varying predictors.
+
+Singer and Willet (2003) exemplify the first of these disadvantages by postulating how one might analyze the person-level tolerance towards deviant behaviour data set. A natural approach would be to summarize the wave-to-wave relationships among `tolerance_11` through `tolerance_15` using bivariate correlations and bivariate plots; however, doing so does not tell us anything about how adolescent tolerance towards deviant behaviour changed over time for either individuals or groups. Rather, the weak positive correlation between measurement occasions merely tells us that the rank order of tolerance towards deviant behaviour remained relatively stable across occasions---that is, adolescents who were more tolerant towards deviant behaviour at one measurement occasion tended to be more tolerant at the next.
+
+```{r}
+# Table 2.1, page 20:
+deviant_tolerance_pl |>
+  select(starts_with("tolerance")) |>
+  correlate(diagonal = 1) |>
+  shave() |>
+  fashion()
+``` 
+
+The first disadvantage is also apparent when examining bivariate plots between measurement occasions: There is again no way to tell how adolescent tolerance towards deviant behaviour changed over time for either individuals or groups. Moreover, because we lack an explicit time-indicator variable, it isn't possible to plot the person-level data set in a more meaningful way, such as a time series plot organized by `id`.
+
+```{r}
+deviant_tolerance_pl |>
+  select(starts_with("tolerance")) |>
+  pairs()
+```
+
+Considered together, these disadvantages make the person-level format ill-suited for most longitudinal data analyses. Fortunately, each of the disadvantages of the person-level format can be addressed by a simple conversion to the person-period format.
+
+### The Person-Period Data Set
+
+In the person-period format (also known as **long** or **univariate** format), each person has one row of data for each measurement occasion, with a **participant identifier variable** for each person, and a **time-indicator variable** for each measurement occasion. In this format, time-invariant variables have identical values across each measurement occasion; whereas time-varying variables have potentially differing values. This is demonstrated in the `deviant_tolerance_pp` data set, a person-period data frame with 80 rows and 5 columns:
+
+- `id`: Participant ID.
+- `age`: Adolescent age in years.
+- `tolerance`: Average score across a 9-item scale assessing attitudes favourable to deviant behaviour. Each item used a four point scale (1 = very wrong, 2 = wrong, 3 = a little bit wrong, 4 = not wrong at all).
+- `male`: Binary indicator for whether the adolescent is a male.
+- `exposure`: Average score across a 9-item scale assessing level of exposure to deviant peers. Each item used a five point Likert score (ranging from 0 = none, to 4 = all).
+
+```{r}
+deviant_tolerance_pp
+```
+
+Although the person-period data set contains the same information as the person-level data set, its format for data organization makes it more amenable to longitudinal data analysis, specifically:
+
+- It includes an explicit participant identifier variable, enabling the data to be sorted into person-specific subsets.
+- It includes an explicit time-indicator variable, rendering time *available* for data analysis, and accommodating research designs in which the number or spacing of measurement occasions varies across individuals.
+- It needs only a *single* column for each variable in the data set---whether time-varying or time-invariant, outcome or predictor---making it trivial to handle any number of variables.
+
+Indeed, most R functions are designed to work with data in the person-period format---which falls under the larger umbrella of the **tidy data** format---due to R’s vectorized nature. As Wickham, Çetinkaya-Rundel, and Grolemund (2023) explain, there are three interrelated rules that make a data set tidy:
+
+1. Each variable must have its own column.
+2. Each observation must have its own row.
+3. Each value must have its own cell.
+
+Thus, the person-period format is simply a special case of the tidy data format, which distinguishes itself through its longitudinal nature and requirements for explicit participant identifier and time-indicator variables.
+
+### Converting Between Person-Level and Person-Period Data Sets
+
+Unfortunately, longitudinal data is often initially stored as a person-level data set, meaning that most real analyses will require at least a little tidying to get your data into a person-period format. There are a few reasons for this:
+
+- Many people aren't familiar with the principles of tidy data---nor its special cases like the person person-period format---and it’s hard to derive them yourself without spending a lot of time working with longitudinal data.
+- The person-level format closely resembles the familiar cross-sectional data-set format, making it a seemingly sensible default for inexperienced analysts.
+- Data is often organized to facilitate non-analytical goals, such as data entry, rather than data analysis.
+
+Thus, an essential skill for the aspiring longitudinal data analyst is to be able to convert a person-level data set into a person-period data set. The **tidyr** package provides two functions that can easily convert a longitudinal data set from one format to the other: `pivot_longer()` and `pivot_wider()`.
+
+To convert a person-level data set into a person-period data set use `pivot_longer()`:
+
+```{r}
+# Figure 2.1, page 18:
+pivot_longer(
+  deviant_tolerance_pl,
+  cols = starts_with("tolerance_"),
+  names_to = "age",
+  names_prefix = "tolerance_",
+  names_transform = as.integer,
+  values_to = "tolerance"
+)
+```
+
+After the person-level data, there are five key arguments:
+
+- `cols` specifies which columns need to be pivoted into longer format---for longitudinal data, this will always be the columns corresponding to any time-varying variables. This argument uses **tidy selection**, a small data science language for selecting columns in a data frame (`?tidyr_tidy_select`), making it simple to select each column of a time-varying variable based on its naming pattern.
+- `names_to` names the new column (or columns) to create from the information stored in the column names specified by `cols`. We named the new column `age`.
+- `names_prefix` removes the matching text from the start of each column name---for longitudinal data, this will always be the prefix for any time-varying variables separating the variable name from the measurement occasion. This argument uses a **regular expression** to select the matching text.
+- `names_transform` applies a function to the new column (or columns). We converted the new column `age` from type character to type integer.
+- `values_to` names the new column (or columns) to create from the data stored in cell values. We named the new column `tolerance`.
+
+Note that `"age"` and `"tolerance"` are quoted in the call to `pivot_longer()` because they represent the column names of the new variables we’re creating, rather than already-existing variables in the data.
+
+Although most longitudinal data analyses will begin by getting your data into a person-period format, it can occasionally be useful to go in the opposite direction. Some computations can be made easier using a person-period data set, and certain functions and analyses expect a person-period data set; therefore, it's helpful to know how to untidy, transform, and re-tidy your data as needed.
+
+To convert a person-period data set to person-level data set use `dplyr::pivot_wider()`:
+
+```{r}
+pivot_wider(
+  deviant_tolerance_pp,
+  names_from = age,
+  names_prefix = "tolerance_",
+  values_from = tolerance
+)
+```
+
+After the person-period data, there are three key arguments:
+
+- `names_from` specifies which column (or columns) to get the name of the output columns from---for longitudinal data, this will always be the columns corresponding to any time-indicator variables.
+- `names_prefix` adds the specified string to the start of each output column name---for longitudinal data, this will always be the prefix for any time-varying variables separating the variable name from the measurement occasion.
+- `values_from` specifies which column (or columns) to get the cell values from---for longitudinal data, this will always be the columns corresponding to any time-varying variables.
+
+To learn more about the principles of tidy data and how pivoting works, see the [Data Tidying](https://r4ds.hadley.nz/data-tidy) chapter of [R for Data Science](https://r4ds.hadley.nz).
+
+## 2.2 Descriptive analysis of individual change over time
+
+In Section 2.2 Singer and Willet (2003) use the `deviant_tolerance_pp` data set to demonstrate how the person-period format facilitates exploratory analyses that describe how individuals in the data set change over time, revealing the nature and idiosyncrasies of each person’s temporal pattern of change. 
+
+### Empirical Growth Plots
+
+**Empirical growth plots** show, for each individual, the sequence of change in a time-varying variable. Here change can be evaluated in either absolute terms against the scale of the variable of interest, or in relative terms in comparison to other sample members. Singer and Willet (2003) identify several questions that are helpful to answer when examining empirical growth plots:
+
+- Who is increasing?
+- Who is decreasing?
+- Who is increasing the most? The least?
+- Who is decreasing the most? The least?
+- Does anyone increase and then decrease?
+- Does anyone decrease and then increase?
+
+To construct an empirical growth plot with the **ggplot2** package, put your time-indicator on the x-axis, your time-varying variable on the y-axis, and facet each individual into a separate panel.
+
+```{r}
+# Figure 2.2, page 25:
+deviant_tolerance_empgrowth <- deviant_tolerance_pp |>
+  ggplot(aes(x = age, y = tolerance)) +
+    geom_point() +
+    coord_cartesian(ylim = c(0, 4)) +
+    facet_wrap(vars(id), labeller = label_both)
+
+deviant_tolerance_empgrowth
+```
+
+If your data set is large, Singer and Willet (2003) suggest constructing empirical growth plots for a randomly selected a subsample of individuals---perhaps stratified into groups defined by the values of important predictors---rather than using the entire sample. 
+
+This task can be be easily accomplished using `filter()` function from the **dplyr** package prior to plotting. For example, here we sample four random adolescents. Note the use of the `set.seed()` function prior to sampling, which sets the state of R's random number generator: we do this so that the results of the random sample are reproducible.
+
+```{r}
+set.seed(345)
+
+deviant_tolerance_pp |>
+  filter(id %in% sample(unique(id), size = 4))
+```
+
+This approach can also be extended to randomly select a subsample of individuals within different strata by combining the `group_split()` function from the dplyr package to split the data into a list of different groups, and the `map()` function from the **purrr** package to apply the `filter()` call from the previous example to each group. For example, here we sample two random adolescent males and two random adolescent females, then combine the filtered data frames in the list back together using the `list_rbind()` function from the purrr package.
+
+```{r}
+set.seed(123)
+
+deviant_tolerance_pp |>
+  group_split(male) |>
+  map(\(.group) filter(.group, id %in% sample(unique(id), size = 2))) |>
+  list_rbind()
+```
+
+### Using a Trajectory to Summarize Each Person’s Empirical Growth Record
+
+Each person's empirical growth record can be summarized by applying two standardized approaches:
+
+- The **nonparametric** approach uses nonparametric smooths to summarize each person’s pattern of change over time graphically without imposing a specific functional form. The primary advantage of the nonparametric approach is that it requires no assumptions.
+- The **parametric** approach uses separate parametric models fit to each person’s data to summarize their pattern of change over time. Each model uses a common functional form for the trajectories (e.g., a straight line, a quadratic curve, etc.). The primary advantage of the parametric approach is that it provides numeric summaries of the trajectories that can be used for further exploration.
+
+Singer and Willett (2003) recommend using both approaches---beginning with the nonparametric approach---as examining the smoothed trajectories will help you select a common functional form for the trajectories in the parametric approach.
+
+#### The Nonparametric Approach
+
+The `stat_smooth()` function can be used to add a nonparametric smooth layer to the empirical growth record plot. The choice of a particular smoothing algorithm is primarily a matter of convenience, so we'll use the default loess smoother. The `span` argument controls the amount of smoothing for the default loess smoother---with smaller numbers producing wigglier lines and larger numbers producing smoother lines; here choose a value that creates a similar smooth to the textbook figure.
+
+```{r}
+# Figure 2.3, page 27:
+deviant_tolerance_empgrowth +
+  stat_smooth(method = "loess", se = FALSE, span = .9)
+```
+
+Singer and Willet (2003) recommend focusing on the elevation, shape, and tilt of the smoothed trajectories by answering questions like:
+
+- Do the scores hover at the low, medium, or high end of the scale?
+- Does everyone change over time or do some people remain the same?
+- Do the trajectories have an inflection point or plateau?
+- Is the rate of change steep or shallow?
+- What is the overall functional form of the trajectory at the group-level? Is it linear or curvilinear? smooth or step-like?
+
+Answering the last question is particularly important, as it will help you select a common functional form for the trajectories in the parametric approach.
+
+#### The Parametric Approach
+
+For the parametric approach, Singer and Willet (2003) suggest using the following three-step process:
+
+1. Estimate a within-person linear model for each person in the data set.
+2. Collect summary statistics from each within-person linear model into a single data set.
+3. Add each person's fitted trajectory to the empirical growth record plot.
+
+To begin, we'll use the `lmList()` function from the **lme4** package to fit a common linear model for each adolescent in the data set. The model formula for the `lmList()` function takes the form `response ~ terms | group`. Here we select a straight line as the common functional form for the trajectories, with age centred at age 11.
+
+```{r}
+deviant_tolerance_fit <- lmList(
+  tolerance ~ I(age - 11) | id,
+  pool = FALSE,
+  data = deviant_tolerance_pp
+)
+
+# Table 2.2, page 30:
+summary(deviant_tolerance_fit)
+```
+
+Next we'll collect summary statistics from each within-person linear model into a single data set using the `tidy()` function from the **broom** package. However, because `lmList()` returns a list of models, we need to apply the `tidy()` call to each model prior to collecting the summary statistics into a single data set. Ironically, we also need to tidy the result of `tidy()` to prepare the data for plotting.
+
+```{r}
+deviant_tolerance_tidy <- deviant_tolerance_fit |>
+  map(tidy) |>
+  list_rbind(names_to = "id") |>
+  mutate(
+    id = as.factor(id),
+    term = case_when(
+      term == "(Intercept)" ~ "intercept",
+      term == "I(age - 11)" ~ "slope"
+    )
+  )
+
+deviant_tolerance_abline <- deviant_tolerance_tidy |>
+  select(id:estimate) |>
+  pivot_wider(names_from = term, values_from = estimate)
+
+deviant_tolerance_abline
+```
+
+Finally, we can add each person's fitted trajectory to the empirical growth record plot using the `geom_abline()` function. However, because we centred `age` in our linear model, we need to transform the scale of the x-axis of the empirical growth plot to be centred as well---otherwise ggplot2 will not be able to align the fitted trajectories correctly. To do so, we must create a custom transformation object using the `new_transform()` function from the **scales** package, which defines the transformation, its inverse, and methods for generating breaks and labels.
+
+```{r}
+transform_centre <- function(subtract) {
+  new_transform(
+    "centre",
+    transform = \(x) x - subtract,
+    inverse = \(x) x + subtract
+  )
+}
+
+# Figure 2.5, page 32:
+deviant_tolerance_empgrowth +
+  geom_abline(
+    aes(intercept = intercept, slope = slope),
+    data = deviant_tolerance_abline
+  ) +
+  scale_x_continuous(transform = transform_centre(11))
+```
+
+Alternatively, if you only plan to examine the parametric trajectories graphically, the three-step process suggested by Singer and Willet (2003) can be skipped altogether by using the `stat_smooth()` function with the `"lm"` method. This approach also fits a within-person linear model for each person in the data set; the only drawback is that it makes it awkward ([though not impossible](https://stackoverflow.com/a/9791394/16844576)) to access the summary statistics from each model.
+
+```{r}
+deviant_tolerance_empgrowth +
+  stat_smooth(method = "lm", se = FALSE)
+```
+
+## 2.3 Exploring differences in change across people
+
+Having explored how each individual changes over time, in Section 2.3 Singer and Willet (2003) continue with the `deviant_tolerance_pp` data set to demonstrate three strategies for exploring **interindividual differences** in change:
+
+1. Plotting the entire set of individual trajectories together, along with an average change trajectory for the entire group. Individual trajectories can either be compared with one another to examine similarities and differences in changes across people, or with the average change trajectory to compare individual change with group change.
+2. Conducting descriptive analyses of key model parameters, such as the estimated intercepts and slopes of the individual change trajectory models.
+3. Exploring the relationship between change and time-invariant predictors. This relationship can be explored through both plots and statistical modelling.
+
+### Plotting the entire set of trajectories together
+
+The purpose of the first strategy is to answer *generic* questions about change, such as:
+
+- Is the direction and rate of change similar or different across people?
+- How does individual change compare to the group-averaged change trajectory?
+
+For this strategy, Singer and Willet (2003) suggest using both the nonparametric and parametric approaches, as certain patterns in the data may be somewhat easier to interpret using one approach or the other.
+
+```{r}
+deviant_tolerance_grptraj <- map(
+  list("loess", "lm"),
+  \(.method) {
+    deviant_tolerance_pp |>
+      mutate(method = .method) |>
+      ggplot(mapping = aes(x = age, y = tolerance)) +
+        stat_smooth(
+          aes(linewidth = "individual", group = id),
+          method = .method, se = FALSE, span = .9
+        ) +
+        stat_smooth(
+          aes(linewidth = "average"),
+          method = .method, se = FALSE, span = .9
+        ) +
+        scale_linewidth_manual(values = c(2, .25)) +
+        coord_cartesian(ylim = c(0, 4)) +
+        facet_wrap(vars(method), labeller = label_both) +
+        labs(linewidth = "trajectory")
+  }
+)
+
+# Figure 2.6, page 34:
+wrap_plots(deviant_tolerance_grptraj) +
+  plot_layout(guides = "collect", axes = "collect")
+```
+
+### Conducting descriptive analyses of key model parameters
+
+The purpose of the second strategy is to answer *specific* questions about the behaviour of key parameters in the individual change trajectory models, such as:
+
+- What is the average initial status and the average annual rate of change?
+- What is the observed variability in initial status and annual rate of change?
+- What is the relationship between initial status and annual rate of change?
+
+For this strategy, Singer and Willet (2003) suggest examining the estimated intercepts and slopes from the fitted linear models with the following three summary statistics:
+
+1. The sample **mean**, which summarizes the average initial status (intercept) and annual rate of change (slope) across the sample.
+2. The sample **variance** or **standard deviation**, which summarize the amount of observed interindividual heterogeneity in initial status and annual rate of change.
+3. The sample **correlation**, which summarizes the strength and direction of the relationship between initial status and annual rate of change.
+
+The sample mean, variance, and standard deviation can be computed together from the tidied model fits we saved earlier using a combination of the `group_by()` and `summarise()` functions from the dplyr package.
+
+```{r}
+# Table 2.3, page 37:
+deviant_tolerance_tidy |>
+  group_by(term) |>
+  summarise(
+    mean = mean(estimate),
+    var = var(estimate),
+    sd = sd(estimate)
+  )
+```
+
+The sample correlation needs to be computed in a separate step, and requires some additional transformations to the tidied model fits before doing so. Here we use the `correlate()` function from the **corrr** package---which is part of the **tidymodels** universe of packages---because its API is designed with data pipelines in mind.
+
+```{r}
+deviant_tolerance_tidy |>
+  select(id, term, estimate) |>
+  pivot_wider(names_from = term, values_from = estimate) |>
+  select(-id) |>
+  correlate() |>
+  stretch(na.rm = TRUE, remove.dups = TRUE)
+```
+
+### Exploring the relationship between change and time-invariant predictors
+
+The purpose of the final strategy is to answer questions about *systematic interindividual differences* in change, such as:
+
+- Does the observed (average) initial status and (average) annual rate of change differ across the levels or values of any time-invariant predictors?
+- Is there a relationship between initial status or annual rate of change and any time-invariant predictors?
+
+For this strategy, Singer and Willet (2003) suggest using two approaches:
+
+1. Plotting (smoothed) individual growth trajectories, displayed separately for groups distinguished by important values of time-invariant predictors. For categorical predictors, each level of the predictor can be used. For continuous predictors, the values can be temporarily categorized for the purpose of display.
+2. Conducting exploratory analyses of the relationship between change and time-invariant predictors, investigating whether the estimated intercepts and slopes of the individual change trajectory models vary systematically with different predictors.
+
+#### The plotting approach
+
+For the plotting approach, we can adapt the code we used earlier to plot the entire set of trajectories together, simply changing the variable we'll facet by. Here we facet by the categorical predictor `male` and the continuous predictor `exposure`, which we split at its median for the purposes of display.
+
+ <!-- TODO: Add `axes = "collect"` to the patchwork once this bug is fixed: <https://github.com/thomasp85/patchwork/issues/359> -->
+
+```{r}
+deviant_tolerance_grptraj_by <- map(
+  list(male = "male", exposure = "exposure"),
+  \(.by) {
+    deviant_tolerance_pp |>
+      mutate(
+        exposure = if_else(exposure < median(exposure), "low", "high"),
+        exposure = factor(exposure, levels = c("low", "high"))
+      ) |>
+      ggplot(aes(x = age, y = tolerance)) +
+        stat_smooth(
+          aes(linewidth = "individual", group = id),
+          method = "lm", se = FALSE, span = .9
+        ) +
+        stat_smooth(
+          aes(linewidth = "average"),
+          method = "lm", se = FALSE, span = .9
+        ) +
+        scale_linewidth_manual(values = c(2, .25)) +
+        coord_cartesian(ylim = c(0, 4)) +
+        facet_wrap(.by, labeller = label_both) +
+        labs(linewidth = "trajectory")
+  }
+)
+
+# Figure 2.7, page 38:
+wrap_plots(deviant_tolerance_grptraj_by, ncol = 1, guides = "collect")
+```
+
+When examining plots like these, Singer and Willet (2003) recommend recommend looking for systematic patterns in the trajectories to answer questions like:
+
+- Do the observed trajectories differ across groups?
+- Do observed differences appear more in the intercepts or in the slopes?
+- Are the observed trajectories of some groups more heterogeneous than others?
+
+If we also wished to conduct descriptive analyses of the key model parameters for each of these groups we could use the `update()` function to update and refit our common linear model to different subsets of the data. Here we store the model fits for each subgroup in a list so they're easier to iterate upon together.
+
+```{r}
+tolerance_fit_sex <- list(
+  male = update(deviant_tolerance_fit, subset = male == 1),
+  female = update(deviant_tolerance_fit, subset = male == 0)
+)
+
+tolerance_fit_exposure <- list(
+  low = update(deviant_tolerance_fit, subset = exposure < 1.145),
+  high = update(deviant_tolerance_fit, subset = exposure >= 1.145)
+)
+```
+
+For example, here is a descriptive analysis of the intercepts and slopes for males and females.
+
+```{r}
+tolerance_fit_sex |>
+  map(
+    \(.fit_sex) {
+      .fit_sex |>
+        map(tidy) |>
+        list_rbind(names_to = "id") |>
+        group_by(term) |>
+          summarise(
+            mean = mean(estimate),
+            sd = sd(estimate)
+          )
+    }
+  ) |>
+    list_rbind(names_to = "sex")
+```
+
+#### The exploratory analysis approach
+
+For the exploratory analysis approach, Singer and Willett (2003) recommend restricting ourselves to the simplest of approaches to examine relationship between change and time-invariant predictors---bivariate scatter plots and sample correlations. Their reasoning for this restriction is twofold:
+
+1. The statistical models presented in this chapter are intended for descriptive and exploratory purposes only; their estimates have known biases that make them imperfect measures of each person’s true initial status and true rate of change.
+2. These models will soon be replaced with the multilevel model for change in Chapter 3, which is better-suited for modelling longitudinal data.
+
+Before doing any plotting or computations, we first need to add each adolescent's `male` and `exposure` values to the `deviant_tolerance_tidy` data frame. This is easily done using the `left_join()` function from the dplyr package, which performs a mutating join to add columns from one data frame to another, matching observations based on the keys. Here we join a selection of columns from the person-level `deviant_tolerance_pl` data set: Specifically, the `id` column, which exists in both data frames and will thus be used for joining; and our two time-invariant predictors `male` and `exposure`. We'll also create a new `sex` variable, which we can use instead of `male` for plotting.
+
+```{r}
+deviant_tolerance_tidy_2 <- deviant_tolerance_tidy |>
+  left_join(select(deviant_tolerance_pl, id, male, exposure)) |>
+  mutate(sex = if_else(male == 0, "female", "male"))
+
+deviant_tolerance_tidy_2
+```
+
+Now we can create the bivariate scatter plots. Note that we use the `.data` pronoun inside our call to `aes()`---the `.data` pronoun is a special construct in the tidyverse that allows us to treat a character vector of variable names as environment variables, so they work in the expected way for arguments that use **non-standard evaluation**. To learn more about the `.data` pronoun, see the dplyr package's [Programming with dplyr](https://dplyr.tidyverse.org/articles/programming.html) vignette.
+
+```{r}
+deviant_tolerance_biplot <- map(
+  list(sex = "sex", exposure = "exposure"),
+  \(.x) {
+    ggplot(deviant_tolerance_tidy_2, aes(x = .data[[.x]], y = estimate)) +
+      geom_point() +
+      facet_wrap(vars(term), ncol = 1, scales = "free_y")
+  }
+)
+
+# Figure 2.8, page 40:
+wrap_plots(deviant_tolerance_biplot) +
+  plot_layout(axes = "collect")
+```
+
+Finally, we can compute the correlation between the intercepts and slopes of the individual change trajectory models with the time-invariant predictors `male` and `exposure`. Here we use the `cor()` function rather than `corrr::correlate()` since we just want to return the correlation value, not a correlation data frame.
+
+```{r}
+# Correlation values shown in Figure 2.8, page 40:
+deviant_tolerance_tidy_2 |>
+  group_by(term) |>
+  summarise(
+    male_cor = cor(estimate, male),
+    exposure_cor = cor(estimate, exposure)
+  )
+```

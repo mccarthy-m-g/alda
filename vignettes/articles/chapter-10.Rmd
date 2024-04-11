@@ -1,0 +1,178 @@
+---
+title: "Chapter 10: Describing discrete-time event occurrence data"
+---
+
+::: {.alert .alert-warning}
+This chapter is under construction.
+:::
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+ggplot2::theme_set(ggplot2::theme_bw())
+ggplot2::theme_update(
+  panel.grid.major = ggplot2::element_blank(),
+  panel.grid.minor = ggplot2::element_blank()
+)
+```
+
+```{r setup}
+library(alda)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(survival)
+library(broom)
+```
+
+## 10.1 The Life Table
+
+Table 10.1, page 327:
+
+```{r}
+# A life table is the tabular form of a survival curve, so begin by fitting a
+# Kaplan-Meir curve to the data.
+teachers_fit <- survfit(Surv(years, 1 - censor) ~ 1, data = teachers)
+
+table_10.1 <- teachers_fit |>
+  # Add a starting time (time 0) for the table.
+  survfit0() |>
+  tidy() |>
+  # The summary of the fit gives most of what we want, but to match Table 10.1
+  # we need to do a little more wrangling.
+  select(-c(std.error:conf.low)) |>
+  mutate(
+    interval = paste0("[", time, ", ", time + 1, ")"),
+    haz.estimate = n.event / n.risk
+  ) |>
+  rename(year = time, surv.estimate = estimate) |>
+  relocate(
+    year, interval, n.risk, n.event, n.censor, haz.estimate, surv.estimate
+  )
+
+table_10.1
+```
+
+## 10.2 A Framework for Characterizing the Distribution of Discrete-Time Event Occurrence Data
+
+Figure 10.1, page 333:
+
+```{r}
+ggplot(table_10.1, aes(x = year, y = haz.estimate)) +
+  geom_line() +
+  scale_x_continuous(breaks = 0:13, limits = c(1, 13)) +
+  scale_y_continuous(breaks = c(0, .05, .1, .15), limits = c(0, .15)) +
+  coord_cartesian(xlim = c(0, 13))
+
+# First interpolate median lifetime
+median_lifetime <- table_10.1 |>
+  # Get the row indices for the first survival estimate immediately below and
+  # immediately above 0.5. This will only work correctly if the values are in
+  # descending order, otherwise min() and max() must be swapped. By default, the
+  # survival estimates are in descending order, however, I've added the
+  # redundant step of ensuring they are here for demonstration purposes.
+  arrange(desc(surv.estimate)) |>
+  slice(min(which(surv.estimate <= .5)), max(which(surv.estimate >= .5))) |>
+  select(year, surv.estimate) |>
+  # Linearly interpolate between the two values of the survival estimates that
+  # bracket .5 following Miller's (1981) equation.
+  summarise(
+    year =
+      min(year) +
+      ((max(surv.estimate) - .5) /
+       (max(surv.estimate) - min(surv.estimate))) *
+      ((min(year) + 1) - min(year)),
+    surv.estimate = .5
+  )
+
+ggplot(table_10.1, aes(x = year, y = surv.estimate)) +
+  geom_line() +
+  geom_segment(
+    aes(xend = year, y = 0, yend = .5), data = median_lifetime, linetype = 2
+  ) +
+  geom_segment(
+    aes(xend = 0, yend = .5), data = median_lifetime, linetype = 2
+  ) +
+  scale_x_continuous(breaks = 0:13) +
+  scale_y_continuous(breaks = c(0, .5, 1), limits = c(0, 1)) +
+  coord_cartesian(xlim = c(0, 13))
+```
+
+## 10.3 Developing Intuition About Hazard Functions, Survivor Functions, and Median Lifetimes
+
+Figure 10.2, page 340:
+
+```{r}
+relapse_fit <- survfit(Surv(weeks, 1 - censor) ~ 1, data = cocaine_relapse_1)
+relapse_tidy <- tidy(relapse_fit)
+relapse_summary <- glance(relapse_fit)
+```
+
+## 10.4 Quantifying the Effects of Sampling Variation
+
+Table 10.2, page 349:
+
+```{r}
+summary(teachers_fit)
+
+teachers_fit |>
+  tidy() |>
+  mutate(
+    # The tidy() method for survfit objects returns the standard error for the
+    # cumulative hazard instead of the survival probability. Multiplying the
+    # survival estimate with the cumulative hazard's standard error will return
+    # the standard error for the survival probability. Note that it is unlikely
+    # the tidy() method will ever change to return the the standard error for
+    # the survival probability instead. See:
+    # - https://github.com/tidymodels/broom/pull/1162
+    # Other transformations of the survival probability can be found here:
+    # - https://stat.ethz.ch/pipermail/r-help/2014-June/376247.html
+    surv.std.error = estimate * std.error,
+    haz.estimate = n.event / n.risk,
+    haz.std.error = sqrt(haz.estimate * (1 - haz.estimate) / n.risk),
+    sqrt = (std.error)^2 / (estimate)^2
+  ) |>
+  select(
+    year = time,
+    n.risk,
+    haz.estimate,
+    haz.std.error,
+    surv.estimate = estimate,
+    sqrt,
+    surv.std.error
+  )
+```
+
+## 10.5 A Simple and Useful Strategy for Constructing the Life Table
+
+Figure 10.4, page 353:
+
+```{r}
+filter(teachers, id %in% c(20, 126, 129))
+
+teachers_pp <- teachers |>
+  reframe(
+    year = 1:max(years),
+    event = if_else(year == years & censor == 0, 1, 0),
+    .by = id
+  )
+
+teachers_pp |>
+  filter(id %in% c(20, 126, 129)) |>
+  print(n = 27)
+```
+
+Table 10.3, page 355:
+
+```{r}
+teachers_pp |>
+  group_by(year) |>
+  count(event) |>
+  pivot_wider(names_from = event, names_prefix = "event_", values_from = n) |>
+  mutate(
+    total = event_0 + event_1,
+    p.event_1 = event_1 / total
+  )
+```

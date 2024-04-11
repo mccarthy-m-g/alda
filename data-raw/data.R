@@ -10,7 +10,15 @@ library(janitor)
 sas_data  <- list.files("data-raw/data/raw", full.names = TRUE)
 filenames <- list.files("data-raw/data/raw") |> path_ext_remove()
 sas_data  <- set_names(sas_data, filenames)
-tidy_data <- map(sas_data, \(.x) .x |> read_sas() |> clean_names())
+tidy_data <- sas_data |>
+  map(
+    \(.x) {
+      .x |>
+        read_sas() |>
+        clean_names() |>
+        mutate(across(any_of("id"), as.factor))
+    }
+  )
 
 # Chapter 2 -------------------------------------------------------------------
 
@@ -153,16 +161,17 @@ tenure <- tidy_data$tenure_orig |>
 
 first_depression_1 <- tidy_data$depression_pp |>
   rename(
-    depress = event,
+    depressive_episode = event,
     interview_age = age,
-    censor_age = censage
+    censor_age = censage,
+    siblings = nsibs,
+    parental_divorce = pd,
+    parental_divorce_now = pdnow
   ) |>
   select(-(censor_age:aged), -(sibs12:sibs9plus), -(one:age_18cub))
 
 first_arrest <- tidy_data$firstarrest_pp |>
-  rename(
-    abused_black = ablack
-  )
+  select(-starts_with("d"), -ablack)
 
 math_dropout <- tidy_data$mathdropout_pp |>
   rename(
@@ -170,7 +179,13 @@ math_dropout <- tidy_data$mathdropout_pp |>
     term = period,
     last_term = lastpd
   ) |>
-  select(-c(one, ltime))
+  select(
+    -c(one, ltime, fltime),
+    -starts_with("hs"),
+    -starts_with("coll"),
+    -starts_with("fhs"),
+    -starts_with("fcoll")
+  )
 
 # Chapter 13 ------------------------------------------------------------------
 
@@ -228,6 +243,7 @@ cocaine_relapse_2 <- tidy_data$relapse_days |>
     cols = starts_with("mood"),
     names_to = "followup",
     names_pattern = "([[:digit:]]+)",
+    names_transform = list(followup = as.integer),
     values_to = "mood"
   )
 

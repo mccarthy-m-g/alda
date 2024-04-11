@@ -1,0 +1,313 @@
+---
+title: "Chapter 5: Treating time more flexibly"
+---
+
+::: {.alert .alert-warning}
+This chapter is under construction.
+:::
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+ggplot2::theme_set(ggplot2::theme_bw())
+ggplot2::theme_update(
+  panel.grid.major = ggplot2::element_blank(),
+  panel.grid.minor = ggplot2::element_blank()
+)
+```
+
+```{r setup}
+library(alda)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(ggplot2)
+library(lme4)
+```
+
+## 5.1 Variably Spaced Measurement Occasions
+
+Table 5.1, page 141:
+
+```{r}
+reading_scores
+```
+
+Figure 5.1, page 143:
+
+```{r}
+reading_scores |>
+  filter(id %in% c(4, 27, 31, 33, 41, 49, 69, 77, 87)) |>
+  pivot_longer(
+    starts_with("age"), names_to = "time_structure", values_to = "time"
+  ) |>
+  ggplot(aes(x = time, y = reading_score, colour = time_structure)) +
+    geom_point(alpha = .5) +
+    stat_smooth(method = "lm", se = FALSE, linewidth = .5) +
+    scale_x_continuous(breaks = 5:12) +
+    coord_cartesian(xlim = c(5, 12), ylim = c(0, 80)) +
+    facet_wrap(vars(id))
+```
+
+Table 5.2, page 145:
+
+```{r}
+age_group_fit <- lmer(
+  reading_score ~ I(age_group - 6.5) + (1 + I(age_group - 6.5) | id),
+  data = reading_scores,
+  REML = FALSE
+)
+
+age_fit <- lmer(
+  reading_score ~ I(age - 6.5) + (1 + I(age - 6.5) | id),
+  data = reading_scores,
+  REML = FALSE
+)
+
+summary(age_group_fit)
+summary(age_fit)
+```
+
+## 5.2 Varying Numbers of Measurement Occasions
+
+Table 5.3, page 147:
+
+```{r}
+dropout_wages |>
+  filter(id %in% c(206, 332, 1028)) |>
+  select(id, experience, log_wages, black, highest_grade, unemployment_rate)
+```
+
+Table 5.4, page 149:
+
+```{r}
+wages_fit_A <- lmer(
+  log_wages ~ experience + (1 + experience | id),
+  data = dropout_wages,
+  REML = FALSE
+)
+
+summary(wages_fit_A)
+
+# Adding new predictors to Model A
+wages_fit_B <- update(
+  wages_fit_A,
+  . ~ . + experience * I(highest_grade - 9) + experience * black
+)
+
+summary(wages_fit_B)
+
+# Removing predictors from Model B
+wages_fit_C <- update(
+  wages_fit_B,
+  . ~ . - experience:I(highest_grade - 9) - black,
+  # The model fails to converge with the default optimizer (although the
+  # estimates are fine). Changing the optimizer achieves convergence.
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+summary(wages_fit_C)
+```
+
+Figure 5.2, page 150:
+
+```{r}
+prototypical_dropouts <- crossing(
+  experience = c(0, 12),
+  highest_grade = c(0, 3) + 9,
+  black = c(FALSE, TRUE)
+)
+
+prototypical_dropout_scores <- tibble(
+  log_wages = predict(
+    wages_fit_C,
+    prototypical_dropouts,
+    re.form = NA
+  )
+)
+
+prototypical_dropouts |>
+  bind_cols(prototypical_dropout_scores) |>
+  ggplot(aes(x = experience, y = log_wages, colour = black)) +
+    geom_line() +
+    scale_x_continuous(breaks = seq(0, 12, by = 2)) +
+    coord_cartesian(ylim = c(1.6, 2.4)) +
+    facet_wrap(vars(highest_grade))
+```
+
+Table 5.5, page 154:
+
+```{r}
+wages_fit_A_subset <- update(
+  wages_fit_C,
+  data = dropout_wages_subset
+)
+
+summary(wages_fit_A_subset)
+
+# {lme4} does not support the removal of boundary constraints to allow for
+# negative variance components, so Model B cannot be replicated.
+
+# Remove varying slope for experience
+wages_fit_C_subset <- update(
+  wages_fit_A_subset,
+  . ~ . - (1 + experience | id) + (1 | id)
+)
+
+summary(wages_fit_C_subset)
+```
+
+## 5.3 Time-Varying Predictors
+
+Table 5.6, page 161:
+
+```{r}
+filter(depression_unemployment, id %in% c(7589, 55697, 67641, 65441, 53782))
+```
+
+Table 5.7, page 163:
+
+```{r}
+unemployment_fit_A <- lmer(
+  depression ~ months + (1 + months | id),
+  data = depression_unemployment,
+  REML = FALSE
+)
+
+summary(unemployment_fit_A)
+
+# Adding a predictor to Model A
+unemployment_fit_B <- update(
+  unemployment_fit_A,
+  . ~ . + unemployed,
+  # The model fails to converge with the default optimizer (although the
+  # estimates are fine). Changing the optimizer achieves convergence.
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+summary(unemployment_fit_B)
+
+# Adding an interaction term to Model B
+unemployment_fit_C <- update(
+  unemployment_fit_B,
+  . ~ . + months:unemployed
+)
+
+summary(unemployment_fit_C)
+
+
+# Note: The original model was fit in SAS, which does not report any issues with
+# the model given the data; however, other programs (MPlus, SPSS, STATA, R) all
+# have convergence/singularity problems and it is not possible to get results
+# that match the textbook. Each of these programs react differently to this
+# situation, but it is reasonable to conclude the problem is not with the
+# software, but with this model given the data.
+unemployment_fit_D <- lmer(
+  depression ~ 
+    unemployed + months:unemployed + (1 + unemployed + months:unemployed | id),
+  data = depression_unemployment,
+  REML = FALSE,
+  control = lmerControl(
+    # The number of observations is less than the number of random effects
+    # levels for each term, which makes the random effects variances unidentifiable
+    # in this model, and ignoring this (as we do here) results in a singular fit.
+    check.nobs.vs.nRE = "ignore"
+  )
+)
+
+summary(unemployment_fit_D)
+```
+
+Figure 5.4, page 167:
+
+```{r}
+unemployment_fit_predictions <- tibble(
+  unemployed = c(0, 0, 1, 1), months = c(3.5, 14, 0, 14)
+)
+
+map(
+  list(
+    model_B = unemployment_fit_B,
+    model_C = unemployment_fit_C,
+    model_D = unemployment_fit_D
+  ),
+  function(.x) {
+    unemployment_fit_predictions |>
+    mutate(
+      depression = predict(.x, unemployment_fit_predictions, re.form = NA),
+      unemployed = factor(unemployed, levels = c(1, 0))
+    ) |>
+    ggplot(aes(x = months, y = depression, colour = unemployed)) +
+      geom_line() +
+      scale_x_continuous(breaks = seq(0, 14, by = 2)) +
+      coord_cartesian(xlim = c(0, 14), ylim = c(5, 20))
+  }
+)
+```
+
+Table 5.8:
+
+```{r}
+
+```
+
+## 5.4 Recentering the Effect of TIME
+
+Table 5.9, page 182:
+
+```{r}
+antidepressants |>
+  select(-c(id, positive_mood, treatment)) |>
+  mutate(time_3.33 = time - 3.33, time_6.67 = time - 6.67)
+```
+
+Table 5.10, page 184:
+
+```{r}
+antidepressants_fit_A <- lmer(
+  positive_mood ~ treatment * time + (1 + time | id),
+  data = antidepressants,
+  REML = FALSE
+)
+
+summary(antidepressants_fit_A)
+
+antidepressants_fit_B <- lmer(
+  positive_mood ~ treatment * I(time - 3.33) + (1 + I(time - 3.33) | id),
+  data = antidepressants,
+  REML = FALSE,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+summary(antidepressants_fit_B)
+
+antidepressants_fit_C <- lmer(
+  positive_mood ~ treatment * I(time - 6.67) + (1 + I(time - 6.67) | id),
+  data = antidepressants,
+  REML = FALSE
+)
+
+summary(antidepressants_fit_C)
+```
+
+Figure 5.5, page 185:
+
+```{r}
+antidepressants_fit_predictions <- tibble(
+  treatment = c(0, 0, 1, 1), time = c(0, 7, 0, 7)
+)
+
+antidepressants_fit_predictions |>
+    mutate(
+      positive_mood = predict(
+        antidepressants_fit_C, antidepressants_fit_predictions, re.form = NA
+      ),
+      treatment = factor(treatment, levels = c(1, 0))
+    ) |>
+    ggplot(aes(x = time, y = positive_mood, colour = treatment)) +
+      geom_line() +
+      scale_x_continuous(breaks = seq(0, 7, by = 1)) +
+      coord_cartesian(ylim = c(140, 190))
+```
