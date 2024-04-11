@@ -6,7 +6,7 @@
 \title{Days to inmate recidivism}
 \format{
 A person-level data frame with 194 rows and
-8 columns:
+7 columns:
 
 \describe{
 \item{\code{id}}{Participant ID.}
