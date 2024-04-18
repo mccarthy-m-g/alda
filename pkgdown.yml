@@ -9,6 +9,7 @@ articles:
   chapter-14: chapter-14.html
   chapter-15: chapter-15.html
   chapter-2: chapter-2.html
+  chapter-3: chapter-3.html
   chapter-4: chapter-4.html
   chapter-5: chapter-5.html
   chapter-6: chapter-6.html
@@ -16,7 +17,7 @@ articles:
   chapter-8: chapter-8.html
   chapter-9: chapter-9.html
   longitudinal-data-organization: longitudinal-data-organization.html
-last_built: 2024-04-11T22:23Z
+last_built: 2024-04-18T00:16Z
 urls:
   reference: https://mccarthy-m-g.github.io/alda/reference
   article: https://mccarthy-m-g.github.io/alda/articles
