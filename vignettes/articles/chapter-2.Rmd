@@ -33,7 +33,7 @@ library(broom)
 
 In Section 2.1 Singer and Willet (2003) introduce two distinct formats of data organization for longitudinal data---the **person-level** format and the **person-period** format---using a subset of data from the National Youth Survey (NYS) measuring the development of tolerance towards deviant behaviour in adolescents over time in relation to self-reported sex and exposure to deviant peers (Raudenbush & Chan, 1992). Adolescents' tolerance towards deviant behaviour was based on a 9-item scale measuring attitudes tolerant of deviant behaviour. The scale was administered each year from age 11 to 15 and so is a **time-varying variable**. However, adolescents' self-reported sex and exposure to deviant peers were only recorded at the beginning of the study period and so are **time-invariant variables**.
 
-For this example we illustrate the difference between the two formats using the `deviant_tolerance_pl` and `deviant_tolerance_pp` data sets, which correspond to the adolescent tolerance of deviant behaviour data organized in the person-level and person-period formats, respectively. 
+For this example we illustrate the difference between the two formats using the `deviant_tolerance_pl` and `deviant_tolerance_pp` data sets, which correspond to the adolescent tolerance of deviant behaviour data organized in the person-level and person-period formats, respectively.
 
 ### The Person-Level Data Set
 
