@@ -9,7 +9,7 @@ This package contains 31 data sets provided by Singer and Willet (2003) with the
 There are eleven data sets for longitudinal mixed effects modelling:
 
 - `?deviant_tolerance`: Adolescent tolerance of deviant behaviour (Chapter 2)
-- `early_intervention`: Early educational interventions and cognitive performance (Chapter 3)
+- `?early_intervention`: Early educational interventions and cognitive performance (Chapter 3)
 - `?alcohol_use_1`: Adolescent and peer alcohol use (Chapters 4 and 6)
 - `?reading_scores`: Peabody Individual Achievement Test reading scores (Chapter 5)
 - `?dropout_wages`: High school dropout labour market experiences (Chapters 5 and 6)
