@@ -6,6 +6,7 @@ library(readr)
 library(fs)
 library(haven)
 library(janitor)
+library(faux)
 
 sas_data  <- list.files("data-raw/data/raw", full.names = TRUE)
 filenames <- list.files("data-raw/data/raw") |> path_ext_remove()
@@ -36,7 +37,49 @@ deviant_tolerance_pp <- tidy_data$tolerance_pp |>
 
 # Chapter 3 -------------------------------------------------------------------
 
-# Data not publicly available
+# The data used in Chapter 3 is not openly available, so we need to simulate
+# data with similar statistical properties instead.
+
+# Simulation parameters:
+# Number of participants                                           = 103
+# Number of participants in the treatment group                    = 58
+# Number of participants in the control group                      = 45
+# Population average of the level-1 intercepts                     = 107.84
+# Population average difference in level-1 intercept               = 6.85
+# Population average of the level-1 slopes                         = -21.13
+# Population average difference in level-1 slope                   = 5.27
+# Level-1 residual variance across all occasions of measurement    = 74.24
+# Level-2 residual variance in true intercept                      = 124.64
+# Level-2 residual variance in true slope                          = 12.29
+# Level-2 residual covariance between true intercep and true slope = -36.41
+set.seed(351)
+early_intervention <- tibble(id = factor(1:103)) |>
+  mutate(
+    gamma_00 = 107.84,
+    gamma_01 = 6.85,
+    gamma_10 = -21.13,
+    gamma_11 = 5.27,
+    zeta = MASS::mvrnorm(
+      n = n(),
+      mu = c(0, 0),
+      Sigma = matrix(c(124.64, -36.41, -36.41, 12.29), nrow = 2)
+    ),
+    zeta_0 = zeta[,1],
+    zeta_1 = zeta[,2]
+  ) |>
+  add_within(age = c(1, 1.5, 2)) |>
+  add_between(
+    treatment = c(0, 1),
+    .prob = c(45/103, 58/103),
+    .by = "id"
+  ) |>
+  mutate(
+    epsilon = rnorm(n(), mean = 0, sd = sqrt(74.24)),
+    pi_0 = gamma_00 + gamma_01 * treatment + zeta_0,
+    pi_1 = gamma_10 + gamma_11 * treatment + zeta_1,
+    cognitive_score = pi_0 + pi_1 * (age - 1) + epsilon
+  ) |>
+  select(id, age, treatment, cognitive_score)
 
 # Chapter 4 -------------------------------------------------------------------
 
@@ -278,6 +321,7 @@ invisible(map(
 usethis::use_data(
   deviant_tolerance_pl,
   deviant_tolerance_pp,
+  early_intervention,
   alcohol_use_1,
   reading_scores,
   dropout_wages,
