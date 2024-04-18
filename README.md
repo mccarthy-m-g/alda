@@ -4,11 +4,12 @@
 [![R-CMD-check](https://github.com/mccarthy-m-g/alda/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mccarthy-m-g/alda/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
   
-This package contains 31 data sets provided by Singer and Willet (2003) with their book, *Applied longitudinal data analysis: Modeling change and event occurrence*, that are suitable for longitudinal mixed effects modelling, longitudinal structural equation modelling, and survival analysis. All the data sets in this package are real data from real studies; however, most were modified by Singer and Willet (2003) for the illustration of statistical methods, so they may not match the results of the original studies. Additionally, the early intervention data used throughout Chapter 3 is not included in this package because it is not openly available.
+This package contains 31 data sets provided by Singer and Willet (2003) with their book, *Applied longitudinal data analysis: Modeling change and event occurrence*, that are suitable for longitudinal mixed effects modelling, longitudinal structural equation modelling, and survival analysis. All the data sets in this package are real data from real studies; however, most were modified by Singer and Willet (2003) for the illustration of statistical methods, so they may not match the results of the original studies.
 
-There are ten data sets for longitudinal mixed effects modelling:
+There are eleven data sets for longitudinal mixed effects modelling:
 
 - `?deviant_tolerance`: Adolescent tolerance of deviant behaviour (Chapter 2)
+- `early_intervention`: Early educational interventions and cognitive performance (Chapter 3)
 - `?alcohol_use_1`: Adolescent and peer alcohol use (Chapters 4 and 6)
 - `?reading_scores`: Peabody Individual Achievement Test reading scores (Chapter 5)
 - `?dropout_wages`: High school dropout labour market experiences (Chapters 5 and 6)
@@ -55,6 +56,7 @@ There is one vignette with tips and tricks for working with longitudinal data:
 There are fourteen articles on the package documentation website demonstrating how to recreate examples from the textbook in R:
 
 - [Chapter 2](articles/chapter-2.html): Exploring longitudinal data on change
+- [Chapter 3](articles/chapter-3.html): Introducing the multilevel model for change
 - [Chapter 4](articles/chapter-4.html): Doing data analysis with the multilevel model for change
 - [Chapter 5](articles/chapter-5.html): Treating time more flexibly
 - [Chapter 6](articles/chapter-6.html): Modeling discontinuous and nonlinear change

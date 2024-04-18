@@ -12,6 +12,7 @@ reference:
   desc:
   contents:
   - deviant_tolerance
+  - early_intervention
   - alcohol_use_1
   - reading_scores
   - dropout_wages
@@ -67,6 +68,8 @@ navbar:
       - text: Longitudinal mixed effects modelling
       - text: Chapter 2
         href: articles/chapter-2.html
+      - text: Chapter 3
+        href: articles/chapter-3.html
       - text: Chapter 4
         href: articles/chapter-4.html
       - text: Chapter 5

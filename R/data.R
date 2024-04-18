@@ -46,6 +46,44 @@ NULL
 #' }
 "deviant_tolerance_pl"
 
+# Chapter 3 -------------------------------------------------------------------
+
+#' Early educational intervention and cognitive performance
+#'
+#' Simulated data from Burchinal, Campbell, Bryant, Wasik, and Ramey (1997)
+#' measuring the effect of early educational intervention on cognitive
+#' performance in a sample of African-American children at ages 12, 18, and 24
+#' months.
+#'
+#' @format
+#' A person-period data frame with `r nrow(early_intervention)` rows and
+#' `r ncol(early_intervention)` columns:
+#'
+#' \describe{
+#'   \item{`id`}{Child ID.}
+#'   \item{`age`}{Age in years at time of measurement.}
+#'   \item{`treatment`}{Treatment condition (control = 0, intervention = 1).}
+#'   \item{`cognitive_score`}{Cognitive performance score on one of two standardized intelligence tests: the Bayley Scales of Infant Development (Bayley, 1969) at 12 and 18 months, and the the Stanford Binet (Terman & Merrill, 1972) at 24 months.}
+#' }
+#' @note
+#' At the request of the researchers, Singer and Willet (2003) did not provide
+#' the data from Burchinal, Campbell, Bryant, Wasik, and Ramey's (1997) in order
+#' to ensure the privacy of the study's participants. However, the data provided
+#' here has been simulated to have similar statistical properties to their study
+#' in order to match the estimates and figures presented in the text as best as
+#' possible.
+#' @source
+#' Burchinal, M. R., Campbell, F. A., Bryant, D. M., Wasik, B. H., & Ramey, C.
+#' T. (1997). Early intervention and mediating processes in cognitive
+#' performance of children of low income African American families. Child
+#' Development, 68, 935–954. <https://doi.org/10.2307/1132043>
+#' @references
+#' Bayley, N. (1969). Bayley Scales of Infant Development. New York:
+#' Psychological Corp.
+#' Terman, L. M., & Merrill, N. Q. (1972). Stanford-Binet Intelligence Scale:
+#' 1972 Norms Editions. Boston: Houghton Mifflin.
+"early_intervention"
+
 # Chapter 4 -------------------------------------------------------------------
 
 #' Adolescent and peer alcohol use
@@ -188,7 +226,7 @@ NULL
 #'   \item{`time_of_day`}{Time of day of measurement expressed numerically (0 for morning readings; 0.33 for afternoon readings; 0.67 for evening readings).}
 #'   \item{`time`}{Time of measurement expressed as a combination of `day` and `time_of_day`.}
 #'   \item{`positive_mood`}{Positive mood score.}
-#'   \item{`treatment`}{Treatment condition (placebo pills = 0, antidepressant pills = 1)}
+#'   \item{`treatment`}{Treatment condition (placebo pills = 0, antidepressant pills = 1).}
 #' }
 #' @source
 #' Tomarken, A. J., Shelton, R. C., Elkins, L., & Anderson, T. (1997). Sleep
