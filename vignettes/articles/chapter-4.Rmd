@@ -9,7 +9,9 @@ This chapter is under construction.
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE
 )
 ggplot2::theme_set(ggplot2::theme_bw())
 ggplot2::theme_update(
@@ -593,7 +595,13 @@ $$
 \text{Deviance} = -2 (LL_\text{current model} - LL_\text{saturated model}).
 $$
 
-Note that for the multilevel model for change this equation reduces to $\text{Deviance} = -2LL_\text{current model}$, as the the log-likelihood statistic for the saturated model is always zero.
+Note that for the multilevel model for change this equation reduces to:
+
+$$
+\text{Deviance} = -2LL_\text{current model},
+$$ 
+
+because the the log-likelihood statistic for the saturated model is always zero.
 
 Deviance statistics from **nested models** estimated using identical data can be compared using the `anova()` function, which computes analysis of deviance tables for one or more fitted models. Unfortunately `anova()` doesn't accept a list as input, so we have to do some meta-programming to use our list of models if we don't want to type out each model by hand.
 
