@@ -11,7 +11,7 @@
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Chapter 11: Fitting basic discrete-time hazard models">
+<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js" integrity="sha512-7O5pXpc0oCRrxk8RUfDYFgn0nO1t+jLuIOQdOMRp4APB7uZ4vSjspzp5y6YDtDs4VzUSTbWzBFZ/LKJhnyFOKw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Chapter 11: Fitting basic discrete-time hazard models">
 <meta property="og:description" content="alda">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -346,10 +346,12 @@ Model<a class="anchor" aria-label="anchor" href="#a-formal-representation-of-the
 <span><span class="co">#&gt; Terms added sequentially (first to last)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                     Df Deviance Resid. Df Resid. Dev</span></span>
-<span><span class="co">#&gt; NULL                                  822    1139.53</span></span>
-<span><span class="co">#&gt; factor(grade)        6   487.58       816     651.96</span></span>
-<span><span class="co">#&gt; parental_transition  1    17.29       815     634.66</span></span>
+<span><span class="co">#&gt;                     Df Deviance Resid. Df Resid. Dev  Pr(&gt;Chi)    </span></span>
+<span><span class="co">#&gt; NULL                                  822    1139.53              </span></span>
+<span><span class="co">#&gt; factor(grade)        6   487.58       816     651.96 &lt; 2.2e-16 ***</span></span>
+<span><span class="co">#&gt; parental_transition  1    17.29       815     634.66 3.203e-05 ***</span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/anova.html" class="external-link">anova</a></span><span class="op">(</span><span class="va">model_C</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Analysis of Deviance Table</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -360,10 +362,12 @@ Model<a class="anchor" aria-label="anchor" href="#a-formal-representation-of-the
 <span><span class="co">#&gt; Terms added sequentially (first to last)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                        Df Deviance Resid. Df Resid. Dev</span></span>
-<span><span class="co">#&gt; NULL                                     822    1139.53</span></span>
-<span><span class="co">#&gt; factor(grade)           6   487.58       816     651.96</span></span>
-<span><span class="co">#&gt; parental_antisociality  1    14.79       815     637.17</span></span>
+<span><span class="co">#&gt;                        Df Deviance Resid. Df Resid. Dev  Pr(&gt;Chi)    </span></span>
+<span><span class="co">#&gt; NULL                                     822    1139.53              </span></span>
+<span><span class="co">#&gt; factor(grade)           6   487.58       816     651.96 &lt; 2.2e-16 ***</span></span>
+<span><span class="co">#&gt; parental_antisociality  1    14.79       815     637.17 0.0001204 ***</span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
 <span><span class="co"># Deviance tests are sequential so the order of terms matters. To test</span></span>
 <span><span class="co"># parental_transition and parental_antisociality, the model needs to be</span></span>
 <span><span class="co"># fit twice, once with each as the last term.</span></span>
@@ -377,11 +381,13 @@ Model<a class="anchor" aria-label="anchor" href="#a-formal-representation-of-the
 <span><span class="co">#&gt; Terms added sequentially (first to last)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                        Df Deviance Resid. Df Resid. Dev</span></span>
-<span><span class="co">#&gt; NULL                                     822    1139.53</span></span>
-<span><span class="co">#&gt; factor(grade)           6   487.58       816     651.96</span></span>
-<span><span class="co">#&gt; parental_antisociality  1    14.79       815     637.17</span></span>
-<span><span class="co">#&gt; parental_transition     1     8.02       814     629.15</span></span>
+<span><span class="co">#&gt;                        Df Deviance Resid. Df Resid. Dev  Pr(&gt;Chi)    </span></span>
+<span><span class="co">#&gt; NULL                                     822    1139.53              </span></span>
+<span><span class="co">#&gt; factor(grade)           6   487.58       816     651.96 &lt; 2.2e-16 ***</span></span>
+<span><span class="co">#&gt; parental_antisociality  1    14.79       815     637.17 0.0001204 ***</span></span>
+<span><span class="co">#&gt; parental_transition     1     8.02       814     629.15 0.0046222 ** </span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/anova.html" class="external-link">anova</a></span><span class="op">(</span><span class="va">model_D</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Analysis of Deviance Table</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -392,11 +398,13 @@ Model<a class="anchor" aria-label="anchor" href="#a-formal-representation-of-the
 <span><span class="co">#&gt; Terms added sequentially (first to last)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                        Df Deviance Resid. Df Resid. Dev</span></span>
-<span><span class="co">#&gt; NULL                                     822    1139.53</span></span>
-<span><span class="co">#&gt; factor(grade)           6   487.58       816     651.96</span></span>
-<span><span class="co">#&gt; parental_transition     1    17.29       815     634.66</span></span>
-<span><span class="co">#&gt; parental_antisociality  1     5.51       814     629.15</span></span></code></pre></div>
+<span><span class="co">#&gt;                        Df Deviance Resid. Df Resid. Dev  Pr(&gt;Chi)    </span></span>
+<span><span class="co">#&gt; NULL                                     822    1139.53              </span></span>
+<span><span class="co">#&gt; factor(grade)           6   487.58       816     651.96 &lt; 2.2e-16 ***</span></span>
+<span><span class="co">#&gt; parental_transition     1    17.29       815     634.66 3.203e-05 ***</span></span>
+<span><span class="co">#&gt; parental_antisociality  1     5.51       814     629.15   0.01886 *  </span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="interpreting-parameter-estimates">11.4 Interpreting Parameter Estimates<a class="anchor" aria-label="anchor" href="#interpreting-parameter-estimates"></a>
@@ -520,13 +528,11 @@ Model<a class="anchor" aria-label="anchor" href="#a-formal-representation-of-the
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p>
-<p>Developed by Michael McCarthy.</p>
+  <p>Developed by Michael McCarthy.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.8.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
 </div>
 
     </footer>
