@@ -2,14 +2,12 @@
 title: "Chapter 4: Doing data analysis with the multilevel model for change"
 ---
 
-::: {.alert .alert-warning}
-This chapter is under construction.
-:::
-
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE
 )
 ggplot2::theme_set(ggplot2::theme_bw())
 ggplot2::theme_update(
@@ -26,308 +24,677 @@ library(purrr)
 library(ggplot2)
 library(patchwork)
 library(lme4)
+library(performance)
 library(broom.mixed)
+library(modelbased)
+library(modelsummary)
+library(gt)
 ```
 
 ## 4.1 Example: Changes in adolescent alcohol use
 
-Figure 4.1, page 77:
+In Chapter 4 Singer and Willet (2003) delve deeper into the specification, estimation, and interpretation of the multilevel model for change using a subset of data from Curran, Stice, and Chassin (1997), who measured the relation between changes in alcohol use and changes in peer alcohol use over a 3-year period in a community-based sample of Hispanic and Caucasian adolescents.
+
+For this example we use the `alcohol_use_1` data set, a person-period data frame with 246 rows and 6 columns:
+
+- `id`: Adolescent ID.
+- `age`: Age in years at time of measurement.
+- `child_of_alcoholic`: Binary indicator for whether the adolescent is a child of an alcoholic parent.
+- `male`: Binary indicator for whether the adolescent is a male.
+- `alcohol_use`: Square root of the summed scores of four eight-point items measuring frequency of alcohol use.
+- `peer_alcohol_use`: Square root of the summed scores of two six-point items measuring frequency of peer alcohol use.
 
 ```{r}
+alcohol_use_1
+```
+
+To inform specification of the multilevel model for change we will fit in subsequent sections, we begin with some basic exploration and description of the `alcohol_use_1` data.
+
+Starting with the `age` variable, we can see that each adolescent was measured on the same three occasions at ages 14, 15, and 16 years.
+
+```{r}
+measurement_occasions <- unique(alcohol_use_1$age)
+measurement_occasions
+
+alcohol_use_1 |>
+  group_by(id) |>
+  summarise(all_occasions = identical(age, measurement_occasions)) |>
+  pull(all_occasions) |>
+  unique()
+```
+
+Next we'll look at the time-invariant `male` and `child_of_alcoholic` variables. Because we're summarizing time-invariant predictors, we'll transform the data to person-level format with the `pivot_wider()` function from the **tidyr** package before summarizing.
+
+```{r}
+alcohol_use_1_pl <- pivot_wider(
+  alcohol_use_1,
+  names_from = age,
+  names_prefix = "alcohol_use_",
+  values_from = alcohol_use
+)
+
+alcohol_use_1_pl
+```
+
+A total of 42 adolescents (51.2%) were male and 40 female (48.8%), and a total of 37 adolescents (45.1%) were children of an alcoholic parent and 45 were not (54.9%).
+
+```{r}
+map(
+  list(male = "male", child_of_alcoholic = "child_of_alcoholic"),
+  \(.x) {
+    alcohol_use_1_pl |>
+      group_by(.data[[.x]]) |>
+      summarise(count = n()) |>
+      mutate(proportion = count / sum(count))
+  }
+)
+```
+
+To inform specification of the level-1 submodel, we can look at empirical growth plots for a random sample of adolescents as usual.
+
+```{r}
+# Figure 4.1, page 77:
 alcohol_use_1 |>
   filter(id %in% c(4, 14, 23, 32, 41, 56, 65, 82)) |>
   ggplot(aes(x = age, y = alcohol_use)) +
     stat_smooth(method = "lm", se = FALSE) +
     geom_point() +
     coord_cartesian(xlim = c(13, 17), ylim = c(0, 4)) +
-    facet_wrap(vars(id), ncol = 4)
+    facet_wrap(vars(id), ncol = 4, labeller = label_both)
 ```
 
-Figure 4.2, page 79:
+Finally, to inform specification of the level-2 submodel, we can look at **coincident growth trajectories**---which are simply the usual individual growth trajectories summarized by the number of individuals with the same trajectory---displayed separately for groups distinguished by important values of the time-invariant predictors.
 
-> To construct this display, we twice divided this subsample into two groups: once by COA (top panel) and again by PEER (bottom panel). Because PEER is continuous, the bottom panel represents a split at the sample mean. Thicker lines represent coincident trajectories—the thicker the line, the more trajectories.
+Here we look at two time-invariant predictors, `child_of_alcoholic` and `peer_alcohol_use`. Because `peer_alcohol_use` is a continuous variable, we split it at the sample mean for the purpose of display.
 
 ```{r}
-figure_4.2 <- map(
-  set_names(c("child_of_alcoholic", "peer_alcohol_use")),
+alcohol_use_1_pl <- alcohol_use_1_pl |>
+  mutate(
+    peer_alcohol_use_split = if_else(
+      peer_alcohol_use < mean(peer_alcohol_use),
+      true = "low",
+      false = "high"
+    ),
+    peer_alcohol_use_split = factor(peer_alcohol_use_split, levels = c("low", "high"))
+  )
+
+alcohol_use_1_pl
+```
+
+To plot the coincident growth trajectories, we first need to summarize, *for each predictor*, the number of individuals with the same trajectory. The easiest way to do this is to count the number of groups with the same trajectory pattern for each level of the time-invariant predictors using the person-level data, then tidying the coincident trajectory summary back to a person-period format.
+
+Afterwards we can plot as usual, with the addition of a `linewidth` aesthetic for the coincident trajectory counts. Note that this plot differs slightly from the text, as unlike Singer and Willet (2003) we use the entire sample instead of a random sample.
+
+```{r}
+alcohol_use_1_cotraj <- map(
+  list("child_of_alcoholic", "peer_alcohol_use_split"),
   \(.x) {
     # Wrangle
-    subset_data <- alcohol_use_1 |>
-      # In order to count the number of coincident trajectories, the data needs
-      # to be in wide format so we can group by each time point.
-      pivot_wider(names_from = age, values_from = alcohol_use) |>
-      mutate(
-        peer_alcohol_use = if_else(peer_alcohol_use < 1.01756, "low", "high"),
-        peer_alcohol_use = factor(peer_alcohol_use, levels = c("low", "high"))
-      ) |>
-      # Indexing into the .data pronoun allows us to use group_by() with
-      # the character string inputs ("child_of_alcoholic", "peer_alcohol_use").
-      group_by(.data[[.x]], `14`, `15`, `16`) |>
-      summarise(n = n()) |>
-      ungroup() |>
-      # An ID is needed to indicate which observations go together after pivoting
-      # back to long format.
-      mutate(id = 1:n()) |>
+    .coincident_trajectories <- alcohol_use_1_pl |>
+      group_by(.data[[.x]], pick(starts_with("alcohol_use"))) |>
+      summarise(coincident_trajectories = n(), .groups = "drop") |>
+      mutate(trajectory_id = 1:n(), .before = everything()) |>
       pivot_longer(
-        cols = starts_with("1"),
+        cols = starts_with("alcohol_use"),
         names_to = "age",
+        names_prefix = "alcohol_use_",
         names_transform = as.integer,
         values_to = "alcohol_use"
       )
     
     # Plot
-    ggplot(subset_data, aes(x = age, y = alcohol_use, group = id)) +
+    ggplot(.coincident_trajectories, aes(x = age, y = alcohol_use)) +
       stat_smooth(
-        aes(linewidth = n), method = "lm", se = FALSE, show.legend = FALSE
+        aes(group = trajectory_id, linewidth = coincident_trajectories),
+        method = "lm",
+        se = FALSE
       ) +
-      scale_linewidth_continuous(range = c(.25, 4)) +
+      scale_linewidth_continuous(limits = c(1, 22), range = c(.25, 4)) +
       coord_cartesian(xlim = c(13, 17), ylim = c(0, 4)) +
-      # To learn about the .data pronoun, see:
-      # https://dplyr.tidyverse.org/articles/programming.html
-      facet_wrap(vars(.data[[.x]]), labeller = label_both) +
-      # We're going to create a shared axis label with patchwork later, see:
-      # https://tidytales.ca/snippets/2022-12-22_patchwork-shared-axis-labels/
-      ylab(NULL)
+      facet_wrap(vars(.data[[.x]]), labeller = label_both)
   }
 )
 
-# Before plotting, remove redundant axis elements for aesthetics and set margins
-# so it looks exactly the same as if the plot was created with facet_wrap(). The
-# margin values selected here are based on the default theme values.
-patch <- wrap_plots(figure_4.2, nrow = 2) &
-  theme(plot.margin = margin(0, 0, 0, 0))
-patch[[1]] <- patch[[1]] +
-  xlab(NULL) +
-  theme(
-    axis.ticks.x = element_blank(),
-    axis.text.x = element_blank(),
-    plot.margin = margin(5.5, 5.5, 1.375, 0)
-  )
-patch[[2]] <- patch[[2]] +
-  theme(plot.margin = margin(1.375, 5.5, 5.5, 0))
-
-# Create a pseudo y-axis title using a tag.
-wrap_elements(patch) +
-  labs(tag = "alcohol_use") +
-  theme(
-    plot.tag = element_text(
-      size = rel(1), angle = 90, vjust = 1,
-      margin = margin(b = 8.25, l = 5.5, r = 2.75)
-    ),
-    plot.tag.position = "left",
-    plot.margin = margin(0)
-  )
+# Figure 4.2, page 79:
+wrap_plots(alcohol_use_1_cotraj, ncol = 1, guides = "collect")
 ```
+
+Based on the exploratory analyses, Singer and Willett (2003) posited the following multilevel model for change for the `alcohol_use_1` data:
+
+$$
+\begin{alignat}{3}
+& \text{Level 1:} \qquad &
+  \text{alcohol_use}_{ij} &=
+  \pi_{0i} + \pi_{1i} (\text{age}_{ij} - 14) + \epsilon_{ij} \\
+& \text{Level 2:} \qquad &
+  \pi_{0i} &=
+  \gamma_{00} + \gamma_{01} \text{child_of_alcoholic}_i + \zeta_{0i} \\
+&                        &
+  \pi_{1i} &=
+  \gamma_{10} + \gamma_{11} \text{child_of_alcoholic}_i + \zeta_{1i},
+\end{alignat}
+$$
+
+where the model parameters follow the same definitions and interpretations as discussed in Chapter 3.
 
 ## 4.2 The composite specification of the multilevel model for change
 
+In Section 4.2 Singer and Willett (2003) introduce what they call the **composite multilevel model for change**, which we prematurely introduced in the Chapter 3 examples as the mixed model specification. After substituting the level-2 equations into level-1, our composite multilevel model for change for the `alcohol_use_1` data looks like:
+
+$$
+\text{alcohol_use}_{ij} = \underbrace{
+  \gamma_{00} + \gamma_{01} \text{coa}_i
+  + \gamma_{10}(\text{age}_{ij} - 14)
+  + \gamma_{11} \text{coa}_i(\text{age}_{ij} - 14)
+}_{\text{Fixed Effects}}
++ \underbrace{
+  \epsilon_{ij} + \zeta_{0i} + \zeta_{1i}(\text{age}_{ij} - 14).
+}_{\text{Random Effects}}
+$$
+
 ## 4.3 Methods of Estimation, Revisited
+
+In Section 4.3 Singer and Willett (2003) discuss two methods of estimation available to frequentist multilevel models, which must be selected *before* fitting the model:
+
+- **Generalized least squares** (GLS), which is an extension of ordinary least-squares estimation that allows the residuals to be autocorrelated and heteroscedastic. GLS estimates are obtained by *minimizing* a weighted function of the residuals. The `gls()` function from the **nlme** package can be used to fit the multilevel model for change using GLS.
+- **Maximum likelihood** (ML), which is a more general approach that is not limited to linear regression models. ML estimates are obtained by *maximizing* a likelihood function so that, under the assumed statistical model, the observed data is most probable. As we have previously demonstrated, the `lmer()` function from the **lme4** package can be used to fit the multilevel model for change using ML.
+
+Because generalized least squares and maximum likelihood estimation use different procedures to fit the multilevel model for change, their estimates *may* differ when fitting the same model using the same data; however, if the normal distribution assumptions required for maximum likelihood estimation hold, their estimates will be equivalent.
+
+Additionally, maximum likelihood estimation can be further distinguished into two types: **full** and **restricted**. As Singer and Willet (2003) explain, under **full maximum likelihood** (FML) the likelihood of the *sample data* is maximized, and goodness-of-fit statistics refer to the fit of the entire model (fixed and random effects); under **restricted maximum likelihood** (REML) the likelihood of the *sample residuals* is maximized, and goodness-of-fit statistics refer to the fit of only the random effects. Consequently, statistical tests comparing the goodness-of-fit statistics from FML models can be used to test hypotheses about either fixed or random effect parameters, whereas those from REML models can be used only to test hypotheses about random effect parameters.
 
 ## 4.4 First Steps: Fitting Two Unconditional Multilevel Models for Change
 
-Table 4.1, page 94-95:
+In Section 4.4 Singer and Willett (2003) introduce a new **model building** workflow for the multilevel model for change that begins by fitting two unconditional multilevel models for change before including any substantive predictors:
+
+- The **unconditional means model**, which partitions and quantifies the total variation in the outcome variable across individuals without regard to time. We fit this model first to determine whether the variance components $\epsilon_{ij}$ and $\zeta_{0i}$ have sufficient variation within individuals (level 1) and between individuals (level 2), respectively, to warrant linking outcome variation *at that level* to predictors. 
+- The **unconditional growth model**, which partitions and quantifies variation in the outcome variable across both individuals and time. We fit this model second to determine whether interindividual differences in change are due to outcome variation in true initial status, $\zeta_{0i}$, or true rate of change, $\zeta_{1i}$.
+
+Together, these two models (1) provide a valuable baseline against which you can evaluate and compare subsequent models that include substantive predictors, and (2) help establish whether and where any systematic variation in the outcome variable worth exploring resides. 
+
+### The unconditional means model
+
+The unconditional means model is an intercept-only model that allows the intercept to vary across individuals:
+
+$$
+\begin{alignat}{3}
+& \text{Level 1:} \qquad &
+  \text{alcohol_use}_{ij} &=
+  \pi_{0i} + \epsilon_{ij} \\
+& \text{Level 2:} \qquad &
+  \pi_{0i} &=
+  \gamma_{00} + \zeta_{0i},
+\end{alignat}
+$$
+
+which postulates that the observed value of `alcohol_use` for the $i$th adolescent at the $j$th time is composed of their within-person deviations, $\epsilon_{ij}$, from their person-specific true mean, $\pi_{0i}$, which in turn is composed of their between-person deviation, $\zeta_{0i}$, from the population average true mean, $\gamma_{00}$.
 
 ```{r}
-# Fit models:
+# Table 4.1, Model A, page 94-95:
 model_A <- lmer(
   alcohol_use ~ 1 + (1 | id),
   data = alcohol_use_1,
   REML = FALSE
 )
 
-model_B <- update(
-  model_A,
-  . ~ . - (1 | id) + I(age - 14) + (I(age - 14) | id)
+summary(model_A)
+```
+
+Note that because the unconditional means model lacks any temporal predictors, it stipulates that the true change trajectory for each individual is completely flat over time, sitting at their person-specific mean ($\pi_{0i}$); and that the true population change trajectory is also flat, sitting at the grand mean ($\gamma_{00}$).
+
+```{r}
+model_A |>
+  augment(data = alcohol_use_1) |>
+  ggplot(aes(x = age, y = .fitted)) +
+    geom_line(aes(linewidth = "individual", group = id), alpha = .35) +
+    geom_line(
+      aes(linewidth = "average"),
+      data = tibble(.fitted = fixef(model_A), age = measurement_occasions)
+    ) +
+    scale_linewidth_manual(values = c(2, .25)) +
+    coord_cartesian(xlim = c(13, 17), ylim = c(0, 4)) +
+    labs(y = "alcohol_use", linewidth = "trajectory")
+```
+
+### The unconditional growth model
+
+The unconditional growth model introduces the time-indicator predictor into the model, and allows the rate of change to vary across individuals:
+
+$$
+\begin{alignat}{3}
+& \text{Level 1:} \qquad &
+  \text{alcohol_use}_{ij} &=
+  \pi_{0i} + \pi_{1i}(\text{age}_{ij} - 14) + \epsilon_{ij} \\
+& \text{Level 2:} \qquad &
+  \pi_{0i} &=
+  \gamma_{00} + \zeta_{0i} \\
+&                        &
+  \pi_{1i} &=
+  \gamma_{10} + \zeta_{1i},
+\end{alignat}
+$$
+
+which postulates that the observed value of `alcohol_use` for the $i$th adolescent at the $j$th time is composed of their within-person deviations, $\epsilon_{ij}$, from their true linear change trajectory---a linear function of their true initial status, $\pi_{0i}$, and true rate of change, $\pi_{1i}$---which in turn are composed of their between-person deviations, $\zeta_{0i}$ and $\zeta_{1i}$, from the population average true initial status, $\gamma_{00}$, and the population average true rate of change, $\gamma_{10}$, respectively.
+
+```{r}
+model_B <- lmer(
+  alcohol_use ~ I(age - 14) + (I(age - 14) | id),
+  data = alcohol_use_1,
+  REML = FALSE
 )
 
+summary(model_B)
+```
+
+This is the same model as Chapter 3's individual growth model---but with a new name to emphasize that the model includes no substantive predictors---so we can plot the trajectories as usual.
+
+```{r}
+model_B |>
+  augment() |>
+  select(-alcohol_use) |>
+  rename(alcohol_use = .fitted, age = `I(age - 14)`) |>
+  mutate(age = as.numeric(age + 14)) |>
+  ggplot(aes(x = age, y = alcohol_use)) +
+    geom_line(aes(linewidth = "individual", group = id), colour = "#3366FF") +
+    geom_line(
+      aes(linewidth = "average"),
+      data = tibble(
+        age = measurement_occasions,
+        alcohol_use = predict(
+          model_B,
+          tibble(age = measurement_occasions),
+          re.form = NA
+        )
+      ),
+      colour = "#3366FF"
+    ) +
+    scale_linewidth_manual(values = c(2, .25)) +
+    scale_x_continuous(breaks = 13:17) +
+    coord_cartesian(xlim = c(13, 17), ylim = c(0, 4)) +
+    labs(linewidth = "trajectory")
+```
+
+## 4.5 Practical Data Analytic Strategies for Model Building
+
+In Section 4.5 Singer and Willet (2003) present their data analytic strategy for model building, which focuses on building a systematic sequence of models that, as a set, address your research questions in a meaningful way. They refer to this sequence as a **taxonomy of statistical models**, where:
+
+- Each model in the taxonomy extends a prior model in some sensible way. 
+- Decisions to enter, retain, and remove predictors are based on a combination of logic, theory, and prior research, supplemented by hypothesis testing and comparisons of model fit.
+- The taxonomy progresses toward a "final" model whose interpretation addresses your research questions.
+
+They present this strategy through one potential analytic path for the `alcohol_use_1` data, where the research question is focused on the relationship between changes in adolescent alcohol use and being the child of an alcoholic parent.
+
+The first substantive model, Model C, updates the unconditional growth model to include `child_of_alcoholic` as a predictor of both initial status and rate of change. Singer and Willet (2003) added these terms as a logical first step, given the research question.
+
+```{r}
 model_C <- update(
   model_B,
   . ~ . + child_of_alcoholic + I(age - 14):child_of_alcoholic
 )
 
+summary(model_C)
+```
+
+Model D builds upon Model C, controlling for the effects of `peer_alcohol_use` on initial status and rate of change. Singer and Willet (2003) added these terms to see if they might explain some of the **conditional residual variation** in initial status and rate of change from Model C. 
+
+```{r}
 model_D <- update(
   model_C,
   . ~ . + peer_alcohol_use + I(age - 14):peer_alcohol_use
 )
 
+summary(model_D)
+```
+
+Model E reduces Model D, removing `child_of_alcoholic` as a predictor of rate of change. Singer and Willet (2003) removed this term based on the results of Models C and D, which both estimated that the difference in the rate of change in `alcohol_use` between children of alchoholic and nonalcoholic parents was practically zero.
+
+```{r}
 model_E <- update(
   model_D,
   . ~ . - I(age - 14):child_of_alcoholic
 )
 
-model_F <- update(
-  model_B,
-  . ~ . + child_of_alcoholic +
-    I(peer_alcohol_use - 1.018) + I(age - 14):I(peer_alcohol_use - 1.018)
-)
-
-model_G <- update(
-  model_F,
-  . ~ . - child_of_alcoholic + I(child_of_alcoholic - 0.451)
-)
-
-# Collect models together for purrr:
-table_4.1_models <- set_names(
-  list(model_A, model_B, model_C, model_D, model_E, model_F, model_G),
-  LETTERS[1:7]
-)
-
-# Estimates:
-map_dfr(table_4.1_models, tidy, .id = "model") |>
-  select(-statistic) |>
-  pivot_longer(cols = c(estimate, std.error), names_to = "statistic") |>
-  pivot_wider(names_from = model, values_from = value) |>
-  arrange(effect, desc(group)) |>
-  print(n = 26)
-
-# Goodness of fit:
-map_dfr(table_4.1_models, glance, .id = "model")
+summary(model_E)
 ```
 
-Figure 4.3, page 99:
+Model F serves as an alternative to Model E, with `peer_alcohol_use` centred on its sample mean of 1.018 (from the *person-level* data set). Singer and Willet (2003) centred `peer_alcohol_use` so that the level-2 intercepts, $\gamma_{00}$ and $\gamma_{10}$, would represent a child of non-alchoholic parents with an average value of `peer_alcohol_use` (`peer_alcohol_use` = 1.018 and `child_of_alcoholic` = 0), rather than a child of non-alchoholic parents whose peers at age 14 were totally abstinent (`peer_alcohol_use` = 0 and `child_of_alcoholic` = 0).
 
 ```{r}
-# Model B
-prototypical_alcohol_users_B <- tibble(age = 14:16)
-
-prototypical_alcohol_use_B <- tibble(
-  alcohol_use = predict(
-    model_B,
-    prototypical_alcohol_users_B,
-    re.form = NA
-  )
+model_F <- update(
+  model_E,
+  data = mutate(alcohol_use_1, peer_alcohol_use = peer_alcohol_use - 1.018)
 )
 
-modelbased::estimate_prediction(model_B, data = tibble(age = 14:16)) |>
-  ggplot(aes(x = age, y = Predicted)) +
-    geom_line() +
-    scale_x_continuous(breaks = 13:17) +
-    coord_cartesian(xlim = c(13, 17), ylim = c(0, 2)) +
-    labs(y = "alcohol_use")
-
-prototypical_alcohol_users_B |>
-  bind_cols(prototypical_alcohol_use_B) |>
-  ggplot(aes(x = age, y = alcohol_use)) +
-    geom_line() +
-    scale_x_continuous(breaks = 13:17) +
-    coord_cartesian(xlim = c(13, 17), ylim = c(0, 2))
-
-# Model C
-prototypical_alcohol_users_C <- crossing(
-  age = 14:16,
-  child_of_alcoholic = 0:1
-)
-
-prototypical_alcohol_use_C <- tibble(
-  alcohol_use = predict(
-    model_C,
-    prototypical_alcohol_users_C,
-    re.form = NA
-  )
-)
-
-prototypical_alcohol_users_C |>
-  bind_cols(prototypical_alcohol_use_C) |>
-  mutate(child_of_alcoholic = factor(child_of_alcoholic)) |>
-  ggplot(aes(x = age, y = alcohol_use, colour = child_of_alcoholic)) +
-    geom_line() +
-    scale_x_continuous(breaks = 13:17) +
-    coord_cartesian(xlim = c(13, 17), ylim = c(0, 2))
-
-modelbased::estimate_prediction(
-  model_C, data = crossing(age = 14:16, child_of_alcoholic = 0:1)
-) |>
-  rename(alcohol_use = Predicted) |>
-  mutate(child_of_alcoholic = factor(child_of_alcoholic)) |>
-  ggplot(aes(x = age, y = alcohol_use, colour = child_of_alcoholic)) +
-    geom_line() +
-    scale_x_continuous(breaks = 13:17) +
-    coord_cartesian(xlim = c(13, 17), ylim = c(0, 2))
-
-# Model E
-prototypical_alcohol_users_E <- crossing(
-  age = 14:16,
-  child_of_alcoholic = 0:1,
-  peer_alcohol_use = c(0.655, 1.381)
-)
-
-prototypical_alcohol_use_E <- tibble(
-  alcohol_use = predict(
-    model_E,
-    prototypical_alcohol_users_E,
-    re.form = NA
-  )
-)
-
-prototypical_alcohol_users_E |>
-  bind_cols(prototypical_alcohol_use_E) |>
-  mutate(child_of_alcoholic = factor(child_of_alcoholic)) |>
-  ggplot(aes(x = age, y = alcohol_use, colour = child_of_alcoholic)) +
-    geom_line() +
-    scale_x_continuous(breaks = 13:17) +
-    coord_cartesian(xlim = c(13, 17), ylim = c(0, 2)) +
-    facet_wrap(vars(peer_alcohol_use), labeller = label_both)
+summary(model_F)
 ```
 
-## 4.5 Practical Data Analytic Strategies for Model Building
+Finally, Model G serves as an alternative to Model F, with `child_of_alcoholic` also centred on its sample mean of 0.451 (from the *person-level* data set). Singer and Willet (2003) also centred `child_of_alcoholic` so that the level-2 intercepts, $\gamma_{00}$ and $\gamma_{10}$, would represent an adolescent with average values of `peer_alcohol_use` and `child_of_alcoholic` (`peer_alcohol_use` = 1.018 and `child_of_alcoholic` = 0.451), and be numerically identical to the corresponding level-2 intercepts in the unconditional growth model.
+
+```{r}
+model_G <- update(
+  model_F,
+  data = mutate(
+    alcohol_use_1,
+    peer_alcohol_use = peer_alcohol_use - 1.018,
+    child_of_alcoholic = child_of_alcoholic - 0.451
+  )
+)
+
+summary(model_G)
+```
+
+To make our taxonomy of statistical models easier to work with in subsequent sections, we will store the models in a list.
+
+```{r}
+alcohol_use_1_fits <- list(
+  `Model A` = model_A,
+  `Model B` = model_B,
+  `Model C` = model_C,
+  `Model D` = model_D,
+  `Model E` = model_E,
+  `Model F` = model_F,
+  `Model G` = model_G
+)
+```
+
+### Inspecting model summary and goodness-of-fit statistics
+
+In addition to the output from `summary()` we can return a one row tibble of model summary and goodness-of-fit statistics using the `glance()` function from the broom.mixed package. Individual statistics can also be returned using the generic functions of the corresponding name (e.g., `AIC()`, `BIC()`, `deviance()`, etc.).
+
+```{r}
+glance(model_A)
+```
+
+Singer and Willet (2003) also introduce three pseudo-$R^2$ statistics for the multilevel model for change, which can be used to *cautiously* quantify how much outcome variation is "explained" by a model's predictors.
+
+The first statistic, $R^2_{y \hat y}$, assesses the proportion of total outcome variation "explained" by a model's specific combination of predictors, based on the squared sample correlation between observed and predicted values.
+
+```{r}
+r2_yy <- alcohol_use_1_fits |> 
+  map(
+    \(.fit) {
+      .fit |>
+        augment() |>
+        summarise(
+          r2_yy = cor(alcohol_use, .fixed)^2
+        )
+    }
+  ) |>
+  list_rbind(names_to = "model")
+```
+
+The second statistic, $R^2_{\epsilon}$, assesses the proportion of within-person variation "explained" by time, based on the proportional decrease in within-person residual variance between the unconditional means model and subsequent models. Note that because the only way of reducing this variance component is to add time-varying predictors to the level-1 submodel, this statistic is the same for all of the models we fit to the `alcohol_use_1` data.
+
+```{r}
+r2_e <- alcohol_use_1_fits[2:7] |> 
+  map(
+    \(.fit) {
+      .fit |>
+        augment() |>
+        summarise(
+          r2_e = (sigma(model_A)^2 - sigma(.fit)^2) / sigma(model_A)^2
+        )
+    }
+  ) |>
+  list_rbind(names_to = "model")
+```
+
+The final statistic, $R^2_{\zeta}$, assesses the proportion of between-person variation "explained" by one or more level-2 predictors, based on the proportional decrease in level-2 residual variance between the unconditional growth model and subsequent models for each level-2 residual variance component.
+
+```{r}
+r2_z <- alcohol_use_1_fits[3:7] |>
+  map(
+    \(.fit) {
+      zeta <- map(
+        list(x = model_B, y = .fit),
+        \(.fit2) {
+          .fit2 |>
+            tidy(effects = "ran_pars", scales = "vcov") |>
+            filter(group != "Residual" & stringr::str_detect(term, "^var"))
+        }
+      )
+      
+      zeta$x |>
+        left_join(zeta$y, by = c("effect", "group", "term")) |>
+        mutate(
+          r2 = (estimate.x - estimate.y) / estimate.x,
+          name = c("r2_z1", "r2_z2")
+        ) |>
+        select(name, r2) |>
+        pivot_wider(names_from = name, values_from = r2)
+    }
+  ) |>
+  list_rbind(names_to = "model")
+```
+
+Because we will be adding these statistics to a table in the next section, we will join them together here.
+
+```{r}
+alcohol_use_1_fits_r2 <- r2_yy |>
+  left_join(r2_e) |>
+  left_join(r2_z)
+
+alcohol_use_1_fits_r2
+```
+
+### Interpreting Fitted Models
+
+To systematically compare fitted models---describing what happens as predictors are added and removed---Singer and Willet (2003) suggest placing them side-by-side in a table, which allows you to more easily inspect and compare estimated fixed effects, variance components, and goodness-of-fit statistics from one model to the next. We can construct such a table using the `modelsummary()` function from the **modelsummary** package. To better match the table in the text, we will set the table `output` to `"gt"` so we can post-process it using the **gt** package.
+
+<!-- TODO: Revise code for modelsummary after next CRAN release: https://github.com/vincentarelbundock/modelsummary/issues/757-->
+
+```{r}
+# This option needs to be set in order to make all the desired goodness-of-fit
+# statistics available to modelsummary.
+options(modelsummary_get = "all")
+
+# Table 4.1, page 94-95:
+alcohol_use_1_fits |>
+  modelsummary(
+    shape = term + effect + statistic ~ model,
+    scales = c("vcov", NA), # argument from broom.mixed::tidy()
+    coef_map = c(
+      "(Intercept)",
+      "child_of_alcoholic",
+      "peer_alcohol_use",
+      "I(age - 14)",
+      "I(age - 14):child_of_alcoholic",
+      "I(age - 14):peer_alcohol_use",
+      "var__Observation",
+      "var__(Intercept)",
+      "var__I(age - 14)",
+      "cov__(Intercept).I(age - 14)"
+    ),
+    gof_map = tibble(
+      raw = c("deviance", "AIC", "BIC"),
+      clean = c("Deviance", "AIC", "BIC"),
+      fmt = 2
+    ),
+    # The R2s need to be transposed to be added to the table columns. Their
+    # position in the table is set by the `position` attribute.
+    add_rows = alcohol_use_1_fits_r2 |>
+      pivot_longer(-model, names_to = "estimate") |>
+      pivot_wider(names_from = model) |>
+      mutate(effect = "", .after = estimate) |>
+      structure(position = 17:21),
+    output = "gt"
+  ) |>
+  tab_row_group(label = "Goodness-of-Fit", rows = 17:23) |>
+  tab_row_group(label = "Variance Components", rows = 13:16) |>
+  tab_row_group(label = "Fixed Effects", rows = 1:12) |>
+  cols_hide(effect)
+```
+
+### Displaying Prototypical Change Trajectories
+
+In addition to numerical summaries, Singer and Willett (2003) suggest plotting fitted trajectories for **prototypical individuals** to describe the results of model fitting, with prototypical values of predictors selected using one or more of the following strategies:
+
+- Choosing substantively interesting values, for categorical or continuous predictors with well-known values.
+- Using a range of percentiles, for continuous predictors without well-known values.
+- Using standard deviations from the sample mean, for continuous predictors without well-known values.
+- Using the sample mean, for categorical or continuous predictors you want to control for.
+
+After selecting prototypical values of the predictors, **prototypical change trajectories** can be derived from combinations of these values using the usual model predictions. 
+
+For convenience, we can use the `estimate_prediction()` function from the **modelbased** package to make these predictions, and the `map2()` function from the **purrr** package to iterate over the desired model and prototypical value combinations. Here we will look at prototypical change trajectories for Models B, C, and E.
+
+```{r}
+prototypical_alcohol_use <- alcohol_use_1_fits |>
+  keep_at(paste0("Model ", c("B", "C", "E"))) |>
+  map2(
+    list(
+      tibble(age = 14:16),
+      crossing(age = 14:16, child_of_alcoholic = 0:1),
+      crossing(
+        age = 14:16, child_of_alcoholic = 0:1, peer_alcohol_use = c(0.655, 1.381)
+      )
+    ),
+    \(.fit, .data) {
+      .fit |>
+        estimate_prediction(data = .data) |>
+        rename(alcohol_use = Predicted) |>
+        as_tibble()
+    }
+  ) |>
+  list_rbind(names_to = "model") |>
+  mutate(
+    child_of_alcoholic = factor(child_of_alcoholic),
+    peer_alcohol_use = factor(peer_alcohol_use, labels = c("low", "high"))
+  )
+
+prototypical_alcohol_use
+```
+
+To systematically compare the prototypical change trajectories, it can be helpful to plot them side-by-side. However, because certain predictors are present in some models but not others, we need to supply an `na.value` to each of the `scale_()` functions to ensure a trajectory appears in panels where those predictors are not present.
+
+```{r}
+# Figure 4.3, page 99:
+prototypical_alcohol_use |>
+  ggplot(aes(x = age, y = alcohol_use)) +
+    geom_line(aes(linetype = child_of_alcoholic, colour = peer_alcohol_use)) +
+    scale_linetype_manual(values = c(2, 6), na.value = 1) +
+    scale_color_viridis_d(
+      option = "G", begin = .4, end = .7, na.value = "black"
+    ) +
+    scale_x_continuous(breaks = 13:17) +
+    coord_cartesian(xlim = c(13, 17), ylim = c(0, 2)) +
+    facet_wrap(vars(model))
+```
+
+Note that depending on the number of predictors across different models, it may be preferable to instead create separate plots (which could be later added together using the **patchwork** package).
 
 ## 4.6 Comparing Models Using Deviance Statistics
 
+In Section 4.6 Singer and Willett (2003) introduce the **deviance** statistic, which quantifies how much worse the current model fit is in comparison to a saturated model that fits the observed data perfectly by comparing log-likelihood statistics for the two models:
+
+$$
+\text{Deviance} = -2 (LL_\text{current model} - LL_\text{saturated model}).
+$$
+
+Note that for the multilevel model for change this equation reduces to:
+
+$$
+\text{Deviance} = -2LL_\text{current model},
+$$ 
+
+because the the log-likelihood statistic for the saturated model is always zero.
+
+Deviance statistics from **nested models** estimated using identical data can be compared using the `anova()` function, which computes analysis of deviance tables for one or more fitted models. Unfortunately `anova()` doesn't accept a list as input, so we have to do some meta-programming to use our list of models if we don't want to type out each model by hand.
+
+```{r}
+with(
+  alcohol_use_1_fits[1:5],
+  do.call(anova, map(names(alcohol_use_1_fits[1:5]), as.name))
+)
+```
+
+Note that by default the `anova()` function will refit objects of class `merMod` with FML before comparing models if they have been estimated with REML to prevent the common mistake of inappropriately comparing REML-fitted models with different fixed effects, whose likelihoods are not directly comparable. For REML-fitted models with identical fixed effects and different random effects, the `refit` argument can be set to `FALSE` to directly compare the REML-fitted models.
+
 ## 4.7 Using Wald Statistics to Test Composite Hypotheses About Fixed Effects
+
+This section is intentionally left blank.
 
 ## 4.8 Evaluating the Tenability of a Model’s Assumptions
 
-Figure 4.4:
+In Section 4.8 Singer and Willett (2003) offer strategies for checking the following assumptions of the multilevel model for change:
+
+1. The linear (or nonlinear) **functional form** of the hypothesized individual change trajectory seems reasonable for the observed data---there do not appear to be systematic deviations from linearity (or nonlinearity) across participants.
+2. The level-1 and level-2 residuals are all **normally distributed**.
+3. The level-1 and level-2 residuals have **equal variances** at each level of every predictor.
+
+### Checking Functional Form
+
+The functional form assumption of the multilevel model for change can be assessed by inspecting "outcome versus predictors" plots at each level.
+
+At level-1, empirical growth plots with superimposed individual change trajectories should support the suitability of specified functional form. Empirical growth plots should be examined for *each* individual (or several subsamples of individuals), looking for systematic deviations that disconfirm the suitability of the hypothesized individual change trajectory.
 
 ```{r}
-ols_fit <- lmList(
+set.seed(333)
+alcohol_use_1 |>
+  filter(id %in% sample(unique(id), size = 16)) |>
+  ggplot(aes(x = age, y = alcohol_use)) +
+    stat_smooth(method = "lm", se = FALSE) +
+    geom_point() +
+    coord_cartesian(xlim = c(13, 17), ylim = c(0, 4)) +
+    facet_wrap(vars(id), ncol = 4, labeller = label_both)
+```
+
+At level-2, OLS-estimated individual growth parameters should be plotted against each substantive predictor to confirm the suitability of the specified level-2 relationships. For linear models, only continuous predictors need to be assessed because categorical predictors are always linear.
+
+```{r}
+alcohol_use_1_fit_np <- lmList(
   alcohol_use ~ I(age - 14) | id,
   pool = FALSE,
   data = alcohol_use_1
 )
 
-ols_fit |>
-  map_dfr(tidy, .id = "id") |>
-  select(-c(std.error, statistic, p.value)) |>
-  #pivot_longer(cols = c(estimate, names_to = "statistic") |>
-  left_join(
-    alcohol_use_1 |>
-      select(id, child_of_alcoholic, peer_alcohol_use) |>
-      distinct() |>
-      mutate(id = as.character(id))
-  ) |>
-  pivot_longer(
-    cols = c(child_of_alcoholic, peer_alcohol_use),
-    names_to = "predictor"
-  ) |>
-  ggplot(aes(x = value, y = estimate)) +
-    geom_hline(yintercept = 0, alpha = .25) +
-    geom_point(alpha = .5) +
-    facet_wrap(vars(predictor, term), dir = "v", scales = "free") +
-    ggh4x::facetted_pos_scales(
-      x = list(
-        predictor == "child_of_alcoholic" ~
-          scale_x_continuous(breaks = c(0, 1), limits = c(-1, 2)),
-        predictor == "peer_alcohol_use" ~
-          scale_x_continuous(limits = c(0, 3))
-      ),
-      y = list(
-        term == "I(age - 14)" ~ scale_y_continuous(limits = c(-1, 2))
-      )
-    )
+alcohol_use_1_est_np <- alcohol_use_1_fit_np |>
+  map(tidy) |>
+  list_rbind(names_to = "id") |>
+  select(id:estimate, alcohol_use = estimate) |>
+  left_join(alcohol_use_1_pl) |>
+  mutate(child_of_alcoholic = factor(child_of_alcoholic))
+
+alcohol_use_1_ovp <- map(
+  list("child_of_alcoholic", "peer_alcohol_use"),
+  \(.x) {
+    ggplot(alcohol_use_1_est_np, aes(x = .data[[.x]], y = alcohol_use)) +
+      geom_hline(yintercept = 0, alpha = .25) +
+      geom_point() +
+      facet_wrap(vars(term), ncol = 1, scales = "free_y")
+  }
+)
+
+# Figure 4.4:
+wrap_plots(alcohol_use_1_ovp) +
+  plot_layout(axes = "collect")
 ```
 
-Figure 4.5, page 131:
+### Checking Normality
+
+The normality assumption of the multilevel model for change can be assessed by inspecting Q-Q plots of the level-1 and level-2 residuals, and also (optionally) with statistical tests of normality. The `check_normality()` function from the **performance** package can perform both of these tasks.
 
 ```{r}
-# Left side figures
-library(easystats)
-performance::check_normality(model_F, effects = "fixed") |> plot(type = "qq")
-performance::check_normality(model_F, effects = "random") |> plot(type = "qq")
+model_F_normality <- map(
+  set_names(c("fixed", "random")),
+  \(.x) check_normality(model_F, effects = .x)
+)
+
+model_F_normality
 ```
 
-Figure 4.6, page 133:
+The `plot()` method for `check_normality()` can be used to return Q-Q plots of the level-1 and level-2 residuals.
 
+```{r}
+# Figure 4.5 (left panels), page 131:
+plot(model_F_normality$fixed, detrend = FALSE) +
+  plot(model_F_normality$random) +
+  plot_layout(widths = c(1/3, 2/3)) &
+  theme_bw() &
+  theme(panel.grid = element_blank())
+```
+
+<!-- TODO: Decide whether to do right panels
 ```{r}
 # Fixed effects
 model_F |>
@@ -335,63 +702,104 @@ model_F |>
   ggplot(aes(x = id, y = scale(.resid))) +
   geom_point() +
   coord_cartesian(ylim = c(-3, 3))
-
-# Random effects
-model_F |>
-  ranef() |>
-  as_tibble() |>
-  rename(id = grp) |>
-  left_join(
-    alcohol_use_1 |>
-      select(id, child_of_alcoholic, peer_alcohol_use) |>
-      distinct() |>
-      mutate(id = factor(id))
-  ) |>
-  pivot_longer(
-    cols = c(child_of_alcoholic, peer_alcohol_use), names_to = "predictor"
-  ) |>
-  ggplot(aes(x = value, y = condval)) +
-    geom_point() +
-    scale_y_continuous(limits = c(-1, 1)) +
-    facet_wrap(vars(term, predictor), scales = "free_x") +
-    ggh4x::facetted_pos_scales(
-      x = list(
-        predictor == "child_of_alcoholic" ~
-          scale_x_continuous(breaks = c(0, 1), limits = c(-1, 2)),
-        predictor == "peer_alcohol_use" ~
-          scale_x_continuous(limits = c(0, 3))
-      )
-    )
 ```
+-->
 
-## 4.9 Model-Based (Empirical Bayes) Estimates of the Individual Growth Parameters
+### Checking Homoscedasticity
 
-Figure 4.7:
+The homoscedasticity assumption of the multilevel model for change can be assessed by inspecting "residual versus predictors" plots at each level to see if residual variability is approximately equal at *every* predictor value.
+
+The level-1 residuals should be plotted against the level-1 predictor.
 
 ```{r}
-alcohol_use_1_subset <- alcohol_use_1 |>
-  filter(id %in% c(4, 14, 23, 32, 41, 56, 65, 82))
-
-alcohol_use_1_subset |>
-  mutate(
-    .fixed  = predict(model_F, newdata = alcohol_use_1_subset, re.form = NA),
-    .fitted = predict(model_F, newdata = alcohol_use_1_subset)
-  ) |>
-  ggplot(aes(x = age)) +
-    geom_point(aes(y = alcohol_use)) +
-    # The OLS lines can just be fit here, instead of going through the trouble
-    # of fitting them separately.
-    stat_smooth(
-      aes(y = alcohol_use),
-      method = "lm", se = FALSE, linetype = 2, linewidth = .5
-    ) +
-    geom_line(
-      aes(y = .fixed), linewidth = .5
-    ) +
-    geom_line(
-      aes(y = .fitted), linewidth = 1
-    ) +
-    scale_y_continuous(breaks = 0:4, limits = c(-1, 4)) +
-    xlim(13, 17) +
-    facet_wrap(vars(id), nrow = 2, labeller = label_both)
+# Figure 4.6 (top panel), page 133:
+model_F |>
+  augment(re.form = NA) |>
+  rename(age = `I(age - 14)`) |>
+  mutate(age = as.numeric(age + 14)) |>
+  ggplot(aes(x = age, y = .resid)) +
+    geom_hline(yintercept = 0, alpha = .25) +
+    geom_point() +
+    coord_cartesian(xlim = c(13, 17), ylim = c(-2, 2))
 ```
+
+The level-2 residuals should be plotted against the level-2 predictor(s).
+
+```{r}
+alcohol_use_1_ranef <- model_F |>
+  ranef() |>
+  augment() |>
+  as_tibble() |>
+  rename(term = variable, id = level, .resid = estimate) |>
+  left_join(alcohol_use_1_pl) |>
+  mutate(child_of_alcoholic = factor(child_of_alcoholic))
+
+alcohol_use_1_rvp <- map(
+  list("child_of_alcoholic", "peer_alcohol_use"),
+  \(.x) {
+    ggplot(alcohol_use_1_ranef, aes(x = .data[[.x]], y = .resid)) +
+      geom_hline(yintercept = 0, alpha = .25) +
+      geom_point() +
+      facet_wrap(vars(term), ncol = 1, scales = "free_y") +
+      coord_cartesian(ylim = c(-1, 1))
+  }
+)
+
+# Figure 4.6 (bottom panels), page 133:
+wrap_plots(alcohol_use_1_rvp) + plot_layout(axes = "collect")
+```
+
+## 4.9 Model-Based Estimates of the Individual Growth Parameters
+
+In Section 4.9 Singer and Willett (2003) discuss how to use **model-based estimates** to display individual growth trajectories, which are simply the partial pooling trajectories we previously discussed in Chapter 3.
+
+We begin by predicting three types of growth trajectories for each individual: (1) A no pooling trajectory estimated from separate linear models; (2) a population average trajectory estimated from the multilevel model for change, which *does not* condition on the random effects; and (3) a model-based trajectory estimated from the multilevel model for change, which *does* condition on the random effects.
+
+```{r}
+alcohol_use_1_np_pred <- alcohol_use_1_fit_np |>
+  map(augment) |>
+  list_rbind(names_to = "id") |>
+  mutate(trajectory = "no_pooling")
+
+alcohol_use_1_pp_pred <- list(population_average = NA, model_based = NULL) |>
+  map(\(.x) augment(model_F, re.form = .x)) |>
+  list_rbind(names_to = "trajectory")
+
+# For display purposes we will tidy up the prediction data frames and only use
+# a subset of participants.
+alcohol_use_1_preds <- alcohol_use_1_np_pred |>
+  bind_rows(alcohol_use_1_pp_pred) |>
+  filter(id %in% c(4, 14, 23, 32, 41, 56, 65, 82)) |>
+  rename(age = `I(age - 14)`) |>
+  mutate(
+    trajectory = factor(
+      trajectory, levels = c("population_average", "no_pooling", "model_based")
+    ),
+    id = factor(id, levels = sort(as.numeric(unique(id)))),
+    age = as.numeric(age + 14),
+  ) |>
+  select(trajectory, id, age, alcohol_use, .fitted)
+
+alcohol_use_1_preds
+```
+
+Now we can plot the three trajectories.
+
+```{r}
+# Figure 4.7:
+ggplot(alcohol_use_1_preds, aes(x = age)) +
+  geom_point(aes(y = alcohol_use)) +
+  geom_line(aes(y = .fitted, colour = trajectory)) +
+  scale_colour_brewer(palette = "Dark2") +
+  scale_y_continuous(breaks = 0:4) +
+  coord_cartesian(xlim = c(13, 17), ylim = c(-1, 4)) +
+  facet_wrap(vars(id), nrow = 2, labeller = label_both)
+```
+
+Similar to our partial pooling example in in Chapter 3, notice that:
+
+- The population average trajectories are the most stable, varying the least across individuals.
+- The no pooling trajectories are the least stable, varying the most across individuals.
+- The model-based trajectories fall somewhere between the population average and no pooling trajectories, due to the effects of partial pooling.
+
+Although we will typically prefer model-based trajectories from the multilevel model for change, Singer and Willet (2003) conclude by cautioning that the model-based trajectories of a flawed model will be flawed as well---as their quality depends heavily on the quality of the model fit and the soundness of the model's assumptions (given the data).

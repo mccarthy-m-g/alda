@@ -169,8 +169,8 @@ We can visualize the differences between complete pooling, no pooling, and parti
 To do so, we'll first use the `augment()` function from the **broom** and **broom.mixed** packages to get the predicted values for each child's fitted trajectory from the complete pooling, no pooling, and partial pooling models. Note that `augment()` is a generic function, whose methods for linear and multilevel models are available in the broom broom.mixed packages, respectively.
 
 ```{r}
-# Because the complete pooling model a group indicator for individuals, we need
-# to manually add the IDs to the predicted values.
+# Because the complete pooling model does not have a group indicator for
+# individuals, we need to manually add the IDs to the predicted values.
 early_intervention_pred_cp <- early_intervention_fit_cp |>
   augment() |>
   mutate(model = "complete_pooling", id = early_intervention$id)
@@ -364,6 +364,7 @@ Before fitting this model, we find it helpful to substitute the level-2 equation
 
 - It makes the parameters of the model easier to identify, particularly in the case of interactions between level-1 and level-2 predictors.
 - It is the format most mixed-effects modelling packages in R use to specify the model formula.
+- It clarifies which statistical model is actually being fit to the data by the software.
 
 $$
 \begin{align}
