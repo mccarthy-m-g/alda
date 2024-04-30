@@ -118,8 +118,8 @@ NULL
 #'
 #' A subset of data from the Children of the National Longitudinal Study of
 #' Youth measuring changes in the reading subtest of the Peabody Individual
-#' Achievement Test (PIAT) in a sample of 89 African-American children at ages
-#' 6, 8, and 10.
+#' Achievement Test (PIAT) in a sample of 89 African-American children across
+#' three waves around the ages of 6, 8, and 10.
 #'
 #' @format
 #' A person-period data frame with `r nrow(reading_scores)` rows and
@@ -128,7 +128,7 @@ NULL
 #' \describe{
 #'   \item{`id`}{Participant ID.}
 #'   \item{`wave`}{Wave of measurement.}
-#'   \item{`age_group`}{Expected age on each measurement occassion.}
+#'   \item{`age_group`}{Expected age on each measurement occasion.}
 #'   \item{`age`}{Age in years at time of measurement.}
 #'   \item{`reading_score`}{Reading score on the reading subtest of the Peabody Individual Achievement Test (PIAT).}
 #' }
@@ -729,7 +729,7 @@ NULL
 #' \describe{
 #'   \item{`id`}{Participant ID.}
 #'   \item{`days`}{Number of days to rearrest.}
-#'   \item{`months`}{Number of months to rearrest, on the scale on an "average" month (with 30.4375 days).}
+#'   \item{`months`}{Number of months to rearrest, on the scale of an "average" month (with 30.4375 days).}
 #'   \item{`censor`}{Censoring status.}
 #'   \item{`personal`}{Committed a person-related crime}
 #'   \item{`property`}{Binary indicator for whether the inmate committed a property crime.}
