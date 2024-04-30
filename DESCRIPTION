@@ -35,6 +35,7 @@ Config/Needs/website:
     lavaan,
     lme4,
     modelbased,
+    modelsummary,
     muhaz,
     patchwork (>= 1.2.0),
     performance,
