@@ -6,10 +6,11 @@
 \title{Unemployment and depression}
 \format{
 A person-period data frame with 674 rows and
-4 columns:
+5 columns:
 
 \describe{
 \item{\code{id}}{Participant ID.}
+\item{\code{interview}}{Time of interview.}
 \item{\code{months}}{Months since job loss.}
 \item{\code{depression}}{Center for Epidemiologic Studies' Depression (CES-D) scale score (Radloff, 1977)}
 \item{\code{unemployed}}{Binary indicator for whether the participant was unemployed at time of interview.}
@@ -27,7 +28,8 @@ depression_unemployment
 \description{
 A subset of data from Ginexi and colleagues (2000) measuring changes in
 depressive symptoms after job loss in a sample of 254 recently unemployed men
-and women.
+and women. Interviews were conducted in three waves at around 1, 5, and 12
+months after job loss.
 }
 \references{
 Radloff, L. S. (1977). The CES-D scale: A self report major depressive

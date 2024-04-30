@@ -184,7 +184,8 @@ NULL
 #'
 #' A subset of data from Ginexi and colleagues (2000) measuring changes in
 #' depressive symptoms after job loss in a sample of 254 recently unemployed men
-#' and women.
+#' and women. Interviews were conducted in three waves at around 1, 5, and 12
+#' months after job loss.
 #'
 #' @format
 #' A person-period data frame with `r nrow(depression_unemployment)` rows and
@@ -192,6 +193,7 @@ NULL
 #'
 #' \describe{
 #'   \item{`id`}{Participant ID.}
+#'   \item{`interview`}{Time of interview.}
 #'   \item{`months`}{Months since job loss.}
 #'   \item{`depression`}{Center for Epidemiologic Studies' Depression (CES-D) scale score (Radloff, 1977)}
 #'   \item{`unemployed`}{Binary indicator for whether the participant was unemployed at time of interview.}
