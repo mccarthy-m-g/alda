@@ -145,7 +145,7 @@ antidepressants <- tidy_data$medication_pp |>
     ),
     .after = "day"
   ) |>
-  select(-(time333:final)) |>
+  select(id, wave, day, reading, positive_mood, treatment) |>
   relocate(treatment, .after = positive_mood)
 
 # Chapter 6 -------------------------------------------------------------------

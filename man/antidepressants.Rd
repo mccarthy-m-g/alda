@@ -13,8 +13,6 @@ A person-period data frame with 1242 rows and
 \item{\code{wave}}{Wave of measurement.}
 \item{\code{day}}{Day of measurement.}
 \item{\code{reading}}{Time of day of measurement.}
-\item{\code{time_of_day}}{Time of day of measurement expressed numerically (0 for morning readings; 0.33 for afternoon readings; 0.67 for evening readings).}
-\item{\code{time}}{Time of measurement expressed as a combination of \code{day} and \code{time_of_day}.}
 \item{\code{positive_mood}}{Positive mood score.}
 \item{\code{treatment}}{Treatment condition (placebo pills = 0, antidepressant pills = 1).}
 }

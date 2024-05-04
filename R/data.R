@@ -225,8 +225,8 @@ NULL
 #'   \item{`wave`}{Wave of measurement.}
 #'   \item{`day`}{Day of measurement.}
 #'   \item{`reading`}{Time of day of measurement.}
-#'   \item{`time_of_day`}{Time of day of measurement expressed numerically (0 for morning readings; 0.33 for afternoon readings; 0.67 for evening readings).}
-#'   \item{`time`}{Time of measurement expressed as a combination of `day` and `time_of_day`.}
+# #'   \item{`time_of_day`}{Time of day of measurement expressed numerically (0 for morning readings; 0.33 for afternoon readings; 0.67 for evening readings).}
+# #'   \item{`time`}{Time of measurement expressed as a combination of `day` and `time_of_day`.}
 #'   \item{`positive_mood`}{Positive mood score.}
 #'   \item{`treatment`}{Treatment condition (placebo pills = 0, antidepressant pills = 1).}
 #' }
