@@ -118,8 +118,8 @@ NULL
 #'
 #' A subset of data from the Children of the National Longitudinal Study of
 #' Youth measuring changes in the reading subtest of the Peabody Individual
-#' Achievement Test (PIAT) in a sample of 89 African-American children at ages
-#' 6, 8, and 10.
+#' Achievement Test (PIAT) in a sample of 89 African-American children across
+#' three waves around the ages of 6, 8, and 10.
 #'
 #' @format
 #' A person-period data frame with `r nrow(reading_scores)` rows and
@@ -128,7 +128,7 @@ NULL
 #' \describe{
 #'   \item{`id`}{Participant ID.}
 #'   \item{`wave`}{Wave of measurement.}
-#'   \item{`age_group`}{Expected age on each measurement occassion.}
+#'   \item{`age_group`}{Expected age on each measurement occasion.}
 #'   \item{`age`}{Age in years at time of measurement.}
 #'   \item{`reading_score`}{Reading score on the reading subtest of the Peabody Individual Achievement Test (PIAT).}
 #' }
@@ -184,7 +184,8 @@ NULL
 #'
 #' A subset of data from Ginexi and colleagues (2000) measuring changes in
 #' depressive symptoms after job loss in a sample of 254 recently unemployed men
-#' and women.
+#' and women. Interviews were conducted in three waves at around 1, 5, and 12
+#' months after job loss.
 #'
 #' @format
 #' A person-period data frame with `r nrow(depression_unemployment)` rows and
@@ -192,6 +193,7 @@ NULL
 #'
 #' \describe{
 #'   \item{`id`}{Participant ID.}
+#'   \item{`interview`}{Time of interview.}
 #'   \item{`months`}{Months since job loss.}
 #'   \item{`depression`}{Center for Epidemiologic Studies' Depression (CES-D) scale score (Radloff, 1977)}
 #'   \item{`unemployed`}{Binary indicator for whether the participant was unemployed at time of interview.}
@@ -223,8 +225,8 @@ NULL
 #'   \item{`wave`}{Wave of measurement.}
 #'   \item{`day`}{Day of measurement.}
 #'   \item{`reading`}{Time of day of measurement.}
-#'   \item{`time_of_day`}{Time of day of measurement expressed numerically (0 for morning readings; 0.33 for afternoon readings; 0.67 for evening readings).}
-#'   \item{`time`}{Time of measurement expressed as a combination of `day` and `time_of_day`.}
+# #'   \item{`time_of_day`}{Time of day of measurement expressed numerically (0 for morning readings; 0.33 for afternoon readings; 0.67 for evening readings).}
+# #'   \item{`time`}{Time of measurement expressed as a combination of `day` and `time_of_day`.}
 #'   \item{`positive_mood`}{Positive mood score.}
 #'   \item{`treatment`}{Treatment condition (placebo pills = 0, antidepressant pills = 1).}
 #' }
@@ -729,7 +731,7 @@ NULL
 #' \describe{
 #'   \item{`id`}{Participant ID.}
 #'   \item{`days`}{Number of days to rearrest.}
-#'   \item{`months`}{Number of months to rearrest, on the scale on an "average" month (with 30.4375 days).}
+#'   \item{`months`}{Number of months to rearrest, on the scale of an "average" month (with 30.4375 days).}
 #'   \item{`censor`}{Censoring status.}
 #'   \item{`personal`}{Committed a person-related crime}
 #'   \item{`property`}{Binary indicator for whether the inmate committed a property crime.}

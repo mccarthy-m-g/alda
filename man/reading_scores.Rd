@@ -11,7 +11,7 @@ A person-period data frame with 267 rows and
 \describe{
 \item{\code{id}}{Participant ID.}
 \item{\code{wave}}{Wave of measurement.}
-\item{\code{age_group}}{Expected age on each measurement occassion.}
+\item{\code{age_group}}{Expected age on each measurement occasion.}
 \item{\code{age}}{Age in years at time of measurement.}
 \item{\code{reading_score}}{Reading score on the reading subtest of the Peabody Individual Achievement Test (PIAT).}
 }
@@ -26,7 +26,7 @@ reading_scores
 \description{
 A subset of data from the Children of the National Longitudinal Study of
 Youth measuring changes in the reading subtest of the Peabody Individual
-Achievement Test (PIAT) in a sample of 89 African-American children at ages
-6, 8, and 10.
+Achievement Test (PIAT) in a sample of 89 African-American children across
+three waves around the ages of 6, 8, and 10.
 }
 \keyword{datasets}

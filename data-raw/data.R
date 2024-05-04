@@ -121,6 +121,14 @@ depression_unemployment <- tidy_data$unemployment_pp |>
   rename(
     depression = cesd,
     unemployed = unemp
+  ) |>
+  mutate(
+    interview = case_when(
+      between(months, 0, 3) ~ 1,
+      between(months, 3, 8) ~ 2,
+      months > 8 ~ 3
+    ),
+    .after = id
   )
 
 antidepressants <- tidy_data$medication_pp |>
@@ -137,7 +145,7 @@ antidepressants <- tidy_data$medication_pp |>
     ),
     .after = "day"
   ) |>
-  select(-(time333:final)) |>
+  select(id, wave, day, reading, positive_mood, treatment) |>
   relocate(treatment, .after = positive_mood)
 
 # Chapter 6 -------------------------------------------------------------------

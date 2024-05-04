@@ -11,7 +11,7 @@ A person-level data frame with 194 rows and
 \describe{
 \item{\code{id}}{Participant ID.}
 \item{\code{days}}{Number of days to rearrest.}
-\item{\code{months}}{Number of months to rearrest, on the scale on an "average" month (with 30.4375 days).}
+\item{\code{months}}{Number of months to rearrest, on the scale of an "average" month (with 30.4375 days).}
 \item{\code{censor}}{Censoring status.}
 \item{\code{personal}}{Committed a person-related crime}
 \item{\code{property}}{Binary indicator for whether the inmate committed a property crime.}
