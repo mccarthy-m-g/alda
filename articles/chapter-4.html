@@ -981,7 +981,7 @@ predictors are added and removed—Singer and Willet (2003) suggest
 placing them side-by-side in a table, which allows you to more easily
 inspect and compare estimated fixed effects, variance components, and
 goodness-of-fit statistics from one model to the next. We can construct
-such a table using the <code><a href="https://modelsummary.com/reference/modelsummary.html" class="external-link">modelsummary()</a></code> function from the
+such a table using the <code><a href="https://modelsummary.com/man/modelsummary.html" class="external-link">modelsummary()</a></code> function from the
 <strong>modelsummary</strong> package. To better match the table in the
 text, we will set the table <code>output</code> to <code>"gt"</code> so
 we can post-process it using the <strong>gt</strong> package.</p>
@@ -993,7 +993,7 @@ we can post-process it using the <strong>gt</strong> package.</p>
 <span></span>
 <span><span class="co"># Table 4.1, page 94-95:</span></span>
 <span><span class="va">alcohol_use_1_fits</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://modelsummary.com/reference/modelsummary.html" class="external-link">modelsummary</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://modelsummary.com/man/modelsummary.html" class="external-link">modelsummary</a></span><span class="op">(</span></span>
 <span>    shape <span class="op">=</span> <span class="va">term</span> <span class="op">+</span> <span class="va">effect</span> <span class="op">+</span> <span class="va">statistic</span> <span class="op">~</span> <span class="va">model</span>,</span>
 <span>    scales <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"vcov"</span>, <span class="cn">NA</span><span class="op">)</span>, <span class="co"># argument from broom.mixed::tidy()</span></span>
 <span>    coef_map <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
