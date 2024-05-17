@@ -6,7 +6,7 @@
 \title{Adolescent and peer alcohol use}
 \format{
 A person-period data frame with 246 rows and
-6 columns:
+7 columns:
 
 \describe{
 \item{\code{id}}{Participant ID.}

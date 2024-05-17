@@ -6,7 +6,7 @@
 \title{Antidepressant medication and positive mood}
 \format{
 A person-period data frame with 1242 rows and
-8 columns:
+6 columns:
 
 \describe{
 \item{\code{id}}{Participant ID.}
