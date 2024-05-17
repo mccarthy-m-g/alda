@@ -118,7 +118,7 @@
 <div class="section level2">
 <h2 id="creating-a-longitudinal-data-set">2.1 Creating a longitudinal data set<a class="anchor" aria-label="anchor" href="#creating-a-longitudinal-data-set"></a>
 </h2>
-<p>In Section 2.1 Singer and Willet (2003) introduce two distinct
+<p>In Section 2.1 Singer and Willett (2003) introduce two distinct
 formats of data organization for longitudinal data—the
 <strong>person-level</strong> format and the
 <strong>person-period</strong> format—using a subset of data from the
@@ -204,7 +204,7 @@ individuals.</li>
 time-varying predictor (one column per measurement occasion), rendering
 it unable to easily handle the presence of time-varying predictors.</li>
 </ol>
-<p>Singer and Willet (2003) exemplify the first of these disadvantages
+<p>Singer and Willett (2003) exemplify the first of these disadvantages
 by postulating how one might analyze the person-level tolerance towards
 deviant behaviour data set. A natural approach would be to summarize the
 wave-to-wave relationships among <code>tolerance_11</code> through
@@ -465,7 +465,7 @@ Science</a>.</p>
 <div class="section level2">
 <h2 id="descriptive-analysis-of-individual-change-over-time">2.2 Descriptive analysis of individual change over time<a class="anchor" aria-label="anchor" href="#descriptive-analysis-of-individual-change-over-time"></a>
 </h2>
-<p>In Section 2.2 Singer and Willet (2003) use the
+<p>In Section 2.2 Singer and Willett (2003) use the
 <code>deviant_tolerance_pp</code> data set to demonstrate how the
 person-period format facilitates exploratory analyses that describe how
 individuals in the data set change over time, revealing the nature and
@@ -477,7 +477,7 @@ idiosyncrasies of each person’s temporal pattern of change.</p>
 the sequence of change in a time-varying variable. Here change can be
 evaluated in either absolute terms against the scale of the variable of
 interest, or in relative terms in comparison to other sample members.
-Singer and Willet (2003) identify several questions that are helpful to
+Singer and Willett (2003) identify several questions that are helpful to
 answer when examining empirical growth plots:</p>
 <ul>
 <li>Who is increasing?</li>
@@ -501,7 +501,7 @@ a separate panel.</p>
 <span></span>
 <span><span class="va">deviant_tolerance_empgrowth</span></span></code></pre></div>
 <p><img src="chapter-2_files/figure-html/unnamed-chunk-8-1.png" width="700"></p>
-<p>If your data set is large, Singer and Willet (2003) suggest
+<p>If your data set is large, Singer and Willett (2003) suggest
 constructing empirical growth plots for a randomly selected a subsample
 of individuals—perhaps stratified into groups defined by the values of
 important predictors—rather than using the entire sample.</p>
@@ -619,7 +619,7 @@ creates a similar smooth to the textbook figure.</p>
 <span><span class="va">deviant_tolerance_empgrowth</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html" class="external-link">stat_smooth</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"loess"</span>, se <span class="op">=</span> <span class="cn">FALSE</span>, span <span class="op">=</span> <span class="fl">.9</span><span class="op">)</span></span></code></pre></div>
 <p><img src="chapter-2_files/figure-html/unnamed-chunk-11-1.png" width="700"></p>
-<p>Singer and Willet (2003) recommend focusing on the elevation, shape,
+<p>Singer and Willett (2003) recommend focusing on the elevation, shape,
 and tilt of the smoothed trajectories by answering questions like:</p>
 <ul>
 <li>Do the scores hover at the low, medium, or high end of the
@@ -638,7 +638,7 @@ parametric approach.</p>
 <div class="section level4">
 <h4 id="the-parametric-approach">The Parametric Approach<a class="anchor" aria-label="anchor" href="#the-parametric-approach"></a>
 </h4>
-<p>For the parametric approach, Singer and Willet (2003) suggest using
+<p>For the parametric approach, Singer and Willett (2003) suggest using
 the following three-step process:</p>
 <ol style="list-style-type: decimal">
 <li>Estimate a within-person linear model for each person in the data
@@ -777,7 +777,7 @@ labels.</p>
 <p><img src="chapter-2_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>
 <p>Alternatively, if you only plan to examine the parametric
 trajectories graphically, the three-step process suggested by Singer and
-Willet (2003) can be skipped altogether by using the
+Willett (2003) can be skipped altogether by using the
 <code><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html" class="external-link">stat_smooth()</a></code> function with the <code>"lm"</code> method.
 This approach also fits a within-person linear model for each person in
 the data set; the only drawback is that it makes it awkward (<a href="https://stackoverflow.com/a/9791394/16844576" class="external-link">though not
@@ -793,7 +793,7 @@ impossible</a>) to access the summary statistics from each model.</p>
 <h2 id="exploring-differences-in-change-across-people">2.3 Exploring differences in change across people<a class="anchor" aria-label="anchor" href="#exploring-differences-in-change-across-people"></a>
 </h2>
 <p>Having explored how each individual changes over time, in Section 2.3
-Singer and Willet (2003) continue with the
+Singer and Willett (2003) continue with the
 <code>deviant_tolerance_pp</code> data set to demonstrate three
 strategies for exploring <strong>interindividual differences</strong> in
 change:</p>
@@ -822,7 +822,7 @@ people?</li>
 <li>How does individual change compare to the group-averaged change
 trajectory?</li>
 </ul>
-<p>For this strategy, Singer and Willet (2003) suggest using both the
+<p>For this strategy, Singer and Willett (2003) suggest using both the
 nonparametric and parametric approaches, as certain patterns in the data
 may be somewhat easier to interpret using one approach or the other.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
@@ -866,7 +866,7 @@ of change?</li>
 <li>What is the relationship between initial status and annual rate of
 change?</li>
 </ul>
-<p>For this strategy, Singer and Willet (2003) suggest examining the
+<p>For this strategy, Singer and Willett (2003) suggest examining the
 estimated intercepts and slopes from the fitted linear models with the
 following three summary statistics:</p>
 <ol style="list-style-type: decimal">
@@ -930,7 +930,7 @@ predictors?</li>
 <li>Is there a relationship between initial status or annual rate of
 change and any time-invariant predictors?</li>
 </ul>
-<p>For this strategy, Singer and Willet (2003) suggest using two
+<p>For this strategy, Singer and Willett (2003) suggest using two
 approaches:</p>
 <ol style="list-style-type: decimal">
 <li>Plotting (smoothed) individual growth trajectories, displayed
@@ -980,7 +980,7 @@ which we split at its median for the purposes of display.</p>
 <span><span class="co"># Figure 2.7, page 38:</span></span>
 <span><span class="fu"><a href="https://patchwork.data-imaginist.com/reference/wrap_plots.html" class="external-link">wrap_plots</a></span><span class="op">(</span><span class="va">deviant_tolerance_grptraj_by</span>, ncol <span class="op">=</span> <span class="fl">1</span>, guides <span class="op">=</span> <span class="st">"collect"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="chapter-2_files/figure-html/unnamed-chunk-19-1.png" width="700"></p>
-<p>When examining plots like these, Singer and Willet (2003) recommend
+<p>When examining plots like these, Singer and Willett (2003) recommend
 recommend looking for systematic patterns in the trajectories to answer
 questions like:</p>
 <ul>

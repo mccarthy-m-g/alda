@@ -327,7 +327,7 @@
 <div class="section level3">
 <h3 id="imputation-strategies-for-time-varying-predictors">15.1.3 Imputation Strategies for Time-Varying Predictors<a class="anchor" aria-label="anchor" href="#imputation-strategies-for-time-varying-predictors"></a>
 </h3>
-<p>In Section 15.1.3 Singer and Willet (2003) discuss imputation
+<p>In Section 15.1.3 Singer and Willett (2003) discuss imputation
 strategies for time-varying predictors using a subset of unpublished
 data from Hall, Havassy, and Wasserman (1990), who measured the relation
 between the number of days until relapse to cocaine use and several
@@ -396,7 +396,8 @@ variable; the time-invariant predictor <code>needle</code>; and a
 different time-varying variable representing the predictor for total
 score on the positive mood subscales of the Mood Questionnaire (Ryman,
 Biersner, &amp; LaRocco, 1974), for which we will explore the following
-popular imputation strategies suggested by Singer and Willet (2003):</p>
+popular imputation strategies suggested by Singer and Willett
+(2003):</p>
 <ol style="list-style-type: decimal">
 <li>Carry forward each mood score until the next one is available.</li>
 <li>Interpolate between adjacent mood scores.</li>
@@ -531,7 +532,7 @@ the respondent’s mood score just before release from treatment.</p>
 </h4>
 <p>For <strong>Model B</strong> we return to the person-period version
 of the <code>cocaine_relapse_2</code> data and explore the first
-imputation strategy suggested by Singer and Willet (2003): Carrying
+imputation strategy suggested by Singer and Willett (2003): Carrying
 forward each mood score until the next one is available. For this
 procedure we will also lag the mood score predictor by one
 week—associating, for example, the first followup with baseline mood
@@ -698,13 +699,13 @@ discussion, see
 <p>For <strong>Model C</strong> we will also start with the lagged
 weekly mood scores, however, we will use a different imputation
 strategy: Interpolating between adjacent mood scores. Although Singer
-and Willet (2003) suggest “resisting the temptation to design
+and Willett (2003) suggest “resisting the temptation to design
 sophisticated imputation algorithms,” their approach to interpolating
 between adjacent mood scores was somewhat complex. Consequently, we need
 to create our own function to suit the purpose, rather than using
 existing functions like <code><a href="https://rdrr.io/pkg/zoo/man/na.approx.html" class="external-link">zoo::na.approx()</a></code> or
 <code>imputeTS::na_ma()</code>.</p>
-<p>Singer and Willet (2003) do not describe their approach in the text,
+<p>Singer and Willett (2003) do not describe their approach in the text,
 but their algorithm appears to be based on the following rules:</p>
 <ol style="list-style-type: decimal">
 <li>Trailing <code>NA</code>s should be imputed consecutively using the
@@ -792,7 +793,7 @@ next non-missing mood score.</li>
 <p>Next, to prepare the <code>cocaine_relapse_2_adjacent</code> data for
 modelling, we will again transform it into counting process format;
 however, for Model C each “at-risk” time interval will be one day long.
-Following Singer and Willet (2003), we will construct a
+Following Singer and Willett (2003), we will construct a
 <code>day_mood</code> variable by linearly interpolating between
 adjacent weekly values to yield daily values, and then assigning to each
 given day the mood value we imputed for the immediate prior day.</p>

@@ -120,7 +120,7 @@
 <div class="section level2">
 <h2 id="example-changes-in-adolescent-alcohol-use">4.1 Example: Changes in adolescent alcohol use<a class="anchor" aria-label="anchor" href="#example-changes-in-adolescent-alcohol-use"></a>
 </h2>
-<p>In Chapter 4 Singer and Willet (2003) delve deeper into the
+<p>In Chapter 4 Singer and Willett (2003) delve deeper into the
 specification, estimation, and interpretation of the multilevel model
 for change using a subset of data from Curran, Stice, and Chassin
 (1997), who measured the relation between changes in alcohol use and
@@ -292,7 +292,7 @@ coincident trajectory summary back to a person-period format.</p>
 <p>Afterwards we can plot as usual, with the addition of a
 <code>linewidth</code> aesthetic for the coincident trajectory counts.
 Note that this plot differs slightly from the text, as unlike Singer and
-Willet (2003) we use the entire sample instead of a random sample.</p>
+Willett (2003) we use the entire sample instead of a random sample.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">alcohol_use_1_cotraj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"child_of_alcoholic"</span>, <span class="st">"peer_alcohol_use_split"</span><span class="op">)</span>,</span>
@@ -397,7 +397,7 @@ maximum likelihood estimation hold, their estimates will be
 equivalent.</p>
 <p>Additionally, maximum likelihood estimation can be further
 distinguished into two types: <strong>full</strong> and
-<strong>restricted</strong>. As Singer and Willet (2003) explain, under
+<strong>restricted</strong>. As Singer and Willett (2003) explain, under
 <strong>full maximum likelihood</strong> (FML) the likelihood of the
 <em>sample data</em> is maximized, and goodness-of-fit statistics refer
 to the fit of the entire model (fixed and random effects); under
@@ -600,7 +600,7 @@ predictors—so we can plot the trajectories as usual.</p>
 <div class="section level2">
 <h2 id="practical-data-analytic-strategies-for-model-building">4.5 Practical Data Analytic Strategies for Model Building<a class="anchor" aria-label="anchor" href="#practical-data-analytic-strategies-for-model-building"></a>
 </h2>
-<p>In Section 4.5 Singer and Willet (2003) present their data analytic
+<p>In Section 4.5 Singer and Willett (2003) present their data analytic
 strategy for model building, which focuses on building a systematic
 sequence of models that, as a set, address your research questions in a
 meaningful way. They refer to this sequence as a <strong>taxonomy of
@@ -620,7 +620,7 @@ focused on the relationship between changes in adolescent alcohol use
 and being the child of an alcoholic parent.</p>
 <p>The first substantive model, Model C, updates the unconditional
 growth model to include <code>child_of_alcoholic</code> as a predictor
-of both initial status and rate of change. Singer and Willet (2003)
+of both initial status and rate of change. Singer and Willett (2003)
 added these terms as a logical first step, given the research
 question.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
@@ -663,7 +663,7 @@ question.</p>
 <span><span class="co">#&gt; I(-14):ch__  0.309 -0.672  -0.460</span></span></code></pre></div>
 <p>Model D builds upon Model C, controlling for the effects of
 <code>peer_alcohol_use</code> on initial status and rate of change.
-Singer and Willet (2003) added these terms to see if they might explain
+Singer and Willett (2003) added these terms to see if they might explain
 some of the <strong>conditional residual variation</strong> in initial
 status and rate of change from Model C.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
@@ -710,7 +710,7 @@ status and rate of change from Model C.</p>
 <span><span class="co">#&gt; I(-14):ch__  0.162 -0.371  -0.436  0.071           </span></span>
 <span><span class="co">#&gt; I(-14):pr__  0.299 -0.686   0.071 -0.436 -0.162</span></span></code></pre></div>
 <p>Model E reduces Model D, removing <code>child_of_alcoholic</code> as
-a predictor of rate of change. Singer and Willet (2003) removed this
+a predictor of rate of change. Singer and Willett (2003) removed this
 term based on the results of Models C and D, which both estimated that
 the difference in the rate of change in <code>alcohol_use</code> between
 children of alchoholic and nonalcoholic parents was practically
@@ -757,7 +757,7 @@ zero.</p>
 <span><span class="co">#&gt; I(-14):pr__  0.334 -0.814   0.000 -0.431</span></span></code></pre></div>
 <p>Model F serves as an alternative to Model E, with
 <code>peer_alcohol_use</code> centred on its sample mean of 1.018 (from
-the <em>person-level</em> data set). Singer and Willet (2003) centred
+the <em>person-level</em> data set). Singer and Willett (2003) centred
 <code>peer_alcohol_use</code> so that the level-2 intercepts, <span class="math inline">\(\gamma_{00}\)</span> and <span class="math inline">\(\gamma_{10}\)</span>, would represent a child of
 non-alchoholic parents with an average value of
 <code>peer_alcohol_use</code> (<code>peer_alcohol_use</code> = 1.018 and
@@ -807,9 +807,9 @@ non-alchoholic parents whose peers at age 14 were totally abstinent
 <span><span class="co">#&gt; I(-14):pr__  0.000  0.001   0.000 -0.431</span></span></code></pre></div>
 <p>Finally, Model G serves as an alternative to Model F, with
 <code>child_of_alcoholic</code> also centred on its sample mean of 0.451
-(from the <em>person-level</em> data set). Singer and Willet (2003) also
-centred <code>child_of_alcoholic</code> so that the level-2 intercepts,
-<span class="math inline">\(\gamma_{00}\)</span> and <span class="math inline">\(\gamma_{10}\)</span>, would represent an
+(from the <em>person-level</em> data set). Singer and Willett (2003)
+also centred <code>child_of_alcoholic</code> so that the level-2
+intercepts, <span class="math inline">\(\gamma_{00}\)</span> and <span class="math inline">\(\gamma_{10}\)</span>, would represent an
 adolescent with average values of <code>peer_alcohol_use</code> and
 <code>child_of_alcoholic</code> (<code>peer_alcohol_use</code> = 1.018
 and <code>child_of_alcoholic</code> = 0.451), and be numerically
@@ -887,7 +887,7 @@ corresponding name (e.g., <code><a href="https://rdrr.io/r/stats/AIC.html" class
 <span><span class="co">#&gt;    nobs sigma logLik   AIC   BIC deviance df.residual</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>   246 0.749  -<span style="color: #BB0000;">335.</span>  676.  687.     670.         243</span></span></code></pre></div>
-<p>Singer and Willet (2003) also introduce three pseudo-<span class="math inline">\(R^2\)</span> statistics for the multilevel model
+<p>Singer and Willett (2003) also introduce three pseudo-<span class="math inline">\(R^2\)</span> statistics for the multilevel model
 for change, which can be used to <em>cautiously</em> quantify how much
 outcome variation is “explained” by a model’s predictors.</p>
 <p>The first statistic, <span class="math inline">\(R^2_{y \hat
@@ -978,7 +978,7 @@ section, we will join them together here.</p>
 <h3 id="interpreting-fitted-models">Interpreting Fitted Models<a class="anchor" aria-label="anchor" href="#interpreting-fitted-models"></a>
 </h3>
 <p>To systematically compare fitted models—describing what happens as
-predictors are added and removed—Singer and Willet (2003) suggest
+predictors are added and removed—Singer and Willett (2003) suggest
 placing them side-by-side in a table, which allows you to more easily
 inspect and compare estimated fixed effects, variance components, and
 goodness-of-fit statistics from one model to the next. We can construct
@@ -2116,7 +2116,7 @@ average and no pooling trajectories, due to the effects of partial
 pooling.</li>
 </ul>
 <p>Although we will typically prefer model-based trajectories from the
-multilevel model for change, Singer and Willet (2003) conclude by
+multilevel model for change, Singer and Willett (2003) conclude by
 cautioning that the model-based trajectories of a flawed model will be
 flawed as well—as their quality depends heavily on the quality of the
 model fit and the soundness of the model’s assumptions (given the
