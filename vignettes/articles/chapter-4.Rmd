@@ -33,7 +33,7 @@ library(gt)
 
 ## 4.1 Example: Changes in adolescent alcohol use
 
-In Chapter 4 Singer and Willet (2003) delve deeper into the specification, estimation, and interpretation of the multilevel model for change using a subset of data from Curran, Stice, and Chassin (1997), who measured the relation between changes in alcohol use and changes in peer alcohol use over a 3-year period in a community-based sample of Hispanic and Caucasian adolescents.
+In Chapter 4 Singer and Willett (2003) delve deeper into the specification, estimation, and interpretation of the multilevel model for change using a subset of data from Curran, Stice, and Chassin (1997), who measured the relation between changes in alcohol use and changes in peer alcohol use over a 3-year period in a community-based sample of Hispanic and Caucasian adolescents.
 
 For this example we use the `alcohol_use_1` data set, a person-period data frame with 246 rows and 6 columns:
 
@@ -123,7 +123,7 @@ alcohol_use_1_pl
 
 To plot the coincident growth trajectories, we first need to summarize, *for each predictor*, the number of individuals with the same trajectory. The easiest way to do this is to count the number of groups with the same trajectory pattern for each level of the time-invariant predictors using the person-level data, then tidying the coincident trajectory summary back to a person-period format.
 
-Afterwards we can plot as usual, with the addition of a `linewidth` aesthetic for the coincident trajectory counts. Note that this plot differs slightly from the text, as unlike Singer and Willet (2003) we use the entire sample instead of a random sample.
+Afterwards we can plot as usual, with the addition of a `linewidth` aesthetic for the coincident trajectory counts. Note that this plot differs slightly from the text, as unlike Singer and Willett (2003) we use the entire sample instead of a random sample.
 
 ```{r}
 alcohol_use_1_cotraj <- map(
@@ -201,7 +201,7 @@ In Section 4.3 Singer and Willett (2003) discuss two methods of estimation avail
 
 Because generalized least squares and maximum likelihood estimation use different procedures to fit the multilevel model for change, their estimates *may* differ when fitting the same model using the same data; however, if the normal distribution assumptions required for maximum likelihood estimation hold, their estimates will be equivalent.
 
-Additionally, maximum likelihood estimation can be further distinguished into two types: **full** and **restricted**. As Singer and Willet (2003) explain, under **full maximum likelihood** (FML) the likelihood of the *sample data* is maximized, and goodness-of-fit statistics refer to the fit of the entire model (fixed and random effects); under **restricted maximum likelihood** (REML) the likelihood of the *sample residuals* is maximized, and goodness-of-fit statistics refer to the fit of only the random effects. Consequently, statistical tests comparing the goodness-of-fit statistics from FML models can be used to test hypotheses about either fixed or random effect parameters, whereas those from REML models can be used only to test hypotheses about random effect parameters.
+Additionally, maximum likelihood estimation can be further distinguished into two types: **full** and **restricted**. As Singer and Willett (2003) explain, under **full maximum likelihood** (FML) the likelihood of the *sample data* is maximized, and goodness-of-fit statistics refer to the fit of the entire model (fixed and random effects); under **restricted maximum likelihood** (REML) the likelihood of the *sample residuals* is maximized, and goodness-of-fit statistics refer to the fit of only the random effects. Consequently, statistical tests comparing the goodness-of-fit statistics from FML models can be used to test hypotheses about either fixed or random effect parameters, whereas those from REML models can be used only to test hypotheses about random effect parameters.
 
 ## 4.4 First Steps: Fitting Two Unconditional Multilevel Models for Change
 
@@ -316,7 +316,7 @@ model_B |>
 
 ## 4.5 Practical Data Analytic Strategies for Model Building
 
-In Section 4.5 Singer and Willet (2003) present their data analytic strategy for model building, which focuses on building a systematic sequence of models that, as a set, address your research questions in a meaningful way. They refer to this sequence as a **taxonomy of statistical models**, where:
+In Section 4.5 Singer and Willett (2003) present their data analytic strategy for model building, which focuses on building a systematic sequence of models that, as a set, address your research questions in a meaningful way. They refer to this sequence as a **taxonomy of statistical models**, where:
 
 - Each model in the taxonomy extends a prior model in some sensible way. 
 - Decisions to enter, retain, and remove predictors are based on a combination of logic, theory, and prior research, supplemented by hypothesis testing and comparisons of model fit.
@@ -324,7 +324,7 @@ In Section 4.5 Singer and Willet (2003) present their data analytic strategy for
 
 They present this strategy through one potential analytic path for the `alcohol_use_1` data, where the research question is focused on the relationship between changes in adolescent alcohol use and being the child of an alcoholic parent.
 
-The first substantive model, Model C, updates the unconditional growth model to include `child_of_alcoholic` as a predictor of both initial status and rate of change. Singer and Willet (2003) added these terms as a logical first step, given the research question.
+The first substantive model, Model C, updates the unconditional growth model to include `child_of_alcoholic` as a predictor of both initial status and rate of change. Singer and Willett (2003) added these terms as a logical first step, given the research question.
 
 ```{r}
 model_C <- update(
@@ -335,7 +335,7 @@ model_C <- update(
 summary(model_C)
 ```
 
-Model D builds upon Model C, controlling for the effects of `peer_alcohol_use` on initial status and rate of change. Singer and Willet (2003) added these terms to see if they might explain some of the **conditional residual variation** in initial status and rate of change from Model C. 
+Model D builds upon Model C, controlling for the effects of `peer_alcohol_use` on initial status and rate of change. Singer and Willett (2003) added these terms to see if they might explain some of the **conditional residual variation** in initial status and rate of change from Model C. 
 
 ```{r}
 model_D <- update(
@@ -346,7 +346,7 @@ model_D <- update(
 summary(model_D)
 ```
 
-Model E reduces Model D, removing `child_of_alcoholic` as a predictor of rate of change. Singer and Willet (2003) removed this term based on the results of Models C and D, which both estimated that the difference in the rate of change in `alcohol_use` between children of alchoholic and nonalcoholic parents was practically zero.
+Model E reduces Model D, removing `child_of_alcoholic` as a predictor of rate of change. Singer and Willett (2003) removed this term based on the results of Models C and D, which both estimated that the difference in the rate of change in `alcohol_use` between children of alchoholic and nonalcoholic parents was practically zero.
 
 ```{r}
 model_E <- update(
@@ -357,7 +357,7 @@ model_E <- update(
 summary(model_E)
 ```
 
-Model F serves as an alternative to Model E, with `peer_alcohol_use` centred on its sample mean of 1.018 (from the *person-level* data set). Singer and Willet (2003) centred `peer_alcohol_use` so that the level-2 intercepts, $\gamma_{00}$ and $\gamma_{10}$, would represent a child of non-alchoholic parents with an average value of `peer_alcohol_use` (`peer_alcohol_use` = 1.018 and `child_of_alcoholic` = 0), rather than a child of non-alchoholic parents whose peers at age 14 were totally abstinent (`peer_alcohol_use` = 0 and `child_of_alcoholic` = 0).
+Model F serves as an alternative to Model E, with `peer_alcohol_use` centred on its sample mean of 1.018 (from the *person-level* data set). Singer and Willett (2003) centred `peer_alcohol_use` so that the level-2 intercepts, $\gamma_{00}$ and $\gamma_{10}$, would represent a child of non-alchoholic parents with an average value of `peer_alcohol_use` (`peer_alcohol_use` = 1.018 and `child_of_alcoholic` = 0), rather than a child of non-alchoholic parents whose peers at age 14 were totally abstinent (`peer_alcohol_use` = 0 and `child_of_alcoholic` = 0).
 
 ```{r}
 model_F <- update(
@@ -368,7 +368,7 @@ model_F <- update(
 summary(model_F)
 ```
 
-Finally, Model G serves as an alternative to Model F, with `child_of_alcoholic` also centred on its sample mean of 0.451 (from the *person-level* data set). Singer and Willet (2003) also centred `child_of_alcoholic` so that the level-2 intercepts, $\gamma_{00}$ and $\gamma_{10}$, would represent an adolescent with average values of `peer_alcohol_use` and `child_of_alcoholic` (`peer_alcohol_use` = 1.018 and `child_of_alcoholic` = 0.451), and be numerically identical to the corresponding level-2 intercepts in the unconditional growth model.
+Finally, Model G serves as an alternative to Model F, with `child_of_alcoholic` also centred on its sample mean of 0.451 (from the *person-level* data set). Singer and Willett (2003) also centred `child_of_alcoholic` so that the level-2 intercepts, $\gamma_{00}$ and $\gamma_{10}$, would represent an adolescent with average values of `peer_alcohol_use` and `child_of_alcoholic` (`peer_alcohol_use` = 1.018 and `child_of_alcoholic` = 0.451), and be numerically identical to the corresponding level-2 intercepts in the unconditional growth model.
 
 ```{r}
 model_G <- update(
@@ -405,7 +405,7 @@ In addition to the output from `summary()` we can return a one row tibble of mod
 glance(model_A)
 ```
 
-Singer and Willet (2003) also introduce three pseudo-$R^2$ statistics for the multilevel model for change, which can be used to *cautiously* quantify how much outcome variation is "explained" by a model's predictors.
+Singer and Willett (2003) also introduce three pseudo-$R^2$ statistics for the multilevel model for change, which can be used to *cautiously* quantify how much outcome variation is "explained" by a model's predictors.
 
 The first statistic, $R^2_{y \hat y}$, assesses the proportion of total outcome variation "explained" by a model's specific combination of predictors, based on the squared sample correlation between observed and predicted values.
 
@@ -479,7 +479,7 @@ alcohol_use_1_fits_r2
 
 ### Interpreting Fitted Models
 
-To systematically compare fitted models---describing what happens as predictors are added and removed---Singer and Willet (2003) suggest placing them side-by-side in a table, which allows you to more easily inspect and compare estimated fixed effects, variance components, and goodness-of-fit statistics from one model to the next. We can construct such a table using the `modelsummary()` function from the **modelsummary** package. To better match the table in the text, we will set the table `output` to `"gt"` so we can post-process it using the **gt** package.
+To systematically compare fitted models---describing what happens as predictors are added and removed---Singer and Willett (2003) suggest placing them side-by-side in a table, which allows you to more easily inspect and compare estimated fixed effects, variance components, and goodness-of-fit statistics from one model to the next. We can construct such a table using the `modelsummary()` function from the **modelsummary** package. To better match the table in the text, we will set the table `output` to `"gt"` so we can post-process it using the **gt** package.
 
 <!-- TODO: Revise code for modelsummary after next CRAN release: https://github.com/vincentarelbundock/modelsummary/issues/757-->
 
@@ -802,4 +802,4 @@ Similar to our partial pooling example in in Chapter 3, notice that:
 - The no pooling trajectories are the least stable, varying the most across individuals.
 - The model-based trajectories fall somewhere between the population average and no pooling trajectories, due to the effects of partial pooling.
 
-Although we will typically prefer model-based trajectories from the multilevel model for change, Singer and Willet (2003) conclude by cautioning that the model-based trajectories of a flawed model will be flawed as well---as their quality depends heavily on the quality of the model fit and the soundness of the model's assumptions (given the data).
+Although we will typically prefer model-based trajectories from the multilevel model for change, Singer and Willett (2003) conclude by cautioning that the model-based trajectories of a flawed model will be flawed as well---as their quality depends heavily on the quality of the model fit and the soundness of the model's assumptions (given the data).

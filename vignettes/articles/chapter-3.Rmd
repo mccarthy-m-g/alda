@@ -29,7 +29,7 @@ library(broom.mixed)
 
 ## 3.1 What Is the Purpose of the Multilevel Model for Change?
 
-In Chapter 3 Singer and Willet (2003) develop and explain the **multilevel model for change** using a subset of data from Burchinal, Campbell, Bryant, Wasik, and Ramey (1997), who measured the effect of early educational intervention on cognitive performance in a sample of African-American children at ages 12, 18, and 24 months (i.e., 1.0, 1.5, and 2.0 years).
+In Chapter 3 Singer and Willett (2003) develop and explain the **multilevel model for change** using a subset of data from Burchinal, Campbell, Bryant, Wasik, and Ramey (1997), who measured the effect of early educational intervention on cognitive performance in a sample of African-American children at ages 12, 18, and 24 months (i.e., 1.0, 1.5, and 2.0 years).
 
 For this example we use the `early_intervention` data set, a person-period data frame with 309 rows and 4 columns:
 
@@ -38,7 +38,7 @@ For this example we use the `early_intervention` data set, a person-period data 
 - `treatment`: Treatment condition (control = 0, intervention = 1).
 - `cognitive_score`: Cognitive performance score on one of two standardized intelligence tests: the Bayley Scales of Infant Development (Bayley, 1969) at 12 and 18 months, and the the Stanford Binet (Terman & Merrill, 1972) at 24 months.
 
-Note that for reasons of participant privacy the `early_intervention` data set uses *simulated* data rather than the real data used by Singer and Willet (2003), so the examples presented in this article will have similar but not identical results to those presented in the text.
+Note that for reasons of participant privacy the `early_intervention` data set uses *simulated* data rather than the real data used by Singer and Willett (2003), so the examples presented in this article will have similar but not identical results to those presented in the text.
 
 ```{r}
 # Table 3.1, page 48:
@@ -82,7 +82,7 @@ early_intervention_pl |>
   mutate(proportion = count / sum(count))
 ```
 
-As Singer and Willet (2003) discuss, the kind of statistical model needed to represent change processes in longitudinal data like this must include components at two levels:
+As Singer and Willett (2003) discuss, the kind of statistical model needed to represent change processes in longitudinal data like this must include components at two levels:
 
 1. A **level-1 submodel** that describes how individuals change over time, which can address questions about **within-person** change.
 2. A **level-2 submodel** that describes how these changes vary across individuals, which can address questions about **between-person** differences in change.
@@ -91,9 +91,9 @@ Together, these two components form a **multilevel model** (also known as a **li
 
 ## 3.2 The Level-1 Submodel for Individual Change
 
-In Section 3.2 Singer and Willet (2003) introduce the level-1 component of the multilevel model for change: The **submodel for individual change**---also known as the **individual growth model**---which represents the individual change in the outcome variable that we expect will occur during each time period under study.
+In Section 3.2 Singer and Willett (2003) introduce the level-1 component of the multilevel model for change: The **submodel for individual change**---also known as the **individual growth model**---which represents the individual change in the outcome variable that we expect will occur during each time period under study.
 
-Because the individual growth model specifies a common functional form for the individual trajectories, Singer and Willet (2003) suggest preceding level-1 submodel specification with visual inspection of empirical growth plots in order to select the most *parsimonious* functional form that the observed data could reasonably have come from. 
+Because the individual growth model specifies a common functional form for the individual trajectories, Singer and Willett (2003) suggest preceding level-1 submodel specification with visual inspection of empirical growth plots in order to select the most *parsimonious* functional form that the observed data could reasonably have come from. 
 
 ```{r}
 set.seed(567)
@@ -109,14 +109,14 @@ early_intervention |>
     facet_wrap(vars(id), ncol = 4, labeller = label_both)
 ```
 
-Singer and Willet (2003) identify several questions that are helpful to answer when examining empirical growth plots to aid model specification:
+Singer and Willett (2003) identify several questions that are helpful to answer when examining empirical growth plots to aid model specification:
 
 - What type of population individual growth model could have generated the observed data?
 - Should the population individual growth model be linear or curvilinear with time? Smooth or jagged? Continuous or disjoint?
 - Are any nonlinearities in the observed data consistent across individuals? Might they be due to measurement error or random error?
 - How many measurement occasions are there? Few or many?
 
-Because the `early_intervention` data only has three measurement occasions for each individual, and any nonlinearities in the observed data are most likely due to measurement error or random error, Singer and Willet (2003) specify a simple linear model for the level-1 submodel:
+Because the `early_intervention` data only has three measurement occasions for each individual, and any nonlinearities in the observed data are most likely due to measurement error or random error, Singer and Willett (2003) specify a simple linear model for the level-1 submodel:
 
 $$
 \text{cognitive_score}_{ij} = \pi_{0i} + \pi_{1i} (\text{age}_{ij} - 1) + \epsilon_{ij},
@@ -291,14 +291,14 @@ early_intervention_fit_1 |>
 
 ## 3.3 The Level-2 Submodel for Systematic Interindividual Differences in Change
 
-In Section 3.3 Singer and Willet (2003) introduce the level-2 component of the multilevel model for change---the **submodel for systematic interindividual differences in change**---which is defined by four specific features:
+In Section 3.3 Singer and Willett (2003) introduce the level-2 component of the multilevel model for change---the **submodel for systematic interindividual differences in change**---which is defined by four specific features:
 
 1. Its outcomes must be the individual growth parameters of the level-1 submodel, $\pi_{0i}$ and $\pi_{1i}$.
 2. It must have one level-2 submodel for each level-1 individual growth parameter, which must be written in separate parts.
 3. Each level-2 submodel must specify a relationship between an individual growth parameter and the level-2 time-invariant predictors.
 4. Each level-2 submodel must allow individuals who share common predictor values to vary in their individual change trajectories.
 
-Because the level-2 submodel must simultaneously account for both between-group differences in individual growth parameters *and* within-group differences in change, Singer and Willet (2003) suggest preceding level-2 submodel specification with visual inspection of individual growth trajectories stratified by levels of the time-invariant predictor(s), in order to identify what kind of population model could give rise to the observed patterns.
+Because the level-2 submodel must simultaneously account for both between-group differences in individual growth parameters *and* within-group differences in change, Singer and Willett (2003) suggest preceding level-2 submodel specification with visual inspection of individual growth trajectories stratified by levels of the time-invariant predictor(s), in order to identify what kind of population model could give rise to the observed patterns.
 
 ```{r}
 # Figure 3.4, page 59:
@@ -320,7 +320,7 @@ ggplot(early_intervention, mapping = aes(x = age, y = cognitive_score)) +
 # TODO: Decide whether or not to do the bottom plots.
 ```
 
-For the `early_intervention` data, which only has a single time-invariant predictor, Singer and Willet (2003) specify the following level-2 submodel: 
+For the `early_intervention` data, which only has a single time-invariant predictor, Singer and Willett (2003) specify the following level-2 submodel: 
 
 $$
 \begin{align}
@@ -413,7 +413,7 @@ summary(early_intervention_fit)
 
 ## 3.5 Examining Estimated Fixed Effects
 
-In Section 3.5 Singer and Willet (2003) explain two ways to interpret the fixed effects estimates of the multilevel model for change:
+In Section 3.5 Singer and Willett (2003) explain two ways to interpret the fixed effects estimates of the multilevel model for change:
 
 1. Interpreting fixed effects coefficients directly.
 2. Plotting fitted change trajectories for prototypical individuals.

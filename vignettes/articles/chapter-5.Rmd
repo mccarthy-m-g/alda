@@ -32,7 +32,7 @@ library(gt)
 
 ## 5.1 Variably Spaced Measurement Occasions
 
-In Section 5.1 Singer and Willet (2003) demonstrate how you can fit the multilevel model for change for data with **variably spaced measurement occasions** using a subset of data from the Children of the National Longitudinal Study of Youth (US Bureau of Labor and Statistics), which measured changes in the reading subtest of the Peabody Individual Achievement Test (PIAT) in a sample of 89 African-American children across three waves around the ages of 6, 8, and 10.
+In Section 5.1 Singer and Willett (2003) demonstrate how you can fit the multilevel model for change for data with **variably spaced measurement occasions** using a subset of data from the Children of the National Longitudinal Study of Youth (US Bureau of Labor and Statistics), which measured changes in the reading subtest of the Peabody Individual Achievement Test (PIAT) in a sample of 89 African-American children across three waves around the ages of 6, 8, and 10.
 
 For this example we use the `reading_scores` data set, a person-period data frame with 267 rows and 5 columns:
 
@@ -130,7 +130,7 @@ Comparing these models, we see that the `age` model fits the data better than th
 
 ## 5.2 Varying Numbers of Measurement Occasions
 
-In Section 5.2 Singer and Willet (2003) demonstrate how you can fit the multilevel model for change for data with **varying numbers of measurement occasions** (i.e., unbalanced data) using a subset of data from the National Longitudinal Study of Youth tracking the labour market experiences of male high school dropouts (Murnane, Boudett, & Willett, 1999).
+In Section 5.2 Singer and Willett (2003) demonstrate how you can fit the multilevel model for change for data with **varying numbers of measurement occasions** (i.e., unbalanced data) using a subset of data from the National Longitudinal Study of Youth tracking the labour market experiences of male high school dropouts (Murnane, Boudett, & Willett, 1999).
 
 For this example we use the `dropout_wages` data set, a person-period data frame with 6402 rows and 9 columns:
 
@@ -166,7 +166,7 @@ dropout_wages |>
   select(id, experience, log_wages, black, highest_grade, unemployment_rate)
 ```
 
-Yet, as Singer and Willet (2003) discuss, a major advantage of the multilevel model for change is that it can easily fit to unbalanced data like this---as long as the person-period data set includes enough people with enough waves of data for the model converge, the analyses can proceed as usual. 
+Yet, as Singer and Willett (2003) discuss, a major advantage of the multilevel model for change is that it can easily fit to unbalanced data like this---as long as the person-period data set includes enough people with enough waves of data for the model converge, the analyses can proceed as usual. 
 
 Here we will fit three models to the `dropout_wages` data: an unconditional growth model (Model A), and two models that include predictors for race and the highest grade completed (Models B and C).
 
@@ -254,7 +254,7 @@ ggplot(prototypical_dropout_wages, aes(x = experience, y = log_wages)) +
 
 ### 5.2.2 Practical Problems That May Arise When Analyzing Unbalanced Data Sets
 
-The multilevel model may fail to converge or be unable to estimate one or more variance components for data sets that are severely unbalanced, or if too few people have enough waves of data. In Section 5.2.2 Singer and Willet (2003) discuss two strategies for addressing these problems:
+The multilevel model may fail to converge or be unable to estimate one or more variance components for data sets that are severely unbalanced, or if too few people have enough waves of data. In Section 5.2.2 Singer and Willett (2003) discuss two strategies for addressing these problems:
 
 - **Removing boundary constraints**, where the software is permitted to obtain negative variance components.
 - **Fixing rates of change**, where the model is simplified by removing the varying slope change.

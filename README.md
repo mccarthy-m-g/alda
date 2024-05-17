@@ -4,7 +4,7 @@
 [![R-CMD-check](https://github.com/mccarthy-m-g/alda/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mccarthy-m-g/alda/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
   
-This package contains 31 data sets provided by Singer and Willet (2003) with their book, *Applied longitudinal data analysis: Modeling change and event occurrence*, that are suitable for longitudinal mixed effects modelling, longitudinal structural equation modelling, and survival analysis. All the data sets in this package are real data from real studies; however, most were modified by Singer and Willet (2003) for the illustration of statistical methods, so they may not match the results of the original studies.
+This package contains 31 data sets provided by Singer and Willett (2003) with their book, *Applied longitudinal data analysis: Modeling change and event occurrence*, that are suitable for longitudinal mixed effects modelling, longitudinal structural equation modelling, and survival analysis. All the data sets in this package are real data from real studies; however, most were modified by Singer and Willett (2003) for the illustration of statistical methods, so they may not match the results of the original studies.
 
 There are eleven data sets for longitudinal mixed effects modelling:
 

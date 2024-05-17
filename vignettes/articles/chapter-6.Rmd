@@ -447,7 +447,7 @@ ggplot(prototypical_alcohol_use, aes(x = age, y = alcohol_use)) +
 
 ### Selecting a suitable transformation
 
-Singer and Willet (2003) suggest examining empirical growth plots for each participant (or a random subset) with several different transformations before selecting one for analysis, keeping in mind that:
+Singer and Willett (2003) suggest examining empirical growth plots for each participant (or a random subset) with several different transformations before selecting one for analysis, keeping in mind that:
 
 - In order to analyze the data, the same transformation must be used for the entire sample.
 - Different transformations may be more or less successful for different participants.
@@ -759,7 +759,7 @@ ggplot() +
 
 Here we will fit two models to the `cognitive_growth` data using our postulated level-1 logistic trajectory: An unconditional logistic growth model (Model A); and a logistic growth model that includes a time-invariant predictor for children's reading skill, `reading_score`, centred on its sample mean of 1.95625 (Model B).
 
-Following Singer and Willet (2003), we specify the level-2 submodels for the nonlinear parameters of Models A and B as:
+Following Singer and Willett (2003), we specify the level-2 submodels for the nonlinear parameters of Models A and B as:
 
 $$
 \begin{align}

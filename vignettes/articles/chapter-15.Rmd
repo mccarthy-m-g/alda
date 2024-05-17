@@ -162,7 +162,7 @@ model_D <- update(first_cocaine_model_C, . ~ . + early_marijuana_use + early_dru
 
 ### 15.1.3 Imputation Strategies for Time-Varying Predictors
 
-In Section 15.1.3 Singer and Willet (2003) discuss imputation strategies for time-varying predictors using a subset of unpublished data from Hall, Havassy, and Wasserman (1990), who measured the relation between the number of days until relapse to cocaine use and several predictors that might be associated with relapse in a sample of 104 newly abstinent cocaine users who recently completed an abstinence-oriented treatment program. Former cocaine users were followed for up to 12 weeks post-treatment or until they used cocaine for 7 consecutive days. Self-reported abstinence was confirmed at each interview by the absence of cocaine in urine specimens.
+In Section 15.1.3 Singer and Willett (2003) discuss imputation strategies for time-varying predictors using a subset of unpublished data from Hall, Havassy, and Wasserman (1990), who measured the relation between the number of days until relapse to cocaine use and several predictors that might be associated with relapse in a sample of 104 newly abstinent cocaine users who recently completed an abstinence-oriented treatment program. Former cocaine users were followed for up to 12 weeks post-treatment or until they used cocaine for 7 consecutive days. Self-reported abstinence was confirmed at each interview by the absence of cocaine in urine specimens.
 
 For this example we use the `cocaine_relapse_2` data set, a person-period data frame with 1248 rows and 7 columns:
 
@@ -180,7 +180,7 @@ glimpse(cocaine_relapse_2)
 
 Because time to relapse was measured in days but follow-up interviews were conducted only once a week, the cocaine relapse data in its current form fails to meet the data requirement for time-varying predictors: For each unique event time in `days` we do not know the time-varying `mood` scores---for everyone still at risk at---at each of those moments. Thus, in order to meet this data requirement we must generate predictor histories that provide near-daily `mood` scores for each participant. 
 
-In the proceeding steps we will develop three Cox regression models fitted to the cocaine relapse data to illustrate and compare different imputation strategies for time-varying predictors. Each includes the number of `days` until relapse to cocaine use as the outcome variable; the time-invariant predictor `needle`; and a different time-varying variable representing the predictor for total score on the positive mood subscales of the Mood Questionnaire (Ryman, Biersner, & LaRocco, 1974), for which we will explore the following popular imputation strategies suggested by Singer and Willet (2003):
+In the proceeding steps we will develop three Cox regression models fitted to the cocaine relapse data to illustrate and compare different imputation strategies for time-varying predictors. Each includes the number of `days` until relapse to cocaine use as the outcome variable; the time-invariant predictor `needle`; and a different time-varying variable representing the predictor for total score on the positive mood subscales of the Mood Questionnaire (Ryman, Biersner, & LaRocco, 1974), for which we will explore the following popular imputation strategies suggested by Singer and Willett (2003):
 
 1. Carry forward each mood score until the next one is available.
 2. Interpolate between adjacent mood scores.
@@ -266,7 +266,7 @@ summary(model_A)
 
 #### Model B: 
 
-For **Model B** we return to the person-period version of the `cocaine_relapse_2` data and explore the first imputation strategy suggested by Singer and Willet (2003): Carrying forward each mood score until the next one is available. For this procedure we will also lag the mood score predictor by one week---associating, for example, the first followup with baseline mood scores, the second followup with the first followup's mood scores, and so forth. <!-- TODO, explain why lag is used: "As Allison (2010) points out, however, the direction of causality here is ambiguous, because a person cannot work when he is in jail. One way of addressing this problem is to use instead a lagged value of employment, from the previous week for example." ([Fox and Weisberg, p. 11](zotero://select/library/items/V5DMHDX8)) ([pdf](zotero://open-pdf/library/items/2KQMEBUS?page=11&annotation=35HDG864)) -->
+For **Model B** we return to the person-period version of the `cocaine_relapse_2` data and explore the first imputation strategy suggested by Singer and Willett (2003): Carrying forward each mood score until the next one is available. For this procedure we will also lag the mood score predictor by one week---associating, for example, the first followup with baseline mood scores, the second followup with the first followup's mood scores, and so forth. <!-- TODO, explain why lag is used: "As Allison (2010) points out, however, the direction of causality here is ambiguous, because a person cannot work when he is in jail. One way of addressing this problem is to use instead a lagged value of employment, from the previous week for example." ([Fox and Weisberg, p. 11](zotero://select/library/items/V5DMHDX8)) ([pdf](zotero://open-pdf/library/items/2KQMEBUS?page=11&annotation=35HDG864)) -->
 
 ```{r}
 cocaine_relapse_2_prevweek <- cocaine_relapse_2 |>
@@ -340,9 +340,9 @@ summary(model_B)
 
 #### Model C:
 
-For **Model C** we will also start with the lagged weekly mood scores, however, we will use a different imputation strategy: Interpolating between adjacent mood scores. Although Singer and Willet (2003) suggest "resisting the temptation to design sophisticated imputation algorithms," their approach to interpolating between adjacent mood scores was somewhat complex. Consequently, we need to create our own function to suit the purpose, rather than using existing functions like `zoo::na.approx()` or `imputeTS::na_ma()`.
+For **Model C** we will also start with the lagged weekly mood scores, however, we will use a different imputation strategy: Interpolating between adjacent mood scores. Although Singer and Willett (2003) suggest "resisting the temptation to design sophisticated imputation algorithms," their approach to interpolating between adjacent mood scores was somewhat complex. Consequently, we need to create our own function to suit the purpose, rather than using existing functions like `zoo::na.approx()` or `imputeTS::na_ma()`.
 
-Singer and Willet (2003) do not describe their approach in the text, but their algorithm appears to be based on the following rules:
+Singer and Willett (2003) do not describe their approach in the text, but their algorithm appears to be based on the following rules:
 
 1. Trailing `NA`s should be imputed consecutively using the most recent
    non-missing mood score.
@@ -413,7 +413,7 @@ cocaine_relapse_2_adjacent |>
   select(id, followup, mood_previous_week:mood_adjacent_lag)
 ```
 
-Next, to prepare the `cocaine_relapse_2_adjacent` data for modelling, we will again transform it into counting process format; however, for Model C each "at-risk" time interval will be one day long. Following Singer and Willet (2003), we will construct a `day_mood` variable by linearly interpolating between adjacent weekly values to yield daily values, and then assigning to each given day the mood value we imputed for the immediate prior day.
+Next, to prepare the `cocaine_relapse_2_adjacent` data for modelling, we will again transform it into counting process format; however, for Model C each "at-risk" time interval will be one day long. Following Singer and Willett (2003), we will construct a `day_mood` variable by linearly interpolating between adjacent weekly values to yield daily values, and then assigning to each given day the mood value we imputed for the immediate prior day.
 
 ```{r}
 cocaine_relapse_2_adjacent_cp <- cocaine_relapse_2_adjacent |>

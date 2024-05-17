@@ -8,7 +8,7 @@ Authors@R:
            email = "m.mccarthy1624@gmail.com")
 Description: Provides the collection of data sets used in the book "Applied
     longitudinal data analysis: Modeling change and event occurrence" by
-    Singer and Willet (2003).
+    Singer and Willett (2003).
 License: CC0
 URL: https://mccarthy-m-g.github.io/alda/, https://github.com/mccarthy-m-g/alda
 BugReports: https://github.com/mccarthy-m-g/alda/issues

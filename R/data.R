@@ -66,7 +66,7 @@ NULL
 #'   \item{`cognitive_score`}{Cognitive performance score on one of two standardized intelligence tests: the Bayley Scales of Infant Development (Bayley, 1969) at 12 and 18 months, and the the Stanford Binet (Terman & Merrill, 1972) at 24 months.}
 #' }
 #' @note
-#' At the request of the researchers, Singer and Willet (2003) did not provide
+#' At the request of the researchers, Singer and Willett (2003) did not provide
 #' the data from Burchinal, Campbell, Bryant, Wasik, and Ramey's (1997) in order
 #' to ensure the privacy of the study's participants. However, the data provided
 #' here has been simulated to have similar statistical properties to their study

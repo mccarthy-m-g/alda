@@ -31,7 +31,7 @@ library(broom)
 
 ## 2.1 Creating a longitudinal data set
 
-In Section 2.1 Singer and Willet (2003) introduce two distinct formats of data organization for longitudinal data---the **person-level** format and the **person-period** format---using a subset of data from the National Youth Survey (NYS) measuring the development of tolerance towards deviant behaviour in adolescents over time in relation to self-reported sex and exposure to deviant peers (Raudenbush & Chan, 1992). Adolescents' tolerance towards deviant behaviour was based on a 9-item scale measuring attitudes tolerant of deviant behaviour. The scale was administered each year from age 11 to 15 and so is a **time-varying variable**. However, adolescents' self-reported sex and exposure to deviant peers were only recorded at the beginning of the study period and so are **time-invariant variables**.
+In Section 2.1 Singer and Willett (2003) introduce two distinct formats of data organization for longitudinal data---the **person-level** format and the **person-period** format---using a subset of data from the National Youth Survey (NYS) measuring the development of tolerance towards deviant behaviour in adolescents over time in relation to self-reported sex and exposure to deviant peers (Raudenbush & Chan, 1992). Adolescents' tolerance towards deviant behaviour was based on a 9-item scale measuring attitudes tolerant of deviant behaviour. The scale was administered each year from age 11 to 15 and so is a **time-varying variable**. However, adolescents' self-reported sex and exposure to deviant peers were only recorded at the beginning of the study period and so are **time-invariant variables**.
 
 For this example we illustrate the difference between the two formats using the `deviant_tolerance_pl` and `deviant_tolerance_pp` data sets, which correspond to the adolescent tolerance of deviant behaviour data organized in the person-level and person-period formats, respectively.
 
@@ -55,7 +55,7 @@ Although the person-level format is common in cross-sectional research, it has f
 3. It requires adding an additional variable to the data set for each unique measurement occasion, making it inefficient or useless when the number or spacing of measurement occasions varies across individuals.
 4. It requires adding an additional *set* of columns for each time-varying predictor (one column per measurement occasion), rendering it unable to easily handle the presence of time-varying predictors.
 
-Singer and Willet (2003) exemplify the first of these disadvantages by postulating how one might analyze the person-level tolerance towards deviant behaviour data set. A natural approach would be to summarize the wave-to-wave relationships among `tolerance_11` through `tolerance_15` using bivariate correlations and bivariate plots; however, doing so does not tell us anything about how adolescent tolerance towards deviant behaviour changed over time for either individuals or groups. Rather, the weak positive correlation between measurement occasions merely tells us that the rank order of tolerance towards deviant behaviour remained relatively stable across occasions---that is, adolescents who were more tolerant towards deviant behaviour at one measurement occasion tended to be more tolerant at the next.
+Singer and Willett (2003) exemplify the first of these disadvantages by postulating how one might analyze the person-level tolerance towards deviant behaviour data set. A natural approach would be to summarize the wave-to-wave relationships among `tolerance_11` through `tolerance_15` using bivariate correlations and bivariate plots; however, doing so does not tell us anything about how adolescent tolerance towards deviant behaviour changed over time for either individuals or groups. Rather, the weak positive correlation between measurement occasions merely tells us that the rank order of tolerance towards deviant behaviour remained relatively stable across occasions---that is, adolescents who were more tolerant towards deviant behaviour at one measurement occasion tended to be more tolerant at the next.
 
 ```{r}
 # Table 2.1, page 20:
@@ -161,11 +161,11 @@ To learn more about the principles of tidy data and how pivoting works, see the 
 
 ## 2.2 Descriptive analysis of individual change over time
 
-In Section 2.2 Singer and Willet (2003) use the `deviant_tolerance_pp` data set to demonstrate how the person-period format facilitates exploratory analyses that describe how individuals in the data set change over time, revealing the nature and idiosyncrasies of each person’s temporal pattern of change. 
+In Section 2.2 Singer and Willett (2003) use the `deviant_tolerance_pp` data set to demonstrate how the person-period format facilitates exploratory analyses that describe how individuals in the data set change over time, revealing the nature and idiosyncrasies of each person’s temporal pattern of change. 
 
 ### Empirical Growth Plots
 
-**Empirical growth plots** show, for each individual, the sequence of change in a time-varying variable. Here change can be evaluated in either absolute terms against the scale of the variable of interest, or in relative terms in comparison to other sample members. Singer and Willet (2003) identify several questions that are helpful to answer when examining empirical growth plots:
+**Empirical growth plots** show, for each individual, the sequence of change in a time-varying variable. Here change can be evaluated in either absolute terms against the scale of the variable of interest, or in relative terms in comparison to other sample members. Singer and Willett (2003) identify several questions that are helpful to answer when examining empirical growth plots:
 
 - Who is increasing?
 - Who is decreasing?
@@ -187,7 +187,7 @@ deviant_tolerance_empgrowth <- deviant_tolerance_pp |>
 deviant_tolerance_empgrowth
 ```
 
-If your data set is large, Singer and Willet (2003) suggest constructing empirical growth plots for a randomly selected a subsample of individuals---perhaps stratified into groups defined by the values of important predictors---rather than using the entire sample. 
+If your data set is large, Singer and Willett (2003) suggest constructing empirical growth plots for a randomly selected a subsample of individuals---perhaps stratified into groups defined by the values of important predictors---rather than using the entire sample. 
 
 This task can be be easily accomplished using `filter()` function from the **dplyr** package prior to plotting. For example, here we sample four random adolescents. Note the use of the `set.seed()` function prior to sampling, which sets the state of R's random number generator: we do this so that the results of the random sample are reproducible.
 
@@ -228,7 +228,7 @@ deviant_tolerance_empgrowth +
   stat_smooth(method = "loess", se = FALSE, span = .9)
 ```
 
-Singer and Willet (2003) recommend focusing on the elevation, shape, and tilt of the smoothed trajectories by answering questions like:
+Singer and Willett (2003) recommend focusing on the elevation, shape, and tilt of the smoothed trajectories by answering questions like:
 
 - Do the scores hover at the low, medium, or high end of the scale?
 - Does everyone change over time or do some people remain the same?
@@ -240,7 +240,7 @@ Answering the last question is particularly important, as it will help you selec
 
 #### The Parametric Approach
 
-For the parametric approach, Singer and Willet (2003) suggest using the following three-step process:
+For the parametric approach, Singer and Willett (2003) suggest using the following three-step process:
 
 1. Estimate a within-person linear model for each person in the data set.
 2. Collect summary statistics from each within-person linear model into a single data set.
@@ -300,7 +300,7 @@ deviant_tolerance_empgrowth +
   scale_x_continuous(transform = transform_centre(11))
 ```
 
-Alternatively, if you only plan to examine the parametric trajectories graphically, the three-step process suggested by Singer and Willet (2003) can be skipped altogether by using the `stat_smooth()` function with the `"lm"` method. This approach also fits a within-person linear model for each person in the data set; the only drawback is that it makes it awkward ([though not impossible](https://stackoverflow.com/a/9791394/16844576)) to access the summary statistics from each model.
+Alternatively, if you only plan to examine the parametric trajectories graphically, the three-step process suggested by Singer and Willett (2003) can be skipped altogether by using the `stat_smooth()` function with the `"lm"` method. This approach also fits a within-person linear model for each person in the data set; the only drawback is that it makes it awkward ([though not impossible](https://stackoverflow.com/a/9791394/16844576)) to access the summary statistics from each model.
 
 ```{r}
 deviant_tolerance_empgrowth +
@@ -309,7 +309,7 @@ deviant_tolerance_empgrowth +
 
 ## 2.3 Exploring differences in change across people
 
-Having explored how each individual changes over time, in Section 2.3 Singer and Willet (2003) continue with the `deviant_tolerance_pp` data set to demonstrate three strategies for exploring **interindividual differences** in change:
+Having explored how each individual changes over time, in Section 2.3 Singer and Willett (2003) continue with the `deviant_tolerance_pp` data set to demonstrate three strategies for exploring **interindividual differences** in change:
 
 1. Plotting the entire set of individual trajectories together, along with an average change trajectory for the entire group. Individual trajectories can either be compared with one another to examine similarities and differences in changes across people, or with the average change trajectory to compare individual change with group change.
 2. Conducting descriptive analyses of key model parameters, such as the estimated intercepts and slopes of the individual change trajectory models.
@@ -322,7 +322,7 @@ The purpose of the first strategy is to answer *generic* questions about change,
 - Is the direction and rate of change similar or different across people?
 - How does individual change compare to the group-averaged change trajectory?
 
-For this strategy, Singer and Willet (2003) suggest using both the nonparametric and parametric approaches, as certain patterns in the data may be somewhat easier to interpret using one approach or the other.
+For this strategy, Singer and Willett (2003) suggest using both the nonparametric and parametric approaches, as certain patterns in the data may be somewhat easier to interpret using one approach or the other.
 
 ```{r}
 deviant_tolerance_grptraj <- map(
@@ -359,7 +359,7 @@ The purpose of the second strategy is to answer *specific* questions about the b
 - What is the observed variability in initial status and annual rate of change?
 - What is the relationship between initial status and annual rate of change?
 
-For this strategy, Singer and Willet (2003) suggest examining the estimated intercepts and slopes from the fitted linear models with the following three summary statistics:
+For this strategy, Singer and Willett (2003) suggest examining the estimated intercepts and slopes from the fitted linear models with the following three summary statistics:
 
 1. The sample **mean**, which summarizes the average initial status (intercept) and annual rate of change (slope) across the sample.
 2. The sample **variance** or **standard deviation**, which summarize the amount of observed interindividual heterogeneity in initial status and annual rate of change.
@@ -396,7 +396,7 @@ The purpose of the final strategy is to answer questions about *systematic inter
 - Does the observed (average) initial status and (average) annual rate of change differ across the levels or values of any time-invariant predictors?
 - Is there a relationship between initial status or annual rate of change and any time-invariant predictors?
 
-For this strategy, Singer and Willet (2003) suggest using two approaches:
+For this strategy, Singer and Willett (2003) suggest using two approaches:
 
 1. Plotting (smoothed) individual growth trajectories, displayed separately for groups distinguished by important values of time-invariant predictors. For categorical predictors, each level of the predictor can be used. For continuous predictors, the values can be temporarily categorized for the purpose of display.
 2. Conducting exploratory analyses of the relationship between change and time-invariant predictors, investigating whether the estimated intercepts and slopes of the individual change trajectory models vary systematically with different predictors.
@@ -436,7 +436,7 @@ deviant_tolerance_grptraj_by <- map(
 wrap_plots(deviant_tolerance_grptraj_by, ncol = 1, guides = "collect")
 ```
 
-When examining plots like these, Singer and Willet (2003) recommend recommend looking for systematic patterns in the trajectories to answer questions like:
+When examining plots like these, Singer and Willett (2003) recommend recommend looking for systematic patterns in the trajectories to answer questions like:
 
 - Do the observed trajectories differ across groups?
 - Do observed differences appear more in the intercepts or in the slopes?

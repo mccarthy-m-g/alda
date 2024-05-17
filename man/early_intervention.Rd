@@ -31,7 +31,7 @@ performance in a sample of African-American children at ages 12, 18, and 24
 months.
 }
 \note{
-At the request of the researchers, Singer and Willet (2003) did not provide
+At the request of the researchers, Singer and Willett (2003) did not provide
 the data from Burchinal, Campbell, Bryant, Wasik, and Ramey's (1997) in order
 to ensure the privacy of the study's participants. However, the data provided
 here has been simulated to have similar statistical properties to their study
