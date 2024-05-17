@@ -2,14 +2,12 @@
 title: "Chapter 6: Modeling Discontinuous and Nonlinear Change"
 ---
 
-::: {.alert .alert-warning}
-This chapter is under construction.
-:::
-
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE
 )
 ggplot2::theme_set(ggplot2::theme_bw())
 ggplot2::theme_update(
@@ -23,26 +21,68 @@ library(alda)
 library(dplyr)
 library(tidyr)
 library(purrr)
+library(stringr)
 library(ggplot2)
 library(scales)
+library(nlme)
 library(lme4)
+library(broom.mixed)
+library(modelbased)
+library(modelsummary)
+library(gt)
 ```
 
 ## 6.1 Discontinuous Individual Change
 
-Table 6.1, page 192:
+In Section 6.1, Singer and Willett (2003) discuss strategies for fitting **discontinuous individual change trajectories** using a subset of data from the National Longitudinal Study of Youth tracking the labour market experiences of male high school dropouts (Murnane, Boudett, & Willett, 1999).
+
+For this example we return to the `dropout_wages` data set introduced in Chapter 5, a person-period data frame with 6402 rows and 9 columns:
+
+- `id`: Participant ID.
+- `log_wages`: Natural logarithm of wages.
+- `experience`: Labour force experience in years, tracked from dropouts' first day of work.
+- `ged`: Binary indicator for whether the dropout obtained a GED.
+- `postsecondary_education`: Binary indicator for whether the dropout obtained post-secondary education.
+- `black`: Binary indicator for whether the dropout is black.
+- `hispanic`: Binary indicator for whether the dropout is hispanic.
+- `highest_grade`: Highest grade completed.
+- `unemployment_rate`: Unemployment rate in the local geographic area.
 
 ```{r}
-dropout_wages |>
-  filter(id %in% c(206,2365,4384)) |>
-  select(id, log_wages, experience, ged, postsecondary_education) |>
-  mutate(ged_x_experience = ged * experience)
+dropout_wages
 ```
 
-Table 6.2, page 203:
+As we demonstrated in Section 5.3, the inclusion of one (or more) time-varying predictor(s) in your level-1 individual growth model can be used to model discontinuous individual change trajectories. As Singer and Willett (2003) discuss, the `dropout_wages` data contains several time-varying predictors that can be used to model different forms of discontinuous change. We can see the behaviour of each of these predictors by examining the data from a subset of individuals:
+
+- `ged`: An immediate shift in elevation, but no shift in slope.
+- `postsecondary_education`: An immediate shift in slope, but no shift in elevation.
+- `ged_x_experience`: Immediate shifts in both elevation and slope.
 
 ```{r}
-wages_fit_A <- lmer(
+# Table 6.1, page 192:
+dropout_wages |>
+  filter(id %in% c(206, 2365, 4384)) |>
+  select(id, log_wages, experience, ged, postsecondary_education) |>
+  mutate(ged_x_experience = ged * experience) |>
+  print(n = 22)
+```
+
+Here we will fit ten models to the `dropout_wages` data:
+
+- Model A: A baseline model.
+- Model B: A model that adds a discontinuity in elevation, but not slope, by including fixed and random effects for `ged`.
+- Model C: A model that excludes the variance/covariance components associated with `ged` in Model B.
+- Model D: A model that adds a discontinuity in slope, but not elevation, by including fixed and random effects for `postsecondary_education`.
+- Model E: A model that excludes the variance/covariance components associated with `postsecondary_education` in Model D.
+- Model F: A model that adds a discontinuity in elevation and slope by including fixed and random effects for `ged` and `postsecondary_education`.
+- Model G: A model that excludes the variance/covariance components associated with `postsecondary_education` in Model F.
+- Model H: A model that excludes the variance/covariance components associated with `ged` in Model F.
+- Model I: A model that adds a discontinuity in elevation and slope by including fixed and random effects for `ged` and the interaction between `ged` and `experience`.
+- Model J: A model that excludes the variance/covariance components associated with the interaction between `ged` and `experience` in Model I.
+
+```{r}
+# Fit models ------------------------------------------------------------------
+dropout_wages_fit_A <- lmer(
   log_wages ~
     experience +
     I(highest_grade - 9) +
@@ -53,330 +93,926 @@ wages_fit_A <- lmer(
   REML = FALSE
 )
 
-deviance(wages_fit_A)
-
-wages_fit_B <- update(
-  wages_fit_A,
+dropout_wages_fit_B <- update(
+  dropout_wages_fit_A,
   . ~ . - (1 + experience | id) + ged + (1 + experience + ged | id),
   control = lmerControl(optimizer = "bobyqa")
 )
 
-deviance(wages_fit_B)
-
-wages_fit_C <- update(
-  wages_fit_A,
+dropout_wages_fit_C <- update(
+  dropout_wages_fit_A,
   . ~ . + ged,
   control = lmerControl(optimizer = "bobyqa")
 )
 
-deviance(wages_fit_C)
-
-wages_fit_D <- update(
-  wages_fit_A,
-  . ~ 
-    . - 
-    (1 + experience | id) + 
-    postsecondary_education + 
-    (1 + experience + postsecondary_education | id),
+dropout_wages_fit_D <- update(
+  dropout_wages_fit_A,
+  . ~ .
+    - (1 + experience | id)
+    + postsecondary_education
+    + (1 + experience + postsecondary_education | id),
   control = lmerControl(optimizer = "bobyqa")
 )
 
-deviance(wages_fit_D)
-
-wages_fit_E <- update(
-  wages_fit_A,
+dropout_wages_fit_E <- update(
+  dropout_wages_fit_A,
   . ~ . + postsecondary_education
 )
 
-deviance(wages_fit_E)
-
-wages_fit_F <- update(
-  wages_fit_A,
-  . ~ 
-    . -
-    (1 + experience | id) + 
-    ged + 
-    postsecondary_education + 
-    (1 + experience + ged + postsecondary_education | id),
+dropout_wages_fit_F <- update(
+  dropout_wages_fit_A,
+  . ~ .
+    - (1 + experience | id)
+    + ged
+    + postsecondary_education
+    + (1 + experience + ged + postsecondary_education | id),
   control = lmerControl(optimizer = "bobyqa")
 )
 
-deviance(wages_fit_F)
-
-wages_fit_G <- update(
-  wages_fit_F,
-  . ~
-    . - 
-    (1 + experience + ged + postsecondary_education | id) +
-    (1 + experience + ged | id)
+dropout_wages_fit_G <- update(
+  dropout_wages_fit_F,
+  . ~ .
+    - (1 + experience + ged + postsecondary_education | id)
+    + (1 + experience + ged | id)
 )
 
-deviance(wages_fit_G)
-
-wages_fit_H <- update(
-  wages_fit_F,
-  . ~
-    . - 
-    (1 + experience + ged + postsecondary_education | id) +
-    (1 + experience + postsecondary_education | id)
+dropout_wages_fit_H <- update(
+  dropout_wages_fit_F,
+  . ~ .
+    - (1 + experience + ged + postsecondary_education | id)
+    + (1 + experience + postsecondary_education | id)
 )
 
-deviance(wages_fit_H)
-
-# FIXME: Singular
-wages_fit_I <- update(
-  wages_fit_A,
-  . ~ 
-    . -
-    (1 + experience | id) +
-    ged +
-    experience:ged +
-    (1 + experience + ged + experience:ged | id)
+dropout_wages_fit_I <- update(
+  dropout_wages_fit_A,
+  . ~ .
+    - (1 + experience | id)
+    + ged
+    + experience:ged
+    + (1 + experience + ged + experience:ged | id)
 )
 
-deviance(wages_fit_I)
-
-wages_fit_J <- update(
-  wages_fit_I,
-  . ~ 
-    . -
-    (1 + experience + ged + experience:ged | id) +
-    (1 + experience + ged | id)
+dropout_wages_fit_J <- update(
+  dropout_wages_fit_I,
+  . ~ .
+    - (1 + experience + ged + experience:ged | id)
+    + (1 + experience + ged | id)
 )
 
-deviance(wages_fit_J)
+dropout_wages_fits <- list(
+  `Model A` = dropout_wages_fit_A,
+  `Model B` = dropout_wages_fit_B,
+  `Model C` = dropout_wages_fit_C,
+  `Model D` = dropout_wages_fit_D,
+  `Model E` = dropout_wages_fit_E,
+  `Model F` = dropout_wages_fit_F,
+  `Model G` = dropout_wages_fit_G,
+  `Model H` = dropout_wages_fit_H,
+  `Model I` = dropout_wages_fit_I,
+  `Model J` = dropout_wages_fit_J
+)
 
-anova(wages_fit_A, wages_fit_B, wages_fit_D)
-anova(wages_fit_B, wages_fit_C, wages_fit_F, wages_fit_I)
-anova(wages_fit_D, wages_fit_E, wages_fit_F)
-anova(wages_fit_F, wages_fit_G, wages_fit_H)
-anova(wages_fit_I, wages_fit_J)
+# Make table ------------------------------------------------------------------
+
+options(modelsummary_get = "all")
+
+dropout_wages_fits |>
+  modelsummary(
+    shape = term + effect + statistic ~ model,
+    scales = c("vcov", NA),
+    coef_map = c(
+      "(Intercept)",
+      "I(highest_grade - 9)",
+      "I(unemployment_rate - 7)",
+      "black",
+      "experience",
+      "experience:I(highest_grade - 9)",
+      "experience:black",
+      "ged",
+      "postsecondary_education",
+      "experience:ged",
+      "var__Observation",
+      "var__(Intercept)",
+      "var__experience",
+      "var__ged",
+      "var__postsecondary_education",
+      "var__experience:ged"
+    ),
+    gof_map = tibble(
+      raw = c("deviance", "AIC", "BIC"),
+      clean = c("Deviance", "AIC", "BIC"),
+      fmt = 1
+    ),
+    output = "gt"
+  ) |>
+  tab_row_group(label = "Goodness-of-Fit", rows = 23:25) |>
+  tab_row_group(label = "Variance Components", rows = 17:22) |>
+  tab_row_group(label = "Fixed Effects", rows = 1:16) |>
+  cols_hide(effect)
 ```
 
-Table 6.3, page 205:
+We can visualize the different forms of discontinuous change hypothesized by these models by plotting the fitted change trajectory for a single prototypical individual.
 
 ```{r}
-summary(wages_fit_F)
+prototypical_dropout_wages <- dropout_wages_fits |>
+  keep_at(paste0("Model ", c("B", "D", "F", "I"))) |>
+  map(
+    \(.fit) {
+      
+      prototypical_dropout <- tibble(
+        experience = c(0, 3, 3, 10),
+        ged = c(0, 0, 1, 1),
+        postsecondary_education = c(0, 0, 0, 7),
+        highest_grade = 9,
+        black = 1,
+        unemployment_rate = 7,
+        cid = c(1, 1, 2, 2)
+      )
+      
+      prototypical_dropout |>
+        mutate(log_wages = predict(.fit, prototypical_dropout, re.form = NA))
+        
+    }
+  ) |>
+  list_rbind(names_to = "model")
+
+# Similar to Figure 6.2:
+ggplot(prototypical_dropout_wages, aes(x = experience, y = log_wages)) +
+  geom_line(aes(group = cid)) +
+  geom_line(aes(group = experience), alpha = .25) +
+  facet_wrap(vars(model))
 ```
 
-Figure 6.3:
+We can select a "final" model from our taxonomy of models by comparing deviance statistics between nested models, and AIC/BIC statistics between non-nested models (in addition to using a combination of logic, theory, and prior research).
 
 ```{r}
-prototypical_dropouts <- tibble(
-  experience = rep(c(0, 3, 3, 12), times = 4),
-  highest_grade = rep(c(9, 12), each = 4, times = 2),
-  black = rep(c(FALSE, TRUE), each = 8),
-  ged = rep(c(0, 0, 1, 1), times = 4),
-  unemployment_rate = 7
-) |>
-  mutate(postsecondary_education = ifelse(ged == 0, 0, experience - 3))
+dropout_wages_anovas <- list(
+  "Model B" = anova(dropout_wages_fit_B, dropout_wages_fit_A),
+  "Model C" = anova(dropout_wages_fit_C, dropout_wages_fit_B),
+  "Model D" = anova(dropout_wages_fit_D, dropout_wages_fit_A),
+  "Model E" = anova(dropout_wages_fit_E, dropout_wages_fit_D),
+  "Model F" = anova(dropout_wages_fit_F, dropout_wages_fit_B),
+  "Model F" = anova(dropout_wages_fit_F, dropout_wages_fit_D),
+  "Model G" = anova(dropout_wages_fit_G, dropout_wages_fit_F),
+  "Model H" = anova(dropout_wages_fit_H, dropout_wages_fit_F),
+  "Model I" = anova(dropout_wages_fit_I, dropout_wages_fit_B),
+  "Model J" = anova(dropout_wages_fit_J, dropout_wages_fit_I)
+)
 
-prototypical_dropout_scores <- tibble(
-  log_wages = predict(
-    wages_fit_F,
-    prototypical_dropouts,
-    re.form = NA
+# Table 6.2, page 203:
+dropout_wages_anovas |>
+  map(tidy) |>
+  list_rbind(names_to = "model") |>
+  select(model, term, npar, deviance, statistic, df, p.value) |>
+  mutate(
+    term = stringr::str_remove(term, "dropout_wages_fit_"),
+    across(c(npar, df), as.integer)
+  ) |>
+  group_by(model) |>
+  gt() |>
+  cols_label(term = "comparison") |>
+  fmt_number(columns = where(is.double), decimals = 2) |>
+  sub_missing(missing_text = "")
+```
+
+Following Singer and Willett (2003), here we choose Model F as our "final" model.
+
+```{r}
+# Table 6.3, page 205:
+dropout_wages_fit_F |>
+  list() |>
+  set_names("Estimate") |>
+  modelsummary(
+    shape = term + effect + statistic ~ model,
+    scales = c("vcov", NA),
+    coef_map = c(
+      "(Intercept)",
+      "I(highest_grade - 9)",
+      "I(unemployment_rate - 7)",
+      "experience",
+      "experience:black",
+      "ged",
+      "postsecondary_education",
+      "var__Observation",
+      "var__(Intercept)",
+      "var__experience",
+      "var__ged",
+      "var__postsecondary_education"
+    ),
+    gof_map = tibble(
+      raw = c("deviance", "AIC", "BIC"),
+      clean = c("Deviance", "AIC", "BIC"),
+      fmt = 1
+    ),
+    output = "gt"
+  ) |>
+  tab_row_group(label = "Goodness-of-Fit", rows = 20:22) |>
+  tab_row_group(label = "Variance Components", rows = 15:19) |>
+  tab_row_group(label = "Fixed Effects", rows = 1:14) |>
+  cols_hide(effect)
+```
+
+Finally, we can plot prototypical change trajectories for the model. Note the additional information captured by these discontinuous trajectories compared to the continuous trajectories for the `dropout_wages` data presented in Chapter 5 (Figure 5.2).
+
+```{r}
+prototypical_dropout_wages_F <- dropout_wages_fit_F |>
+  estimate_prediction(
+    data = tibble(
+      experience = rep(c(0, 3, 3, 10), times = 4),
+      highest_grade = rep(c(9, 12), each = 4, times = 2),
+      black = rep(c(FALSE, TRUE), each = 8),
+      ged = rep(c(0, 0, 1, 1), times = 4),
+      unemployment_rate = 7,
+      postsecondary_education = rep(c(0, 0, 0, 7), times = 4)
+    )
+  ) |>
+  rename(log_wages = Predicted) |>
+  mutate(
+    highest_grade = factor(highest_grade),
+    black = as.logical(black),
+    cid = consecutive_id(ged)
   )
-)
 
-prototypical_dropouts |>
-  bind_cols(prototypical_dropout_scores) |>
-  ggplot(aes(x = experience, y = log_wages, colour = as.logical(black))) +
-    geom_line() +
-    scale_x_continuous(breaks = seq(0, 10, by = 2)) +
-    coord_cartesian(xlim = c(0, 10), ylim = c(1.6, 2.4)) +
-    facet_wrap(vars(highest_grade))
+# Figure 6.3:
+ggplot(prototypical_dropout_wages_F, aes(x = experience, y = log_wages)) +
+  geom_line(aes(group = cid, colour = black)) +
+  geom_line(
+    aes(group = interaction(experience, black), colour = black),
+    alpha = .25
+  ) +
+  scale_x_continuous(breaks = seq(0, 10, by = 2)) +
+  scale_color_brewer(palette = "Dark2") +
+  coord_cartesian(xlim = c(0, 10), ylim = c(1.6, 2.4)) +
+  facet_wrap(vars(highest_grade), labeller = label_both)
 ```
 
 ## 6.2 Using Transformations to Model Nonlinear Individual Change
 
-Figure 6.4, page 209:
+In Section 6.2, Singer and Willett (2003) discuss strategies for transforming outcome and time-indicator variables to model **nonlinear individual change trajectories** using a subset of data from Curran, Stice, and Chassin (1997), who measured the relation between changes in alcohol use and changes in peer alcohol use over a 3-year period in a community-based sample of Hispanic and Caucasian adolescents.
+
+For this example we return to the `alcohol_use_1` data set introduced in Chapter 4, a person-period data frame with 246 rows and 6 columns:
+
+- `id`: Adolescent ID.
+- `age`: Age in years at time of measurement.
+- `child_of_alcoholic`: Binary indicator for whether the adolescent is a child of an alcoholic parent.
+- `male`: Binary indicator for whether the adolescent is a male.
+- `alcohol_use`: Square root of the summed scores of four eight-point items measuring frequency of alcohol use.
+- `peer_alcohol_use`: Square root of the summed scores of two six-point items measuring frequency of peer alcohol use.
 
 ```{r}
-alcohol_fit <- lmer(
-  alcohol_use ~ 
+alcohol_use_1
+```
+
+Note that the outcome variable, `alcohol_use`, uses a square root metric---meaning that a **square root transformation** was previously applied to the raw scores. To return the `alcohol_use` scores to their original metric, we can **back-transform** them by applying the inverse of the transformation. In this case, by squaring the square root transformed values.
+
+```{r}
+alcohol_use_1 <- alcohol_use_1 |>
+  mutate(alcohol_use_raw = alcohol_use^2, .before = alcohol_use) |>
+  rename(alcohol_use_sqrt = alcohol_use)
+
+alcohol_use_1
+```
+
+The difference between the original and transformed metrics is best seen by examining empirical growth plots for a random subset of individuals.
+
+Notice that in the original metric---despite only having three measurement occasions---the individual change trajectories for participants 13, 20, 22, and 45 appear obviously nonlinear.
+
+```{r}
+alcohol_use_1_empgrowth <- map(
+  list(original = "alcohol_use_raw", sqrt = "alcohol_use_sqrt"),
+  \(.y) {
+    set.seed(333)
+    alcohol_use_1 |>
+      filter(id %in% sample(id, size = 8)) |>
+      ggplot(aes(x = age, y = .data[[.y]])) +
+        geom_point() +
+        coord_cartesian(xlim = c(13, 17), ylim = c(-1, 15)) +
+        facet_wrap(vars(id), ncol = 4, labeller = label_both)
+  }
+)
+
+alcohol_use_1_empgrowth$original
+```
+
+However, in the square root metric these same trajectories become more obviously linear.
+
+```{r}
+alcohol_use_1_empgrowth$sqrt
+```
+
+As Singer and Willett (2003) discuss, the ability to transform the outcome variable (or time-indicator variables) so that individual change becomes linear suggests a simple strategy for modelling nonlinear change:
+
+1. Transform the outcome variable (or time-indicator variables) so that individual change becomes linear.
+2. Fit the multilevel model for change in the transformed metric.
+3. Back-transform estimates and predictions to present findings in the original metric.
+
+We return to Model E from Chapter 4 to demonstrate this strategy. As we did in Chapter 4, we begin by fitting the multilevel model for change in the transformed metric.
+
+```{r}
+alcohol_use_1_fit <- lmer(
+  alcohol_use_sqrt ~ 
     I(age - 14) * peer_alcohol_use + child_of_alcoholic + (1 + I(age - 14) | id),
   data = alcohol_use_1,
   REML = FALSE
 )
 
-prototypical_alcohol_users <- tibble(
-  age = rep(seq(14, 16, by = .25), times = 4),
-  child_of_alcoholic = rep(c(0, 1), each = 9, times = 2),
-  peer_alcohol_use = rep(c(.655, 1.381), each = 18)
-)
-
-prototypical_alcohol_use <- tibble(
-  alcohol_use = predict(
-    alcohol_fit,
-    prototypical_alcohol_users,
-    re.form = NA
-  )
-)
-
-prototypical_alcohol_users |>
-  bind_cols(prototypical_alcohol_use) |>
-  mutate(alcohol_use = alcohol_use^2) |>
-  ggplot(aes(x = age, y = alcohol_use, colour = factor(peer_alcohol_use))) +
-    geom_line() +
-    facet_wrap(vars(child_of_alcoholic)) +
-    coord_cartesian(xlim = c(13, 17), ylim = c(0, 3))
-
+summary(alcohol_use_1_fit)
 ```
 
-Figure 6.6, page 212:
+However, instead of plotting prototypical change trajectories in the transformed metric, we now back-transform to present them in their original metric. Note the similarities and differences between by these nonlinear trajectories compared to the linear trajectories for the `alcohol_use_1` data presented in Chapter 4 (Figure 4.3).
 
 ```{r}
- ggplot(berkeley, aes(x = age, y = iq)) +
-  geom_point(data = \(.x) mutate(.x, group = "1: untransformed")) +
-  geom_point(data = \(.x) mutate(.x, iq = iq^(2.3), group = "2: iq^(2.3)")) +
-  geom_point(data = \(.x) mutate(.x, age = age^(1/2.3), group = "3: age^(1/2.3)")) +
-  facet_wrap(vars(group), scales = "free")
-```
-
-## 6.3 Representing Individual Change Using a Polynomial Function of TIME
-
-Figure 6.7, page 218:
-
-```{r}
-# Polynomial formulas for plotting:
-linear <- formula(y ~ x)
-quadratic <- formula(y ~ x + I(x^2))
-cubic <- formula(y ~ x + I(x^2) + I(x^3))
-quartic <- formula(y ~ x + I(x^2) + I(x^3) + I(x^4))
-
-# We need to pmap() over geoms to get facets with unique subsets of data and
-# smooths since there's no aesthetic mappings for geom_smooth() formulas.
-participant_params <- list(
-  list(1, 6, 11, 25, 34, 36, 40, 26),
-  LETTERS[1:8],
-  list(quadratic, quadratic, linear, linear, cubic, quartic, cubic, quartic)
-)
-
-ggplot(mapping = aes(x = grade, y = externalizing_behaviour)) +
-  {
-    pmap(
-      participant_params,
-      \(.x, .y, .z) {
-        # Subset data to a given id and add a case variable for faceting.
-        participant_data <- externalizing_behaviour |>
-          filter(id == .x) |>
-          mutate(participant = .y)
-        
-        # Rather than adding the geoms together with + they need to be returned
-        # as a list of geoms to be added to the plot from within pmap().
-        list(
-          geom_point(data = participant_data),
-          geom_smooth(
-            data = participant_data,
-            method = "lm", formula = quartic, se = FALSE,
-            linewidth = .25, linetype = 2
-          ),
-          geom_smooth(
-            data = participant_data,
-            method = "lm", formula = .z, se = FALSE, linewidth = .5
-          )
-        )
-      }
+prototypical_alcohol_use <- alcohol_use_1_fit |>
+  estimate_prediction(
+    data = crossing(
+        age = seq(14, 16, by = .25),
+        child_of_alcoholic = 0:1,
+        peer_alcohol_use = c(0.655, 1.381)
     )
-  } +
-  scale_x_continuous(breaks = 0:7) +
-  coord_cartesian(xlim = c(0, 7)) +
-  facet_wrap(vars(participant), nrow = 2)
+  ) |>
+  rename(alcohol_use = Predicted) |>
+  mutate(
+    alcohol_use = alcohol_use^2,
+    child_of_alcoholic = factor(child_of_alcoholic),
+    peer_alcohol_use = factor(peer_alcohol_use, labels = c("low", "high"))
+  )
+
+# Figure 6.4, page 209:
+ggplot(prototypical_alcohol_use, aes(x = age, y = alcohol_use)) +
+  geom_line(aes(linetype = child_of_alcoholic, colour = peer_alcohol_use)) +
+  scale_color_viridis_d(option = "G", begin = .4, end = .7) +
+  scale_x_continuous(breaks = 13:17) +
+  coord_cartesian(xlim = c(13, 17), ylim = c(0, 3))
 ```
 
-Table 6.5, page 221:
+### Selecting a suitable transformation
+
+Singer and Willet (2003) suggest examining empirical growth plots for each participant (or a random subset) with several different transformations before selecting one for analysis, keeping in mind that:
+
+- In order to analyze the data, the same transformation must be used for the entire sample.
+- Different transformations may be more or less successful for different participants.
+- The transformation selected for analysis should work well for most of the sample, but some compromise is expected.
+
+We illustrate this process using the `berkeley` data set, which contains a subset of data from the Berkeley Growth Study measuring changes in IQ of a single girl followed from childhood into older adulthood (Bayley, 1935).
 
 ```{r}
-behaviour_fit_A <- lmer(
+berkeley
+```
+
+Following Singer and Willett (2003), here we try transforming both the outcome and time-indicator variable to see which is most successful in removing nonlinearity. Note that although the two transformations in this example are simply inversions of each other (raising `iq` to the *power* of 2.3, and taking the 2.3th *root* of `age`), they do not produce identical reductions in nonlinearity.
+
+```{r}
+berkeley_transforms <- list("original", "iq^(2.3)", "age^(1/2.3)") |>
+  set_names() |>
+  map(
+  \(.transform) {
+      mutate(
+        berkeley,
+        transform = .transform,
+        age = if_else(transform == "age^(1/2.3)", age^(1/2.3), age),
+        iq = if_else(transform == "iq^(2.3)", iq^(2.3), iq)
+      )
+    }
+  ) |>
+  list_rbind(names_to = "metric") |>
+  mutate(metric = factor(metric, levels = unique(metric)))
+
+# Figure 6.6, page 212:
+ggplot(berkeley_transforms, aes(x = age, y = iq)) +
+  geom_point() +
+  facet_wrap(vars(metric), scales = "free", labeller = label_both)
+```
+
+## 6.3 Representing individual change using a polynomial function of `time`
+
+In Section 6.3, Singer and Willett (2003) discuss strategies for fitting **polynomial individual change trajectories** using a subset of data from Keiley, Bates, Dodge, and Pettit (2000), who measured changes in externalizing behaviour in a sample of 45 children tracked from first through sixth grade.
+
+For this example we use the `externalizing_behaviour` data set, a person-period data frame with 270 rows and 5 columns:
+
+- `id`: Child ID.
+- `time`: Time of measurement.
+- `externalizing_behaviour`: Sum of scores on Achenbach's (1991) Child Behavior Checklist. Scores range from 0 to 68
+- `female`: Binary indicator for whether the adolescent is a female.
+- `grade`: Grade year.
+
+```{r}
+externalizing_behaviour
+```
+
+Singer and Willett (2003) recommend using two approaches for selecting among competing polynomial forms for the level-1 individual growth model:
+
+- Examining empirical growth plots to identify the highest order polynomial change trajectory suggested by the data.
+- Comparing goodness-of-fit statistics across a series of polynomial level-1 models.
+
+### Using a polynomial trajectory to summarize each person’s empirical growth record
+
+We begin by examining empirical growth plots for a subset of children whose trajectories span the wide array of individual change patterns in the `externalizing_behaviour` data.
+
+Unlike previous examples, here we (1) match the order of IDs in the input vector to the order of `id`s in the resultant data frame using the `map()` function from the **purrr** package to filter the data in a specific order; then (2) assign each participant in the subset a consecutive alphabetical identifier using the `consecutive_id()` function from the **dplyr** package.
+
+```{r}
+# Note that participant 26 is last in the input vector and resultant data frame.
+externalizing_behaviour_subset <- c(1, 6, 11, 25, 34, 36, 40, 26) |>
+  map(\(.id) filter(externalizing_behaviour, id == .id)) |>
+  list_rbind() |>
+  mutate(child = LETTERS[consecutive_id(id)])
+
+tail(externalizing_behaviour_subset, n = 12)
+```
+
+Now we can examine empirical growth plots for the `externalizing_behaviour_subset` data. 
+
+```{r}
+externalizing_behaviour_empgrowth <- externalizing_behaviour_subset |>
+  ggplot(aes(x = grade, y = externalizing_behaviour)) +
+    geom_point() +
+    scale_x_continuous(breaks = 0:7) +
+    coord_cartesian(xlim = c(0, 7), ylim = c(0, 60)) +
+    facet_wrap(vars(child), ncol = 4, labeller = label_both)
+
+externalizing_behaviour_empgrowth
+```
+
+When faced with this many different individual change patterns, Singer and Willett (2003) suggest beginning with the following exploratory approach:
+
+1. First, identify the highest order polynomial needed to summarize change for *each* participant by fitting separate **person-specific polynomial trajectories**.
+2. Second, identify the highest order polynomial needed to summarize change for *any* participant by fitting a **common polynomial trajectory** across all participants.
+
+Similar to previous examples, the `geom_smooth()` function with the `"lm"` method can be used to add each person’s fitted polynomial trajectory to the empirical growth record plot---all we need to do is specify the functional form of the trajectories with the `formula` argument. There are two ways to specify polynomial trajectories using R's formula syntax:
+
+- `I()`: The `I()` function can be used to construct a series of polynomial predictors by hand.
+- `poly()`: The `poly()` function can be used to construct a series of (by default, orthogonal) polynomial predictors from degree 1 up to a specified `degree`.
+
+We begin with the person-specific polynomial trajectories. Note that because there are no aesthetic mappings for `geom_smooth()` formulas that can be used to specify the degree of each child's polynomial trajectory, we instead need to add a separate smooth geom to the empirical growth plots for each child's data.
+
+```{r}
+externalizing_behaviour_empgrowth <- externalizing_behaviour_empgrowth +
+  map2(
+    group_split(externalizing_behaviour_subset, child),
+    list(2, 2, 1, 1, 3, 4, 2, 4),
+    \(.child, .degree) {
+      geom_smooth(
+        aes(linetype = polynomial, colour = degree),
+        data = mutate(
+          .child,
+          polynomial = factor("person-specific"),
+          degree = factor(.degree, levels = 1:4)
+        ),
+        method = "lm",
+        formula = y ~ poly(x, degree = .degree),
+        se = FALSE
+      )
+    }
+  ) +
+  scale_colour_brewer(palette = "Dark2", drop = FALSE) +
+  guides(linetype = guide_legend(override.aes = list(colour = "black")))
+
+externalizing_behaviour_empgrowth
+```
+
+Next the common polynomial trajectories. Following Singer and Willett (2003), here we select a quartic (degree 4) trajectory because no child appears to need a higher order polynomial. 
+
+```{r}
+# Figure 6.7, page 218:
+externalizing_behaviour_empgrowth +
+  geom_smooth(
+    aes(linetype = "common (quartic)"),
+    method = "lm",
+    formula = y ~ poly(x, degree = 4),
+    se = FALSE,
+    colour = "black",
+    linewidth = .5
+  )
+```
+
+### Testing Higher Order Terms in a Polynomial Level-1 Model
+
+To select a "final" polynomial trajectory, Singer and Willett (2003) suggest fitting a series of level-1 individual growth models of increasing polynomial complexity, stopping when goodness-of-fit statistics suggest there is no need to add further polynomial predictors to the model. 
+
+Here we will fit four models to the `externalizing_behaviour` data: an unconditional means model (Model A), an unconditional growth model (Model B), and two models of increasing polynomial order (Models C and D). Note that we set the `raw` argument of the `poly()` function to `TRUE` in order to use raw, not orthogonal, polynomials.
+
+```{r}
+# Fit models ------------------------------------------------------------------
+externalizing_behaviour_fit_A <- lmer(
   externalizing_behaviour ~ 1 + (1 | id),
   data = externalizing_behaviour,
   REML = FALSE
 )
 
-summary(behaviour_fit_A)
-
-behaviour_fit_B <- lmer(
-  externalizing_behaviour ~ time + (1 + time | id),
-  data = externalizing_behaviour,
-  REML = FALSE
+externalizing_behaviour_poly_fits <- map(
+  set_names(1:3),
+  \(.degree) {
+    lmer(
+      externalizing_behaviour ~ poly(time, .degree, raw = TRUE)
+        + (poly(time, .degree, raw = TRUE) | id),
+      data = externalizing_behaviour,
+      REML = FALSE
+    )
+  }
 )
 
-summary(behaviour_fit_B)
-
-behaviour_fit_C <- lmer(
-  externalizing_behaviour ~
-    poly(time, 2, raw = TRUE) + (1 + poly(time, 2, raw = TRUE) | id),
-  data = externalizing_behaviour,
-  REML = FALSE
+externalizing_behaviour_fits <- list(
+  "Model A" = externalizing_behaviour_fit_A,
+  "Model B" = externalizing_behaviour_poly_fits[["1"]],
+  "Model C" = externalizing_behaviour_poly_fits[["2"]],
+  "Model D" = externalizing_behaviour_poly_fits[["3"]]
 )
 
-summary(behaviour_fit_C)
+# Make table ------------------------------------------------------------------
 
-# Singular
-behaviour_fit_D <- lmer(
-  externalizing_behaviour ~
-    poly(time, 3, raw = TRUE) + (1 + poly(time, 3, raw = TRUE) | id),
-  data = externalizing_behaviour,
-  REML = FALSE
-)
+# Table 6.5, page 221:
+externalizing_behaviour_fits |>
+  modelsummary(
+    shape = term + effect + statistic ~ model,
+    statistic = NULL,
+    scales = c("vcov", NA),
+    coef_map = c(
+      "(Intercept)" = "(Intercept)",
+      "poly(time, .degree, raw = TRUE)" = "time",
+      "poly(time, .degree, raw = TRUE)1" = "time",
+      "poly(time, .degree, raw = TRUE)2" = "time^2",
+      "poly(time, .degree, raw = TRUE)3" = "time^3",
+      "var__Observation" = "var__Observation",
+      "var__(Intercept)" = "var__(Intercept)",
+      "var__poly(time, .degree, raw = TRUE)" = "var__time",
+      "var__poly(time, .degree, raw = TRUE)1" = "var__time",
+      "cov__(Intercept).poly(time, .degree, raw = TRUE)" =
+        "cov__(Intercept).time",
+      "cov__(Intercept).poly(time, .degree, raw = TRUE)1" =
+        "cov__(Intercept).time",
+      "var__poly(time, .degree, raw = TRUE)2" = "var__time^2",
+      "cov__(Intercept).poly(time, .degree, raw = TRUE)2" =
+        "cov__(Intercept).time^2",
+      "cov__poly(time, .degree, raw = TRUE)1.poly(time, .degree, raw = TRUE)2" =
+        "cov__time.time^2",
+      "var__poly(time, .degree, raw = TRUE)3" = "var__time^3",
+      "cov__(Intercept).poly(time, .degree, raw = TRUE)3" =
+        "cov__(Intercept).time^3",
+      "cov__poly(time, .degree, raw = TRUE)1.poly(time, .degree, raw = TRUE)3" =
+        "cov__time.time^3",
+      "cov__poly(time, .degree, raw = TRUE)2.poly(time, .degree, raw = TRUE)3" =
+        "cov__time^2.time^3"
+    ),
+    gof_map = tibble(
+      raw = c("deviance", "AIC", "BIC"),
+      clean = c("Deviance", "AIC", "BIC"),
+      fmt = 1
+    ),
+    output = "gt"
+  ) |>
+  tab_row_group(label = "Goodness-of-Fit", rows = 16:18) |>
+  tab_row_group(label = "Variance Components", rows = 5:15) |>
+  tab_row_group(label = "Fixed Effects", rows = 1:4) |>
+  cols_hide(effect)
+```
 
-summary(behaviour_fit_D)
+As usual, we can inspect analysis of deviance tables to compare the nested models.
+
+```{r}
+externalizing_behaviour_fits |>
+  with(do.call(anova, map(names(externalizing_behaviour_fits), as.name))) |>
+  tidy()
 ```
 
 ## 6.4 Truly Nonlinear Trajectories
 
-Figure 6.8, page 227:
+In Section 6.4, Singer and Willett (2003) discuss strategies for fitting **truly nonlinear change trajectories** using data from Tivnan (1980), who measured changes in cognitive growth over a three-week period in a sample of 17 first and second-graders. Childrens' cognitive growth was based on improvement in the number of moves completed in a two-person checkerboard game, Fox n' Geese, before making a catastrophic error.
+
+For this example we use the `cognitive_growth` data set, a person-period data frame with 445 rows and 4 columns:
+
+- `id`: Child ID.
+- `game`: Game number. Each child played up to a maximum of 27 games.
+- `nmoves`: The number of moves completed before making a catastrophic error.
+- `reading_score`: Score on an unnamed standardized reading test.
 
 ```{r}
-cognitive_growth |>
-  filter(id %in% c(1, 4, 6, 7, 8, 11, 12, 15)) |>
-  ggplot(aes(x = game, y = nmoves)) +
-  geom_point() +
-  coord_cartesian(xlim = c(0, 30), ylim = c(0, 25)) +
-  facet_wrap(vars(id), ncol = 4, labeller = label_both)
+cognitive_growth
 ```
 
-Help wanted for Table 6.6, page 231, see: <https://github.com/mccarthy-m-g/alda/issues/3>
-
-<!--
-$$
-\begin{alignat}{3}
-&\text{Level 1:}& \qquad
-  Y_{ij} &= 1 + \frac{19}{1 + \Pi_{0i} e^{-(\Pi_{1i} t_{ij})}} + \epsilon_{ij} \\
-  
-&\text{Level 2:} \\\\
-&\qquad\text{(A)}&
-  \Pi_{0i} &= \gamma_{00} + \zeta_{0i} \\&&
-  \Pi_{1i} &= \gamma_{10} + \zeta_{1i} \\\\
-
-&\qquad\text{(B)}&
-  \Pi_{0i} &= \gamma_{00} + \gamma_{01}(\mathrm{READ}_i - \overline{\mathrm{READ}}) +
-              \zeta_{0i} \\&&
-  \Pi_{1i} &= \gamma_{10} + \gamma_{11}(\mathrm{READ}_i - \overline{\mathrm{READ}}) + 
-              \zeta_{1i}
-\end{alignat}
-$$
--->
-
-<!--
-Table 6.6, page 231 with formulas used in website examples models: <https://stats.oarc.ucla.edu/sas/examples/alda/chapter6/applied-longitudinal-data-analysis-modeling-change-and-event-occurrenceby-judith-d-singer-and-john-b-willett-chapter-6-modeling-discontinuous-and-nonlinear-c/>. Note: These seem to be the models that were actually used in the table, but I don't understand how these were attained given the equations in the textbook.
-
-$$
-\begin{alignat}{3}
-&\text{Model A:}& \qquad
-  Y_{ij} &= 1 + \frac{19}{1 + \gamma_{00} * e^{-(\gamma_{10} + u_1) t + u_0}} +
-            \epsilon_{ij} \\\\
-
-&\text{Model B:}& \qquad
-  Y_{ij} &= 1 + \frac{19}{1 + \gamma_{00} * e^{-((\gamma_{10} + u_1) t +
-            \gamma_{01}x + \gamma_{11}xt + u_0)}} + \epsilon_{ij}
-\end{alignat}
-$$
--->
-
-Figure 6.10, page 232:
+To inform specification of the nonlinear multilevel model for change we will fit in this example, we begin by examining empirical growth plots for a subset of children in the `cognitive_growth` data.
 
 ```{r}
-# TODO after resolving the equations and code for Models A and B.
+# Figure 6.8, page 227:
+cognitive_growth_empgrowth <- cognitive_growth |>
+  filter(id %in% c(1, 4, 6, 7, 8, 11, 12, 15)) |>
+  ggplot(aes(x = game, y = nmoves)) +
+    geom_point() +
+    coord_cartesian(xlim = c(0, 30), ylim = c(0, 25)) +
+    facet_wrap(vars(id), ncol = 4, labeller = label_both)
+
+cognitive_growth_empgrowth
+```
+
+As Singer and Willett (2003) discuss, knowledge of the Fox n' Geese game and inspection of these plots suggests a (generalized) **logistic trajectory** for the level-1 individual growth model consisting of three features:
+
+- **A fixed lower asymptote**: Each child's trajectory rises from a fixed lower asymptote of 1 because all players must make at least one move.
+- **A fixed upper asymptote**: Each child's trajectory approaches an upper asymptote because they can only make a finite number of moves before making a catastrophic error. Based on examining empirical growth plots, a fixed upper asymptote of 20 appears reasonable.
+- **A smooth curve joining the lower and upper asymptotes**: Learning theory suggests that each child's true trajectory will smoothly traverse the region between the lower and upper asymptotes---accelerating away from the lower asymptote as the child initially deduces the winning strategy, and decelerating toward the upper asymptote as the child finds it increasingly difficult to refine the winning strategy further.
+
+We write this level-1 logistic trajectory as:
+
+$$
+\text{nmoves}_{ij} = a_{1}
+  + \frac{(a_{2} - a_{1})}{1 + \pi_{0i} e^{-(\pi_{1i} \text{game}_{ij})}}
+  + \epsilon_{ij},
+$$
+
+which asserts that $\text{nmoves}_{ij}$---the true value of `nmoves` for the $i$th child at the $j$th game---is a nonlinear function of the logistic growth parameters $\pi_{0i}$ and $\pi_{1i}$. Here the parameters $a_{1}$ and $a_{2}$ represent the lower and upper asymptotes, which we will fix to values of 1 and 20, respectively.
+
+To develop an intuition for how this level-1 logistic trajectory models the relationship between `nmoves` and `game`, we can plot **true trajectories** for different children using specific combinations of values for the nonlinear parameters, $\pi_{0i}$ and $\pi_{1i}$. We can do this by first writing a function with `deriv()` representing the level-1 logistic trajectory (note that we will also use this function when fitting the nonlinear multilevel model for change).
+
+```{r}
+logistic_function <- deriv(
+  ~ 1 + (19.0 / (1.0 + pi0 * exp(-pi1 * time))),
+  namevec = c("pi0", "pi1"),
+  function.arg = c("time", "pi0", "pi1")
+)
+```
+
+Then using the `geom_function()` geom to plot true trajectories for different combinations of the nonlinear parameters.
+
+```{r}
+# Figure 6.9:
+ggplot() +
+  pmap(
+    arrange_all(crossing(.pi0 = c(150, 15, 1.5), .pi1 = c(.5, .3, .1)), desc),
+    \(.pi0, .pi1) {
+      geom_function(
+        aes(colour = pi1),
+        data = tibble(pi0 = factor(.pi0), pi1 = factor(.pi1)),
+        fun = \(.game) {
+          logistic_function(.game, pi0 = .pi0, pi1 = .pi1)
+        },
+        n = 30
+      )
+    }
+  ) +
+  scale_x_continuous(limits = c(0, 30)) +
+  scale_color_brewer(palette = "Dark2") +
+  coord_cartesian(ylim = c(0, 25)) +
+  facet_wrap(vars(pi0), labeller = label_both) +
+  labs(
+    x = "game",
+    y = "nmoves"
+  )
+```
+
+Here we will fit two models to the `cognitive_growth` data using our postulated level-1 logistic trajectory: An unconditional logistic growth model (Model A); and a logistic growth model that includes a time-invariant predictor for children's reading skill, `reading_score`, centred on its sample mean of 1.95625 (Model B).
+
+Following Singer and Willet (2003), we specify the level-2 submodels for the nonlinear parameters of Models A and B as:
+
+$$
+\begin{align}
+\text{Model A:} \qquad
+  \pi_{0i} &= \gamma_{00} + \zeta_{0i} \\
+  \pi_{1i} &= \gamma_{10} + \zeta_{1i} \\
+\\
+\text{Model B:} \qquad
+  \pi_{0i} &= \gamma_{00}
+    + \gamma_{01}(\text{reading_score}_i
+    - \overline{\text{reading_score}})
+    + \zeta_{0i} \\
+  \pi_{1i} &= \gamma_{10}
+    + \gamma_{11}(\text{reading_score}_i
+    - \overline{\text{reading_score}})
+    + \zeta_{1i}
+\end{align}
+$$
+
+where
+
+$$
+\begin{bmatrix}
+\zeta_{0i} \\ \zeta_{1i}
+\end{bmatrix}
+\sim
+\begin{pmatrix}
+N
+\begin{bmatrix}
+0 \\ 0
+\end{bmatrix},
+\begin{bmatrix}
+\sigma^2_0 & \ \sigma_{10} \\ \ \sigma_{10} & \sigma^2_1
+\end{bmatrix}
+\end{pmatrix}.
+$$
+
+We can fit these logistic growth models using the `nlme()` function from the **nlme** package. The model formula for the `nlme()` function takes the form `response ~ nonlinear_formula`, where the nonlinear formula can either be represented *using a function* or *written directly*. For this example we will use the `logistic_function()` created above. There are several important differences between linear and nonlinear models to keep in mind when fitting these models:
+
+- The nonlinear parameters must be declared explicitly in the nonlinear formula. For the `nlme()` function, linear models for these parameters are specified in the `fixed` and `random` arguments; if multiple parameters share the same model they can be written as a single formula instead of a list of single parameter formulas.
+- Starting estimates for the parameters must be provided, unless a self-starting function is used to calculate the initial parameter estimates; the final estimates can also be quite sensitive to the starting values. For this example, we chose starting estimates close to the parameter estimates reported in the text (Table 6.6). Strategies for choosing reasonable starting estimates are covered in Bates and Watts (1988), and Pinheiro and Bates (2000).
+- An intercept is not assumed by default, and must be included in the nonlinear model formula if desired.
+
+Note that although the models fit below match those described in the textbook equations, these models are not exactly the same as the those Singer and Willett (2003) secretly fit for Table 6.6 and Figure 6.10 (for discussion, see <https://github.com/mccarthy-m-g/alda/issues/3>).
+
+<!--
+Note also that because Singer and Willett (2003) fit these models using SAS, it does not seem seem possible to get results that match the textbook exactly---even when the models are specified in the same way, nlme gives different estimates (although they're similar enough).
+
+```{sas, eval=FALSE}
+title1 "Table 6.6, page 231:";
+proc import datafile="/home/u63840851/nlme/cognitive_growth.csv"
+  out=cognitive_growth
+  dbms=csv
+  replace;
+  getnames=yes;
+run;
+ 
+proc nlmixed data=cognitive_growth maxiter=1000;
+  title2 "Model A";
+  parms G00=12 G10=.1 s2e=20 s2u0=.3 cu10=0 s2u1=.01;
+  pi0 = G00 + u0;
+  pi1 = G10 + u1;
+  num = 19;
+  den = 1 + pi0*(exp(-(pi1*game)));
+  model nmoves ~ normal(1+num/den,s2e);
+  random u0 u1 ~ normal([0,0],[s2u0,cu10,s2u1]) subject=id;
+  
+  p = 1 + num/(1  + G00*exp(-(G10*game)));
+  predict p out=model_a;
+run;
+
+proc nlmixed data=cognitive_growth maxiter=1000;
+  title2 "Model B";
+  parms G00=12 G01=-.4 G10=.12 G11=.04 s2e=14 s2u0=.5 s2u1=.01 cu10=0;
+  
+  pi0 = G00 + G01*(reading_score-1.95625) + u0;
+  pi1 = G10 + G11*(reading_score-1.95625) + u1;
+  num = 19;
+  den = 1 + pi0*(exp(-(pi1*game)));
+  model nmoves ~ normal(1+num/den,s2e);
+  random u0 u1 ~ normal([0,0],[s2u0,cu10,s2u1]) subject=id;
+  
+  plow = 1 + num/(1 + (G00 + G01*1)*exp(-(G10*GAME + G11*GAME*1)));
+  phigh = 1 + num/(1 + (G00 + G01*4)*exp(-(G10*GAME + G11*GAME*4)));
+  predict plow  out=model_b_low;
+  predict phigh  out=model_b_high;
+run;
+
+/* plots */
+proc sort data = model_a;
+  by game;
+run;
+
+title "Model A";
+proc sgplot data = model_a;
+  xaxis min=0 max=30;
+  yaxis min=0 max=25;
+  series x=game y=pred;
+run;
+
+data model_b;
+  merge model_b_low (keep=id game pred rename = (pred=plow))
+        model_b_high (keep=id game pred rename = (pred=phigh));
+  by id;
+run;
+
+proc sort data = model_b;
+  by game;
+run;
+
+title "Model B";
+proc sgplot data = model_b noautolegend;
+  xaxis min=0 max=30;
+  yaxis min=0 max=25;
+  series x=game y=plow;
+  series x=game y=phigh;
+run;
+```
+-->
+
+```{r}
+# Fit models ------------------------------------------------------------------
+cognitive_growth_fit_A <- nlme(
+  nmoves ~ logistic_function(game, pi0, pi1),
+  fixed = pi0 + pi1 ~ 1,
+  random = pi0 + pi1 ~ 1,
+  groups = ~ id,
+  start = list(fixed = c(pi0 = 13, pi0 = .12)),
+  data = cognitive_growth
+)
+
+cognitive_growth_fit_B <- update(
+  cognitive_growth_fit_A,
+  fixed = pi0 + pi1 ~ 1 + I(reading_score - 1.95625),
+  start = list(fixed = c(13, -.4, .12, .04))
+)
+
+cognitive_growth_fits <- list(
+  "Model A" = cognitive_growth_fit_A,
+  "Model B" = cognitive_growth_fit_B
+)
+
+# Make table ------------------------------------------------------------------
+
+# broom.mixed and easystats don't have methods to extract random effects from
+# objects of class nlme, so we have to construct this part of the table manually.
+cognitive_growth_fits_ranef <- cognitive_growth_fits |>
+  map(
+    \(.fit) {
+      .fit |>
+        VarCorr() |>
+        as.data.frame(order = "cov.last") |>
+        mutate(
+          across(
+            c(var1, var2),
+            \(.x)
+            if_else(str_ends(.x, "[:digit:]"), paste0(.x, ".(Intercept)"), .x)
+          ),
+          effect = "random",
+          var1 = case_when(
+            grp == "Residual" ~  "sd__Observation",
+            grp == "id" & is.na(var2) ~ paste0("sd__", var1),
+            grp == "id" & !is.na(var2) ~ paste0("cor__pi0", var1, ".", var2)
+          )
+        ) |>
+        arrange(grp) |>
+        select(term = var1, estimate = sdcor) 
+    }
+  ) |>
+  list_rbind(names_to = "model") |>
+  pivot_wider(names_from = model, values_from = estimate) |>
+  structure(position = 5:8)
+
+# Table 6.6, page 231:
+cognitive_growth_fits |>
+  modelsummary(
+    statistic = NULL,
+    coef_map = c(
+      "pi0" = "pi0.(Intercept)",
+      "pi0.(Intercept)" = "pi0.(Intercept)",
+      "pi0.I(reading_score - 1.95625)" = "pi0.I(reading_score - 1.95625)",
+      "pi1" = "pi1.(Intercept)",
+      "pi1.(Intercept)" = "pi1.(Intercept)",
+      "pi1.I(reading_score - 1.95625)" = "pi1.I(reading_score - 1.95625)"
+    ),
+    gof_map = tibble(
+      raw = c("deviance", "AIC", "BIC"),
+      clean = c("Deviance", "AIC", "BIC"),
+      fmt = 1
+    ),
+    add_rows = cognitive_growth_fits_ranef,
+    output = "gt"
+  ) |>
+  tab_row_group(label = "Goodness-of-Fit", rows = 9:11) |>
+  tab_row_group(label = "Variance Components", rows = 5:8) |>
+  tab_row_group(label = "Fixed Effects", rows = 1:4)
+```
+
+We can plot both individual and prototypical change trajectories as usual. First the prototypical trajectories.
+
+```{r}
+prototypical_cognitive_growth <- cognitive_growth_fits |>
+  map2(
+    list(
+      tibble(game = seq(from = 0, to = 30, by = 0.1)),
+      crossing(game = seq(from = 0, to = 30, by = 0.1), reading_score = c(1, 4))
+    ),
+    \(.fit, .df) {
+      .df |>
+        mutate(nmoves = predict(.fit, newdata = .df, level = 0))
+    }
+  ) |>
+  list_rbind(names_to = "model") |>
+  mutate(reading_score = factor(reading_score, labels = c("low", "high")))
+
+# Similar to Figure 6.10, page 232:
+ggplot(prototypical_cognitive_growth, aes(x = game, y = nmoves)) +
+  geom_line(aes(colour = reading_score)) +
+  scale_color_viridis_d(
+    option = "G", begin = .4, end = .7, na.value = "black"
+  ) +
+  coord_cartesian(ylim = c(0, 25)) +
+  facet_wrap(vars(model))
+```
+
+Finally, the individual trajectories. We can plot all the trajectories together to get a sense of interindividual variation.
+
+```{r}
+cognitive_growth_fits |>
+  map(\(.fit) augment(.fit, data = cognitive_growth)) |>
+  list_rbind(names_to = "model") |>
+  select(-nmoves) |>
+  rename(nmoves = .fitted) |>
+  mutate(reading_score = if_else(model == "Model A", NA, reading_score)) |>
+  ggplot(aes(x = game, y = nmoves)) +
+    geom_line(aes(group = id, colour = reading_score)) +
+    scale_colour_viridis_b(
+      option = "G", begin = .4, end = .8, na.value = "black"
+    ) +
+    coord_cartesian(ylim = c(0, 25)) +
+    facet_wrap(vars(model))
+```
+
+Or we can add each child’s fitted trajectory to their empirical growth plot to get a sense of how well the model fits the data. 
+
+```{r}
+cognitive_growth_empgrowth +
+  geom_line(
+    aes(y = .fitted, group = id, colour = reading_score),
+    data = filter(
+      augment(cognitive_growth_fit_B, data = cognitive_growth),
+      id %in% c(1, 4, 6, 7, 8, 11, 12, 15)
+    )
+  ) +
+  scale_colour_viridis_b(breaks = 1:4, option = "G", begin = .4, end = .8)
 ```
