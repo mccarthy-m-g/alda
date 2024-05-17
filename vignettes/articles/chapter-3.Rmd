@@ -166,7 +166,7 @@ summary(early_intervention_fit_1)
 
 We can visualize the differences between complete pooling, no pooling, and partial pooling by adding the fitted trajectory from each model to the empirical growth plots of a random sample of children in the `early_intervention` data.
 
-To do so, we'll first use the `augment()` function from the **broom** and **broom.mixed** packages to get the predicted values for each child's fitted trajectory from the complete pooling, no pooling, and partial pooling models. Note that `augment()` is a generic function, whose methods for linear and multilevel models are available in the broom broom.mixed packages, respectively.
+To do so, we'll first use the `augment()` function from the **broom** and **broom.mixed** packages to get the predicted values for each child's fitted trajectory from the complete pooling, no pooling, and partial pooling models. Note that `augment()` is a generic function, whose methods for linear and multilevel models are available in the broom and broom.mixed packages, respectively.
 
 ```{r}
 # Because the complete pooling model does not have a group indicator for
