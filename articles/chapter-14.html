@@ -117,8 +117,9 @@
 <span><span class="co">#&gt;     filter, lag</span></span>
 <span><span class="co">#&gt; The following objects are masked from 'package:base':</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span></span>
@@ -129,7 +130,7 @@
 <h2 id="toward-a-statistical-model-for-continuous-time-hazard">14.1 Toward a Statistical Model for Continuous-Time Hazard<a class="anchor" aria-label="anchor" href="#toward-a-statistical-model-for-continuous-time-hazard"></a>
 </h2>
 <p>Figure 14.1, page 505:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Fit survival models</span></span>
 <span><span class="va">rearrest_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/survfit.html" class="external-link">survfit</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">months</span>, <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">censor</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">rearrest</span></span>
@@ -188,8 +189,9 @@
 <span>  <span class="op">}</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning in muhaz(survival_time, event, min.time = min(survival_time[1 - : minimum time &gt; minimum Survival Time</span></span>
-<span><span class="co">#&gt; Warning in muhaz(survival_time, event, min.time = min(survival_time[1 - : minimum time &gt; minimum Survival Time</span></span>
-<span></span>
+<span><span class="co">#&gt; Warning in muhaz(survival_time, event, min.time = min(survival_time[1 - : minimum time &gt; minimum Survival Time</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="co"># Combine estimates</span></span>
 <span><span class="va">estimates_tidy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map2.html" class="external-link">map2</a></span><span class="op">(</span></span>
 <span>  <span class="va">survival_models_tidy</span>, <span class="va">kernel_smoothed_hazards_tidy</span>,</span>
@@ -206,10 +208,10 @@
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">estimates_tidy</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span>, y <span class="op">=</span> <span class="va">estimate</span>, linetype <span class="op">=</span> <span class="va">person_crime</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_step</a></span><span class="op">(</span>data <span class="op">=</span> \<span class="op">(</span><span class="va">.x</span><span class="op">)</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">.x</span>, <span class="va">statistic</span> <span class="op">!=</span> <span class="st">"hazard"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> \<span class="op">(</span><span class="va">.x</span><span class="op">)</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">.x</span>, <span class="va">statistic</span> <span class="op">==</span> <span class="st">"hazard"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">statistic</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">1</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">statistic</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">1</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="chapter-14_files/figure-html/unnamed-chunk-2-1.png" width="700"></p>
 <p>Figure 14.2, page 508:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Top plot</span></span>
 <span><span class="va">log_cumulative_hazards</span> <span class="op">&lt;-</span> <span class="va">estimates_tidy</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">statistic</span> <span class="op">==</span> <span class="st">"cumulative_hazard"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -223,7 +225,7 @@
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_step</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_cartesian.html" class="external-link">coord_cartesian</a></span><span class="op">(</span>xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">30</span><span class="op">)</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">6</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="chapter-14_files/figure-html/unnamed-chunk-3-1.png" width="700"></p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Middle and bottom plots ----</span></span>
 <span><span class="va">rearrest_fit_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/coxph.html" class="external-link">coxph</a></span><span class="op">(</span></span>
@@ -263,7 +265,7 @@
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>breaks <span class="op">=</span> <span class="op">-</span><span class="fl">6</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_cartesian.html" class="external-link">coord_cartesian</a></span><span class="op">(</span>xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">30</span><span class="op">)</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">6</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="chapter-14_files/figure-html/unnamed-chunk-3-2.png" width="700"></p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Bottom plot</span></span>
 <span><span class="va">rearrest_fit_2</span> <span class="op">|&gt;</span></span>
@@ -290,7 +292,7 @@
 Data<a class="anchor" aria-label="anchor" href="#interpreting-the-results-of-fitting-the-cox-regression-model-to-data"></a>
 </h2>
 <p>Table 14.1, page 525:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># TODO: Make table</span></span>
 <span><span class="va">model_A</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/coxph.html" class="external-link">coxph</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">months</span>, <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">censor</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">~</span> <span class="va">person_crime</span>, data <span class="op">=</span> <span class="va">rearrest</span><span class="op">)</span></span>
 <span></span>
@@ -303,7 +305,7 @@ Data<a class="anchor" aria-label="anchor" href="#interpreting-the-results-of-fit
 <span>  data <span class="op">=</span> <span class="va">rearrest</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Table 14.2, page 533:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># TODO</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -311,7 +313,7 @@ Data<a class="anchor" aria-label="anchor" href="#interpreting-the-results-of-fit
 Fitting<a class="anchor" aria-label="anchor" href="#nonparametric-strategies-for-displaying-the-results-of-model-fitting"></a>
 </h2>
 <p>Figure 14.4, page 538:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://purrr.tidyverse.org/reference/pmap.html" class="external-link">pmap</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>baseline <span class="op">=</span> <span class="fl">0</span>, average <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">rearrest</span><span class="op">$</span><span class="va">person_crime</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -383,7 +385,7 @@ Fitting<a class="anchor" aria-label="anchor" href="#nonparametric-strategies-for
 <span><span class="co">#&gt; Warning: Removed 6 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">#&gt; (`geom_point()`).</span></span></code></pre></div>
 <p><img src="chapter-14_files/figure-html/unnamed-chunk-6-1.png" width="700"></p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co">#TODO: Not sure if muhaz can deal with this situation with newdata, not sure if the</span></span>
 <span><span class="co"># estimates can be modified after fitting to get the desired values</span></span>
@@ -397,8 +399,9 @@ Fitting<a class="anchor" aria-label="anchor" href="#nonparametric-strategies-for
 <span>  b.cor <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  kern <span class="op">=</span> <span class="st">"epanechnikov"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in muhaz(rearrest$months, 1 - rearrest$censor, min.time = min(rearrest$months[rearrest$censor == : minimum time &gt; minimum Survival Time</span></span>
-<span><span class="va">hazard_fit</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in muhaz(rearrest$months, 1 - rearrest$censor, min.time = min(rearrest$months[rearrest$censor == : minimum time &gt; minimum Survival Time</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">hazard_fit</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; List of 7</span></span>
 <span><span class="co">#&gt;  $ pin      :List of 13</span></span>
 <span><span class="co">#&gt;   ..$ times      : num [1:194] 0.0657 0.1314 0.23 0.2957 0.2957 ...</span></span>
@@ -422,7 +425,7 @@ Fitting<a class="anchor" aria-label="anchor" href="#nonparametric-strategies-for
 <span><span class="co">#&gt;  $ bw.grid  : num 8</span></span>
 <span><span class="co">#&gt;  - attr(*, "class")= chr "muhaz"</span></span></code></pre></div>
 <p>Figure 14.5, page 541:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">prototypical_individuals</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map_dfr.html" class="external-link">map2_df</a></span><span class="op">(</span></span>
 <span>  <span class="co"># .person_crime</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>neither <span class="op">=</span> <span class="fl">0</span>, personal_only <span class="op">=</span> <span class="fl">1</span>, property_only <span class="op">=</span> <span class="fl">0</span>, both <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>

@@ -117,8 +117,9 @@
 <span><span class="co">#&gt;     filter, lag</span></span>
 <span><span class="co">#&gt; The following objects are masked from 'package:base':</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://broom.tidymodels.org/" class="external-link">broom</a></span><span class="op">)</span></span></code></pre></div>
@@ -126,7 +127,7 @@
 <h2 id="the-life-table">10.1 The Life Table<a class="anchor" aria-label="anchor" href="#the-life-table"></a>
 </h2>
 <p>Table 10.1, page 327:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># A life table is the tabular form of a survival curve, so begin by fitting a</span></span>
 <span><span class="co"># Kaplan-Meir curve to the data.</span></span>
 <span><span class="va">teachers_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/survfit.html" class="external-link">survfit</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="fl">1</span> <span class="op">-</span> <span class="va">censor</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">teachers</span><span class="op">)</span></span>
@@ -170,7 +171,7 @@
 Discrete-Time Event Occurrence Data<a class="anchor" aria-label="anchor" href="#a-framework-for-characterizing-the-distribution-of-discrete-time-event-occurrence-data"></a>
 </h2>
 <p>Figure 10.1, page 333:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">table_10.1</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">year</span>, y <span class="op">=</span> <span class="va">haz.estimate</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span>breaks <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">13</span>, limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">13</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -179,7 +180,7 @@ Discrete-Time Event Occurrence Data<a class="anchor" aria-label="anchor" href="#
 <span><span class="co">#&gt; Warning: Removed 1 row containing missing values or values outside the scale range</span></span>
 <span><span class="co">#&gt; (`geom_line()`).</span></span></code></pre></div>
 <p><img src="chapter-10_files/figure-html/unnamed-chunk-3-1.png" width="700"></p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># First interpolate median lifetime</span></span>
 <span><span class="va">median_lifetime</span> <span class="op">&lt;-</span> <span class="va">table_10.1</span> <span class="op">|&gt;</span></span>
@@ -220,7 +221,7 @@ Discrete-Time Event Occurrence Data<a class="anchor" aria-label="anchor" href="#
 Functions, and Median Lifetimes<a class="anchor" aria-label="anchor" href="#developing-intuition-about-hazard-functions-survivor-functions-and-median-lifetimes"></a>
 </h2>
 <p>Figure 10.2, page 340:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">relapse_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/survfit.html" class="external-link">survfit</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">weeks</span>, <span class="fl">1</span> <span class="op">-</span> <span class="va">censor</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">cocaine_relapse_1</span><span class="op">)</span></span>
 <span><span class="va">relapse_tidy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">relapse_fit</span><span class="op">)</span></span>
 <span><span class="va">relapse_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">relapse_fit</span><span class="op">)</span></span></code></pre></div>
@@ -229,7 +230,7 @@ Functions, and Median Lifetimes<a class="anchor" aria-label="anchor" href="#deve
 <h2 id="quantifying-the-effects-of-sampling-variation">10.4 Quantifying the Effects of Sampling Variation<a class="anchor" aria-label="anchor" href="#quantifying-the-effects-of-sampling-variation"></a>
 </h2>
 <p>Table 10.2, page 349:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">teachers_fit</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Call: survfit(formula = Surv(years, 1 - censor) ~ 1, data = teachers)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -245,8 +246,9 @@ Functions, and Median Lifetimes<a class="anchor" aria-label="anchor" href="#deve
 <span><span class="co">#&gt;     9   1256      53    0.445 0.00811        0.429        0.461</span></span>
 <span><span class="co">#&gt;    10    948      35    0.428 0.00827        0.412        0.445</span></span>
 <span><span class="co">#&gt;    11    648      16    0.418 0.00848        0.401        0.435</span></span>
-<span><span class="co">#&gt;    12    391       5    0.412 0.00870        0.396        0.430</span></span>
-<span></span>
+<span><span class="co">#&gt;    12    391       5    0.412 0.00870        0.396        0.430</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="va">teachers_fit</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
@@ -294,15 +296,16 @@ Functions, and Median Lifetimes<a class="anchor" aria-label="anchor" href="#deve
 Table<a class="anchor" aria-label="anchor" href="#a-simple-and-useful-strategy-for-constructing-the-life-table"></a>
 </h2>
 <p>Figure 10.4, page 353:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">teachers</span>, <span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">126</span>, <span class="fl">129</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 3</span></span></span>
 <span><span class="co">#&gt;   id    years censor</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 20        3      0</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 126      12      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 129      12      1</span></span>
-<span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 129      12      1</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="va">teachers_pp</span> <span class="op">&lt;-</span> <span class="va">teachers</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/reframe.html" class="external-link">reframe</a></span><span class="op">(</span></span>
 <span>    year <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">years</span><span class="op">)</span>,</span>
@@ -344,7 +347,7 @@ Table<a class="anchor" aria-label="anchor" href="#a-simple-and-useful-strategy-f
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">26</span> 129      11     0</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">27</span> 129      12     0</span></span></code></pre></div>
 <p>Table 10.3, page 355:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">teachers_pp</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">year</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">event</span><span class="op">)</span> <span class="op">|&gt;</span></span>

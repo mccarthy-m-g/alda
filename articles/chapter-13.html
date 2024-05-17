@@ -117,8 +117,9 @@
 <span><span class="co">#&gt;     filter, lag</span></span>
 <span><span class="co">#&gt; The following objects are masked from 'package:base':</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://stringr.tidyverse.org" class="external-link">stringr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
@@ -136,7 +137,7 @@ Continuous-Time Event Data<a class="anchor" aria-label="anchor" href="#a-framewo
 Hazard Functions<a class="anchor" aria-label="anchor" href="#grouped-methods-for-estimating-continuous-time-survivor-and-hazard-functions"></a>
 </h2>
 <p>Table 13.2, page 477:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Adding discrete-time intervals</span></span>
 <span><span class="va">honking_discrete</span> <span class="op">&lt;-</span> <span class="va">honking</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
@@ -186,8 +187,9 @@ Hazard Functions<a class="anchor" aria-label="anchor" href="#grouped-methods-for
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> [6,7)                  6        7     4       2        2      9  0.222 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> [7,8)                  7        8     1       1        0      5  0.2   </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> [8,18)                 8       18     4       3        1      4  0.75  </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: survival &lt;dbl&gt;, hazard &lt;dbl&gt;</span></span></span>
-<span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: survival &lt;dbl&gt;, hazard &lt;dbl&gt;</span></span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="co"># Estimates by hand</span></span>
 <span><span class="va">honking_discrete_fit</span> <span class="op">&lt;-</span> <span class="va">honking_grouped</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
@@ -226,7 +228,7 @@ Hazard Functions<a class="anchor" aria-label="anchor" href="#grouped-methods-for
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: conditional_probability &lt;dbl&gt;, discrete.s &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   discrete.h &lt;dbl&gt;, actuarial.s &lt;dbl&gt;, actuarial.h &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>Figure 13.1, page 479:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">honking_discrete_fit</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span></span>
 <span>    cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">discrete.h</span>, <span class="va">discrete.s</span>, <span class="va">actuarial.h</span>, <span class="va">actuarial.s</span><span class="op">)</span>,</span>
@@ -245,7 +247,7 @@ Hazard Functions<a class="anchor" aria-label="anchor" href="#grouped-methods-for
 <span>      direction <span class="op">=</span> <span class="st">"vh"</span></span>
 <span>    <span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">20</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">estimate</span><span class="op">)</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">estimate</span><span class="op">)</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu">ggh4x</span><span class="fu">::</span><span class="fu"><a href="https://teunbrand.github.io/ggh4x/reference/facetted_pos_scales.html" class="external-link">facetted_pos_scales</a></span><span class="op">(</span></span>
 <span>      y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>        <span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">str_detect</a></span><span class="op">(</span><span class="va">estimate</span>, <span class="st">"s$"</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -260,7 +262,7 @@ Hazard Functions<a class="anchor" aria-label="anchor" href="#grouped-methods-for
 Survivor Function<a class="anchor" aria-label="anchor" href="#the-kaplan-meier-method-of-estimating-the-continuous-time-survivor-function"></a>
 </h2>
 <p>Table 13.3, page 484:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">honking_continuous_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/survfit.html" class="external-link">survfit</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">seconds</span>, <span class="fl">1</span> <span class="op">-</span> <span class="va">censor</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">honking</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">honking_continuous_fit_tidy</span> <span class="op">&lt;-</span> <span class="va">honking_continuous_fit</span> <span class="op">|&gt;</span></span>
@@ -304,7 +306,7 @@ Survivor Function<a class="anchor" aria-label="anchor" href="#the-kaplan-meier-m
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: conditional_probability &lt;dbl&gt;, survival &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   std.error &lt;dbl&gt;, width &lt;dbl&gt;, hazard &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>Figure 13.2, page 485:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">honking_continuous_fit_tidy</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://tibble.tidyverse.org/reference/add_row.html" class="external-link">add_row</a></span><span class="op">(</span>time_end <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">1</span>, survival <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="co"># The largest event time was censored, so we extend the last step out to that</span></span>
@@ -332,7 +334,7 @@ Survivor Function<a class="anchor" aria-label="anchor" href="#the-kaplan-meier-m
 <h2 id="the-cumulative-hazard-function">13.4 The Cumulative Hazard Function<a class="anchor" aria-label="anchor" href="#the-cumulative-hazard-function"></a>
 </h2>
 <p>Figure 13.4, page 493:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">honking_continuous_fit_tidy</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>time_end <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="va">time_end</span> <span class="op">==</span> <span class="cn">Inf</span>, <span class="va">time_start</span>, <span class="va">time_end</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time_end</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -352,7 +354,7 @@ Survivor Function<a class="anchor" aria-label="anchor" href="#the-kaplan-meier-m
 <h2 id="kernel-smoothed-estimates-of-the-hazard-function">13.5 Kernel-Smoothed Estimates of the Hazard Function<a class="anchor" aria-label="anchor" href="#kernel-smoothed-estimates-of-the-hazard-function"></a>
 </h2>
 <p>Figure 13.5, page 496:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">kernel_smoothed_hazards</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map_dfr.html" class="external-link">map_df</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rlang.r-lib.org/reference/set_names.html" class="external-link">set_names</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span>,</span>
 <span>  \<span class="op">(</span><span class="va">bandwidth</span><span class="op">)</span> <span class="op">{</span></span>
@@ -377,12 +379,13 @@ Survivor Function<a class="anchor" aria-label="anchor" href="#the-kaplan-meier-m
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning in muhaz(honking$seconds, 1 - honking$censor, min.time = min(honking$seconds[honking$censor == : minimum time &gt; minimum Survival Time</span></span>
 <span><span class="co">#&gt; Warning in muhaz(honking$seconds, 1 - honking$censor, min.time = min(honking$seconds[honking$censor == : minimum time &gt; minimum Survival Time</span></span>
-<span><span class="co">#&gt; Warning in muhaz(honking$seconds, 1 - honking$censor, min.time = min(honking$seconds[honking$censor == : minimum time &gt; minimum Survival Time</span></span>
-<span></span>
+<span><span class="co">#&gt; Warning in muhaz(honking$seconds, 1 - honking$censor, min.time = min(honking$seconds[honking$censor == : minimum time &gt; minimum Survival Time</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">kernel_smoothed_hazards</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span>, y <span class="op">=</span> <span class="va">estimate</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">20</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">bandwidth</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">1</span>, labeller <span class="op">=</span> <span class="va">label_both</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">bandwidth</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">1</span>, labeller <span class="op">=</span> <span class="va">label_both</span><span class="op">)</span></span></code></pre></div>
 <p><img src="chapter-13_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
 </div>
 <div class="section level2">
@@ -390,7 +393,7 @@ Survivor Function<a class="anchor" aria-label="anchor" href="#the-kaplan-meier-m
 Cumulative Hazard, and Kernel-Smoothed Hazard Functions<a class="anchor" aria-label="anchor" href="#developing-an-intuition-about-continuous-time-survivor-cumulative-hazard-and-kernel-smoothed-hazard-functions"></a>
 </h2>
 <p>Figure 13.6, page 499:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># TODO: Check that models are correct, then tidy up code.</span></span>
 <span></span>
 <span><span class="co"># Fit survival models</span></span>
@@ -471,8 +474,9 @@ Cumulative Hazard, and Kernel-Smoothed Hazard Functions<a class="anchor" aria-la
 <span><span class="co">#&gt; Warning in muhaz(survival_time, event, min.time = min(survival_time[1 - : minimum time &gt; minimum Survival Time</span></span>
 <span><span class="co">#&gt; Warning in muhaz(survival_time, event, min.time = min(survival_time[1 - : minimum time &gt; minimum Survival Time</span></span>
 <span><span class="co">#&gt; Warning in muhaz(survival_time, event, min.time = min(survival_time[1 - : minimum time &gt; minimum Survival Time</span></span>
-<span><span class="co">#&gt; Warning in muhaz(survival_time, event, min.time = min(survival_time[1 - : minimum time &gt; minimum Survival Time</span></span>
-<span></span>
+<span><span class="co">#&gt; Warning in muhaz(survival_time, event, min.time = min(survival_time[1 - : minimum time &gt; minimum Survival Time</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="co"># Combine estimates</span></span>
 <span><span class="va">estimates_tidy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map2.html" class="external-link">map2</a></span><span class="op">(</span></span>
 <span>  <span class="va">survival_models_tidy</span>, <span class="va">kernel_smoothed_hazards_tidy</span>,</span>
@@ -490,7 +494,7 @@ Cumulative Hazard, and Kernel-Smoothed Hazard Functions<a class="anchor" aria-la
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">.x</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span>, y <span class="op">=</span> <span class="va">estimate</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_step</a></span><span class="op">(</span>data <span class="op">=</span> \<span class="op">(</span><span class="va">.x</span><span class="op">)</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">.x</span>, <span class="va">statistic</span> <span class="op">!=</span> <span class="st">"hazard"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> \<span class="op">(</span><span class="va">.x</span><span class="op">)</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">.x</span>, <span class="va">statistic</span> <span class="op">==</span> <span class="st">"hazard"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">statistic</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">1</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">statistic</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">1</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="va">.y</span><span class="op">)</span></span>
 <span>  <span class="op">}</span></span>
 <span><span class="op">)</span></span>

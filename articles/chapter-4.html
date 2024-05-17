@@ -171,8 +171,9 @@ adolescent was measured on the same three occasions at ages 14, 15, and
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">measurement_occasions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">alcohol_use_1</span><span class="op">$</span><span class="va">age</span><span class="op">)</span></span>
 <span><span class="va">measurement_occasions</span></span>
-<span><span class="co">#&gt; [1] 14 15 16</span></span>
-<span></span>
+<span><span class="co">#&gt; [1] 14 15 16</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="va">alcohol_use_1</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>all_occasions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">age</span>, <span class="va">measurement_occasions</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -184,7 +185,7 @@ adolescent was measured on the same three occasions at ages 14, 15, and
 time-invariant predictors, we’ll transform the data to person-level
 format with the <code><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html" class="external-link">pivot_wider()</a></code> function from the
 <strong>tidyr</strong> package before summarizing.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">alcohol_use_1_pl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html" class="external-link">pivot_wider</a></span><span class="op">(</span></span>
 <span>  <span class="va">alcohol_use_1</span>,</span>
 <span>  names_from <span class="op">=</span> <span class="va">age</span>,</span>
@@ -211,7 +212,7 @@ format with the <code><a href="https://tidyr.tidyverse.org/reference/pivot_wider
 <p>A total of 42 adolescents (51.2%) were male and 40 female (48.8%),
 and a total of 37 adolescents (45.1%) were children of an alcoholic
 parent and 45 were not (54.9%).</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>male <span class="op">=</span> <span class="st">"male"</span>, child_of_alcoholic <span class="op">=</span> <span class="st">"child_of_alcoholic"</span><span class="op">)</span>,</span>
 <span>  \<span class="op">(</span><span class="va">.x</span><span class="op">)</span> <span class="op">{</span></span>
@@ -236,7 +237,7 @@ parent and 45 were not (54.9%).</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>                  1    37      0.451</span></span></code></pre></div>
 <p>To inform specification of the level-1 submodel, we can look at
 empirical growth plots for a random sample of adolescents as usual.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Figure 4.1, page 77:</span></span>
 <span><span class="va">alcohol_use_1</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">14</span>, <span class="fl">23</span>, <span class="fl">32</span>, <span class="fl">41</span>, <span class="fl">56</span>, <span class="fl">65</span>, <span class="fl">82</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -255,7 +256,7 @@ distinguished by important values of the time-invariant predictors.</p>
 <code>child_of_alcoholic</code> and <code>peer_alcohol_use</code>.
 Because <code>peer_alcohol_use</code> is a continuous variable, we split
 it at the sample mean for the purpose of display.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">alcohol_use_1_pl</span> <span class="op">&lt;-</span> <span class="va">alcohol_use_1_pl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
 <span>    peer_alcohol_use_split <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span></span>
@@ -292,7 +293,7 @@ coincident trajectory summary back to a person-period format.</p>
 <code>linewidth</code> aesthetic for the coincident trajectory counts.
 Note that this plot differs slightly from the text, as unlike Singer and
 Willet (2003) we use the entire sample instead of a random sample.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">alcohol_use_1_cotraj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"child_of_alcoholic"</span>, <span class="st">"peer_alcohol_use_split"</span><span class="op">)</span>,</span>
 <span>  \<span class="op">(</span><span class="va">.x</span><span class="op">)</span> <span class="op">{</span></span>
@@ -457,7 +458,7 @@ within-person deviations, <span class="math inline">\(\epsilon_{ij}\)</span>, fr
 true mean, <span class="math inline">\(\pi_{0i}\)</span>, which in turn
 is composed of their between-person deviation, <span class="math inline">\(\zeta_{0i}\)</span>, from the population average
 true mean, <span class="math inline">\(\gamma_{00}\)</span>.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Table 4.1, Model A, page 94-95:</span></span>
 <span><span class="va">model_A</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lme4/man/lmer.html" class="external-link">lmer</a></span><span class="op">(</span></span>
 <span>  <span class="va">alcohol_use</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">id</span><span class="op">)</span>,</span>
@@ -492,7 +493,7 @@ individual is completely flat over time, sitting at their
 person-specific mean (<span class="math inline">\(\pi_{0i}\)</span>);
 and that the true population change trajectory is also flat, sitting at
 the grand mean (<span class="math inline">\(\gamma_{00}\)</span>).</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model_A</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">alcohol_use_1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">age</span>, y <span class="op">=</span> <span class="va">.fitted</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -532,7 +533,7 @@ change trajectory—a linear function of their true initial status, <span class=
 their between-person deviations, <span class="math inline">\(\zeta_{0i}\)</span> and <span class="math inline">\(\zeta_{1i}\)</span>, from the population average
 true initial status, <span class="math inline">\(\gamma_{00}\)</span>,
 and the population average true rate of change, <span class="math inline">\(\gamma_{10}\)</span>, respectively.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model_B</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lme4/man/lmer.html" class="external-link">lmer</a></span><span class="op">(</span></span>
 <span>  <span class="va">alcohol_use</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="va">age</span> <span class="op">-</span> <span class="fl">14</span><span class="op">)</span> <span class="op">+</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="va">age</span> <span class="op">-</span> <span class="fl">14</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">alcohol_use_1</span>,</span>
@@ -569,7 +570,7 @@ and the population average true rate of change, <span class="math inline">\(\gam
 <p>This is the same model as Chapter 3’s individual growth model—but
 with a new name to emphasize that the model includes no substantive
 predictors—so we can plot the trajectories as usual.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model_B</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">alcohol_use</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -622,7 +623,7 @@ growth model to include <code>child_of_alcoholic</code> as a predictor
 of both initial status and rate of change. Singer and Willet (2003)
 added these terms as a logical first step, given the research
 question.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model_C</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span></span>
 <span>  <span class="va">model_B</span>,</span>
 <span>  <span class="va">.</span> <span class="op">~</span> <span class="va">.</span> <span class="op">+</span> <span class="va">child_of_alcoholic</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="va">age</span> <span class="op">-</span> <span class="fl">14</span><span class="op">)</span><span class="op">:</span><span class="va">child_of_alcoholic</span></span>
@@ -665,7 +666,7 @@ question.</p>
 Singer and Willet (2003) added these terms to see if they might explain
 some of the <strong>conditional residual variation</strong> in initial
 status and rate of change from Model C.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model_D</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span></span>
 <span>  <span class="va">model_C</span>,</span>
 <span>  <span class="va">.</span> <span class="op">~</span> <span class="va">.</span> <span class="op">+</span> <span class="va">peer_alcohol_use</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="va">age</span> <span class="op">-</span> <span class="fl">14</span><span class="op">)</span><span class="op">:</span><span class="va">peer_alcohol_use</span></span>
@@ -714,7 +715,7 @@ term based on the results of Models C and D, which both estimated that
 the difference in the rate of change in <code>alcohol_use</code> between
 children of alchoholic and nonalcoholic parents was practically
 zero.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model_E</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span></span>
 <span>  <span class="va">model_D</span>,</span>
 <span>  <span class="va">.</span> <span class="op">~</span> <span class="va">.</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="va">age</span> <span class="op">-</span> <span class="fl">14</span><span class="op">)</span><span class="op">:</span><span class="va">child_of_alcoholic</span></span>
@@ -764,7 +765,7 @@ non-alchoholic parents with an average value of
 non-alchoholic parents whose peers at age 14 were totally abstinent
 (<code>peer_alcohol_use</code> = 0 and <code>child_of_alcoholic</code> =
 0).</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model_F</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span></span>
 <span>  <span class="va">model_E</span>,</span>
 <span>  data <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">alcohol_use_1</span>, peer_alcohol_use <span class="op">=</span> <span class="va">peer_alcohol_use</span> <span class="op">-</span> <span class="fl">1.018</span><span class="op">)</span></span>
@@ -814,7 +815,7 @@ adolescent with average values of <code>peer_alcohol_use</code> and
 and <code>child_of_alcoholic</code> = 0.451), and be numerically
 identical to the corresponding level-2 intercepts in the unconditional
 growth model.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model_G</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span></span>
 <span>  <span class="va">model_F</span>,</span>
 <span>  data <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
@@ -861,7 +862,7 @@ growth model.</p>
 <span><span class="co">#&gt; I(-14):pr__  0.000  0.001   0.000 -0.431</span></span></code></pre></div>
 <p>To make our taxonomy of statistical models easier to work with in
 subsequent sections, we will store the models in a list.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">alcohol_use_1_fits</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  `Model A` <span class="op">=</span> <span class="va">model_A</span>,</span>
 <span>  `Model B` <span class="op">=</span> <span class="va">model_B</span>,</span>
@@ -880,7 +881,7 @@ one row tibble of model summary and goodness-of-fit statistics using the
 statistics can also be returned using the generic functions of the
 corresponding name (e.g., <code><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC()</a></code>, <code><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">BIC()</a></code>,
 <code><a href="https://rdrr.io/r/stats/deviance.html" class="external-link">deviance()</a></code>, etc.).</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">model_A</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 7</span></span></span>
 <span><span class="co">#&gt;    nobs sigma logLik   AIC   BIC deviance df.residual</span></span>
@@ -894,7 +895,7 @@ y}\)</span>, assesses the proportion of total outcome variation
 “explained” by a model’s specific combination of predictors, based on
 the squared sample correlation between observed and predicted
 values.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">r2_yy</span> <span class="op">&lt;-</span> <span class="va">alcohol_use_1_fits</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span></span>
 <span>    \<span class="op">(</span><span class="va">.fit</span><span class="op">)</span> <span class="op">{</span></span>
@@ -913,7 +914,7 @@ unconditional means model and subsequent models. Note that because the
 only way of reducing this variance component is to add time-varying
 predictors to the level-1 submodel, this statistic is the same for all
 of the models we fit to the <code>alcohol_use_1</code> data.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">r2_e</span> <span class="op">&lt;-</span> <span class="va">alcohol_use_1_fits</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">7</span><span class="op">]</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span></span>
 <span>    \<span class="op">(</span><span class="va">.fit</span><span class="op">)</span> <span class="op">{</span></span>
@@ -930,7 +931,7 @@ between-person variation “explained” by one or more level-2 predictors,
 based on the proportional decrease in level-2 residual variance between
 the unconditional growth model and subsequent models for each level-2
 residual variance component.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">r2_z</span> <span class="op">&lt;-</span> <span class="va">alcohol_use_1_fits</span><span class="op">[</span><span class="fl">3</span><span class="op">:</span><span class="fl">7</span><span class="op">]</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span></span>
 <span>    \<span class="op">(</span><span class="va">.fit</span><span class="op">)</span> <span class="op">{</span></span>
@@ -956,7 +957,7 @@ residual variance component.</p>
 <span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html" class="external-link">list_rbind</a></span><span class="op">(</span>names_to <span class="op">=</span> <span class="st">"model"</span><span class="op">)</span></span></code></pre></div>
 <p>Because we will be adding these statistics to a table in the next
 section, we will join them together here.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">alcohol_use_1_fits_r2</span> <span class="op">&lt;-</span> <span class="va">r2_yy</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span><span class="va">r2_e</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span><span class="va">r2_z</span><span class="op">)</span></span>
@@ -986,7 +987,7 @@ such a table using the <code><a href="https://modelsummary.com/man/modelsummary.
 text, we will set the table <code>output</code> to <code>"gt"</code> so
 we can post-process it using the <strong>gt</strong> package.</p>
 <!-- TODO: Revise code for modelsummary after next CRAN release: https://github.com/vincentarelbundock/modelsummary/issues/757-->
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># This option needs to be set in order to make all the desired goodness-of-fit</span></span>
 <span><span class="co"># statistics available to modelsummary.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>modelsummary_get <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span></span>
@@ -1748,7 +1749,7 @@ predictions, and the <code><a href="https://purrr.tidyverse.org/reference/map2.h
 <strong>purrr</strong> package to iterate over the desired model and
 prototypical value combinations. Here we will look at prototypical
 change trajectories for Models B, C, and E.</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">prototypical_alcohol_use</span> <span class="op">&lt;-</span> <span class="va">alcohol_use_1_fits</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/keep_at.html" class="external-link">keep_at</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Model "</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"B"</span>, <span class="st">"C"</span>, <span class="st">"E"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/map2.html" class="external-link">map2</a></span><span class="op">(</span></span>
@@ -1794,7 +1795,7 @@ predictors are present in some models but not others, we need to supply
 an <code>na.value</code> to each of the <code>scale_()</code> functions
 to ensure a trajectory appears in panels where those predictors are not
 present.</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Figure 4.3, page 99:</span></span>
 <span><span class="va">prototypical_alcohol_use</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">age</span>, y <span class="op">=</span> <span class="va">alcohol_use</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -1838,7 +1839,7 @@ function, which computes analysis of deviance tables for one or more
 fitted models. Unfortunately <code><a href="https://rdrr.io/r/stats/anova.html" class="external-link">anova()</a></code> doesn’t accept a list
 as input, so we have to do some meta-programming to use our list of
 models if we don’t want to type out each model by hand.</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span></span>
 <span>  <span class="va">alcohol_use_1_fits</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>,</span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">anova</span>, <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">alcohol_use_1_fits</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span><span class="op">)</span>, <span class="va">as.name</span><span class="op">)</span><span class="op">)</span></span>
@@ -1901,7 +1902,7 @@ functional form. Empirical growth plots should be examined for
 <em>each</em> individual (or several subsamples of individuals), looking
 for systematic deviations that disconfirm the suitability of the
 hypothesized individual change trajectory.</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">333</span><span class="op">)</span></span>
 <span><span class="va">alcohol_use_1</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span>, size <span class="op">=</span> <span class="fl">16</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -1916,7 +1917,7 @@ plotted against each substantive predictor to confirm the suitability of
 the specified level-2 relationships. For linear models, only continuous
 predictors need to be assessed because categorical predictors are always
 linear.</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">alcohol_use_1_fit_np</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lme4/man/lmList.html" class="external-link">lmList</a></span><span class="op">(</span></span>
 <span>  <span class="va">alcohol_use</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="va">age</span> <span class="op">-</span> <span class="fl">14</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span>,</span>
 <span>  pool <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -1954,7 +1955,7 @@ and also (optionally) with statistical tests of normality. The
 <code><a href="https://easystats.github.io/performance/reference/check_normality.html" class="external-link">check_normality()</a></code> function from the
 <strong>performance</strong> package can perform both of these
 tasks.</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model_F_normality</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rlang.r-lib.org/reference/set_names.html" class="external-link">set_names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fixed"</span>, <span class="st">"random"</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  \<span class="op">(</span><span class="va">.x</span><span class="op">)</span> <span class="fu"><a href="https://easystats.github.io/performance/reference/check_normality.html" class="external-link">check_normality</a></span><span class="op">(</span><span class="va">model_F</span>, effects <span class="op">=</span> <span class="va">.x</span><span class="op">)</span></span>
@@ -1969,7 +1970,7 @@ tasks.</p>
 <span><span class="co">#&gt; Warning: Non-normality for random effects 'id: I(age - 14)' detected (p &lt; .001).</span></span></code></pre></div>
 <p>The <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> method for <code><a href="https://easystats.github.io/performance/reference/check_normality.html" class="external-link">check_normality()</a></code> can
 be used to return Q-Q plots of the level-1 and level-2 residuals.</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Figure 4.5 (left panels), page 131:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">model_F_normality</span><span class="op">$</span><span class="va">fixed</span>, detrend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">model_F_normality</span><span class="op">$</span><span class="va">random</span><span class="op">)</span> <span class="op">+</span></span>
@@ -1979,7 +1980,7 @@ be used to return Q-Q plots of the level-1 and level-2 residuals.</p>
 <p><img src="chapter-4_files/figure-html/unnamed-chunk-31-1.png" width="700"></p>
 <!-- TODO: Decide whether to do right panels
 
-```r
+``` r
 # Fixed effects
 model_F |>
   augment(re.form = NA) |>
@@ -2000,7 +2001,7 @@ level to see if residual variability is approximately equal at
 <em>every</em> predictor value.</p>
 <p>The level-1 residuals should be plotted against the level-1
 predictor.</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Figure 4.6 (top panel), page 133:</span></span>
 <span><span class="va">model_F</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment</a></span><span class="op">(</span>re.form <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -2013,7 +2014,7 @@ predictor.</p>
 <p><img src="chapter-4_files/figure-html/unnamed-chunk-33-1.png" width="700"></p>
 <p>The level-2 residuals should be plotted against the level-2
 predictor(s).</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">alcohol_use_1_ranef</span> <span class="op">&lt;-</span> <span class="va">model_F</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/pkg/nlme/man/random.effects.html" class="external-link">ranef</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -2052,7 +2053,7 @@ multilevel model for change, which <em>does not</em> condition on the
 random effects; and (3) a model-based trajectory estimated from the
 multilevel model for change, which <em>does</em> condition on the random
 effects.</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">alcohol_use_1_np_pred</span> <span class="op">&lt;-</span> <span class="va">alcohol_use_1_fit_np</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">augment</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html" class="external-link">list_rbind</a></span><span class="op">(</span>names_to <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -2093,7 +2094,7 @@ effects.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> no_pooling 32       14        1.73   1.75 </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 62 more rows</span></span></span></code></pre></div>
 <p>Now we can plot the three trajectories.</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Figure 4.7:</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">alcohol_use_1_preds</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">age</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">alcohol_use</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>

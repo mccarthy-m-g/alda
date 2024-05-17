@@ -117,15 +117,16 @@
 <span><span class="co">#&gt;     filter, lag</span></span>
 <span><span class="co">#&gt; The following objects are masked from 'package:base':</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/glmmTMB/glmmTMB" class="external-link">glmmTMB</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="the-standard-specification-of-the-multilevel-model-for-change">7.1 The “Standard” Specification of the Multilevel Model for
 Change<a class="anchor" aria-label="anchor" href="#the-standard-specification-of-the-multilevel-model-for-change"></a>
 </h2>
 <p>Table 7.1:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">opposites_naming</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">time</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html" class="external-link">pivot_wider</a></span><span class="op">(</span></span>
@@ -149,7 +150,7 @@ Change<a class="anchor" aria-label="anchor" href="#the-standard-specification-of
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 9       138   156   197   200                      104</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 10      216   252   274   298                       96</span></span></code></pre></div>
 <p>Table 7.2, page 246:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mucog</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">opposites_naming</span><span class="op">$</span><span class="va">baseline_cognitive_score</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">opposites_fit_A</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
@@ -203,7 +204,7 @@ Error Covariance Matrix<a class="anchor" aria-label="anchor" href="#using-the-co
 </h2>
 <p>Table 7.3, page 258-259:</p>
 <p>Table 7.4, page 265:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">opposites_fit_A</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
 <span><span class="co">#&gt; Formula:          opposites_naming_score ~ time * I(baseline_cognitive_score -  </span></span>
@@ -236,8 +237,9 @@ Error Covariance Matrix<a class="anchor" aria-label="anchor" href="#using-the-co
 <span><span class="co">#&gt; I(baseline_cognitive_score - mucog)         </span></span>
 <span><span class="co">#&gt; time:I(baseline_cognitive_score - mucog) ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
-<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
-<span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="co"># Toeplitz</span></span>
 <span><span class="va">opposites_fit_B</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span></span>
 <span>  <span class="va">opposites_fit_A</span>,</span>
@@ -275,8 +277,9 @@ Error Covariance Matrix<a class="anchor" aria-label="anchor" href="#using-the-co
 <span><span class="co">#&gt; I(baseline_cognitive_score - mucog)      ***</span></span>
 <span><span class="co">#&gt; time:I(baseline_cognitive_score - mucog) ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
-<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
-<span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="co"># Unstructured</span></span>
 <span><span class="va">opposites_fit_C</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span></span>
 <span>  <span class="va">opposites_fit_A</span>,</span>

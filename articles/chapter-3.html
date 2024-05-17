@@ -171,8 +171,9 @@ design</strong>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">measurement_occasions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">early_intervention</span><span class="op">$</span><span class="va">age</span><span class="op">)</span></span>
 <span><span class="va">measurement_occasions</span></span>
-<span><span class="co">#&gt; [1] 1.0 1.5 2.0</span></span>
-<span></span>
+<span><span class="co">#&gt; [1] 1.0 1.5 2.0</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="va">early_intervention</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>all_occasions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">age</span>, <span class="va">measurement_occasions</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -184,7 +185,7 @@ variable. Because we’re summarizing a time-invariant predictor, we’ll
 transform the data to person-level format with the
 <code><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html" class="external-link">pivot_wider()</a></code> function from the <strong>tidyr</strong>
 package before summarizing.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">early_intervention_pl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html" class="external-link">pivot_wider</a></span><span class="op">(</span></span>
 <span>  <span class="va">early_intervention</span>,</span>
 <span>  names_from <span class="op">=</span> <span class="va">age</span>,</span>
@@ -210,7 +211,7 @@ package before summarizing.</p>
 <p>A total of 58 children (56.3%) were assigned to participate in the
 early educational intervention, with the remaining 45 children (43.7%)
 participating in the control group.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">early_intervention_pl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">treatment</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>count <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -250,7 +251,7 @@ preceding level-1 submodel specification with visual inspection of
 empirical growth plots in order to select the most <em>parsimonious</em>
 functional form that the observed data could reasonably have come
 from.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">567</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Figure 3.1, page 50:</span></span>
@@ -319,7 +320,7 @@ definition, a complete pooling model ignores variation between
 individuals, making it unsuitable for analyzing individual change over
 time. This corresponds to the average trajectory in the group trajectory
 plot from Section 2.3.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">early_intervention_fit_cp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span></span>
 <span>  <span class="va">cognitive_score</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="va">age</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">early_intervention</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -333,7 +334,7 @@ interindividual differences in initial status and rate of change look
 more different than they actually are. This corresponds to the
 individual trajectories in the group trajectory plot from Section
 2.3.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">early_intervention_fit_np</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lme4/man/lmList.html" class="external-link">lmList</a></span><span class="op">(</span></span>
 <span>  <span class="va">cognitive_score</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="va">age</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span>,</span>
 <span>  pool <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -360,7 +361,7 @@ used by Singer and Willett (2003) in this chapter, we also set the
 <code>REML</code> argument to <code>FALSE</code> so the model is fit
 using <em>full</em> maximum likelihood (FML) estimation rather than
 <em>restricted</em> maximum likelihood (REML).</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">early_intervention_fit_1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lme4/man/lmer.html" class="external-link">lmer</a></span><span class="op">(</span></span>
 <span>  <span class="va">cognitive_score</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="va">age</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="va">age</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">early_intervention</span>,</span>
@@ -403,9 +404,9 @@ the <strong>broom</strong> and <strong>broom.mixed</strong> packages to
 get the predicted values for each child’s fitted trajectory from the
 complete pooling, no pooling, and partial pooling models. Note that
 <code><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment()</a></code> is a generic function, whose methods for linear
-and multilevel models are available in the broom broom.mixed packages,
-respectively.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+and multilevel models are available in the broom and broom.mixed
+packages, respectively.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Because the complete pooling model does not have a group indicator for</span></span>
 <span><span class="co"># individuals, we need to manually add the IDs to the predicted values.</span></span>
 <span><span class="va">early_intervention_pred_cp</span> <span class="op">&lt;-</span> <span class="va">early_intervention_fit_cp</span> <span class="op">|&gt;</span></span>
@@ -426,8 +427,9 @@ respectively.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>            80.4          1      93.0 -<span style="color: #BB0000;">12.6</span>  0.008<span style="text-decoration: underline;">09</span>   13.8 3.42<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span>     -<span style="color: #BB0000;">0.916</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>           103.           0     110.   -<span style="color: #BB0000;">6.77</span> 0.008<span style="text-decoration: underline;">09</span>   13.8 9.88<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>     -<span style="color: #BB0000;">0.492</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 299 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: model &lt;chr&gt;, id &lt;fct&gt;</span></span></span>
-<span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: model &lt;chr&gt;, id &lt;fct&gt;</span></span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="co"># Because the no pooling models are separate linear models stored in a list, we</span></span>
 <span><span class="co"># need to apply the augment() call to each model, then bind the predicted values</span></span>
 <span><span class="co"># from each model into a single data set. Here the individual ID for each model</span></span>
@@ -452,8 +454,9 @@ respectively.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 3                80.4          1      83.5 -<span style="color: #BB0000;">3.12</span>  0.833    <span style="color: #BB0000;">Inf</span>    2.50</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 4               103.           0     104.  -<span style="color: #BB0000;">0.686</span> 0.833    <span style="color: #BB0000;">NaN</span>    2.50</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 299 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: .std.resid &lt;dbl&gt;, model &lt;chr&gt;</span></span></span>
-<span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: .std.resid &lt;dbl&gt;, model &lt;chr&gt;</span></span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="co"># Nothing special needs to be done for the partial pooling model, aside from</span></span>
 <span><span class="co"># having the broom.mixed package loaded.</span></span>
 <span><span class="va">early_intervention_pred_pp</span> <span class="op">&lt;-</span> <span class="va">early_intervention_fit_1</span> <span class="op">|&gt;</span></span>
@@ -475,8 +478,9 @@ respectively.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>           103.           0   4       107.  -<span style="color: #BB0000;">3.71</span>  0.439 0.139    110.  107. </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 299 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: .offset &lt;dbl&gt;, .sqrtXwt &lt;dbl&gt;, .sqrtrwt &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .weights &lt;dbl&gt;, .wtres &lt;dbl&gt;, model &lt;chr&gt;</span></span></span>
-<span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .weights &lt;dbl&gt;, .wtres &lt;dbl&gt;, model &lt;chr&gt;</span></span></span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="co"># Finally, we can bind the predicted values from the models into a single data</span></span>
 <span><span class="co"># frame.</span></span>
 <span><span class="va">early_intervention_preds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span></span>
@@ -485,7 +489,7 @@ respectively.</p>
 <span>  <span class="va">early_intervention_pred_pp</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Next, we’ll tidy and sample the predicted values data.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">333</span><span class="op">)</span></span>
 <span><span class="va">early_intervention_preds_tidy</span> <span class="op">&lt;-</span> <span class="va">early_intervention_preds</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">id</span>, <span class="va">cognitive_score</span>, age <span class="op">=</span> <span class="va">`I(age - 1)`</span>, <span class="va">.fitted</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -513,7 +517,7 @@ respectively.</p>
 <p>Finally, we can plot the empirical growth plots of the randomly
 sampled children, along with their fitted trajectory from the complete
 pooling, no pooling, and partial pooling models.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">early_intervention_preds_tidy</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">age</span>, group <span class="op">=</span> <span class="va">id</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">cognitive_score</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">.fitted</span>, colour <span class="op">=</span> <span class="va">model</span>, group <span class="op">=</span> <span class="va">model</span><span class="op">)</span>, linewidth <span class="op">=</span> <span class="fl">.75</span><span class="op">)</span> <span class="op">+</span></span>
@@ -550,7 +554,7 @@ from both the average trajectory of the complete pooling model, and the
 entire set of trajectories from the no pooling model together. Although
 the rate of decline varied across children, few showed any
 improvement.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Figure 3.3, page 57:</span></span>
 <span><span class="va">early_intervention</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span>mapping <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">age</span>, y <span class="op">=</span> <span class="va">cognitive_score</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -573,7 +577,7 @@ strongly towards the group average. The full extent of this effect can
 be seen by plotting the entire set of fitted trajectories from the
 partial pooling model together, along with the model’s population
 average trajectory.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">early_intervention_fit_1</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">cognitive_score</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -629,7 +633,7 @@ preceding level-2 submodel specification with visual inspection of
 individual growth trajectories stratified by levels of the
 time-invariant predictor(s), in order to identify what kind of
 population model could give rise to the observed patterns.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Figure 3.4, page 59:</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">early_intervention</span>, mapping <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">age</span>, y <span class="op">=</span> <span class="va">cognitive_score</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html" class="external-link">stat_smooth</a></span><span class="op">(</span></span>
@@ -646,7 +650,7 @@ population model could give rise to the observed patterns.</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">treatment</span><span class="op">)</span>, labeller <span class="op">=</span> <span class="va">label_both</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>linewidth <span class="op">=</span> <span class="st">"trajectory"</span><span class="op">)</span> </span></code></pre></div>
 <p><img src="chapter-3_files/figure-html/unnamed-chunk-15-1.png" width="700"></p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># TODO: Decide whether or not to do the bottom plots.</span></span></code></pre></div>
 <p>For the <code>early_intervention</code> data, which only has a single
@@ -745,7 +749,7 @@ data by the software.</li>
 we need to do is update our level-1 submodel to include predictors for
 <code>treatment</code>, and the interaction between
 <code>treatment</code> and <code>age</code>.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span></span>
 <span>  <span class="va">early_intervention_fit_1</span>,</span>
 <span>  <span class="va">.</span> <span class="op">~</span> <span class="va">.</span> <span class="op">+</span> <span class="va">treatment</span> <span class="op">+</span> <span class="va">treatment</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="va">age</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span></span>
@@ -769,7 +773,7 @@ we need to do is update our level-1 submodel to include predictors for
 <span><span class="co">#&gt;                5.702</span></span></code></pre></div>
 <p>Alternatively, were we to start from scratch, we can specify our
 final multilevel model for change like so.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">early_intervention_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lme4/man/lmer.html" class="external-link">lmer</a></span><span class="op">(</span></span>
 <span>  <span class="va">cognitive_score</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="va">age</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span> <span class="op">*</span> <span class="va">treatment</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="va">age</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">early_intervention</span>,</span>
@@ -850,7 +854,7 @@ in the control group.</li>
 </ul>
 <p>As with any model, we can view these estimates with the
 <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> function.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">early_intervention_fit</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Linear mixed model fit by maximum likelihood  ['lmerMod']</span></span>
 <span><span class="co">#&gt; Formula: cognitive_score ~ I(age - 1) * treatment + (1 + I(age - 1) |      id)</span></span>
@@ -886,13 +890,14 @@ in the control group.</li>
 generic <code><a href="https://rdrr.io/pkg/nlme/man/fixed.effects.html" class="external-link">fixef()</a></code> function to return a vector of the
 estimates, or the <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code> function from the broom.mixed
 package to return a tibble.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/nlme/man/fixed.effects.html" class="external-link">fixef</a></span><span class="op">(</span><span class="va">early_intervention_fit</span><span class="op">)</span></span>
 <span><span class="co">#&gt;          (Intercept)           I(age - 1)            treatment </span></span>
 <span><span class="co">#&gt;           107.821683           -20.123396             3.656602 </span></span>
 <span><span class="co">#&gt; I(age - 1):treatment </span></span>
-<span><span class="co">#&gt;             5.702077</span></span>
-<span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">early_intervention_fit</span>, effects <span class="op">=</span> <span class="st">"fixed"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;             5.702077</span></span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">early_intervention_fit</span>, effects <span class="op">=</span> <span class="st">"fixed"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 5</span></span></span>
 <span><span class="co">#&gt;   effect term                 estimate std.error statistic</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
@@ -932,7 +937,7 @@ these functions is that <code><a href="https://tidyr.tidyverse.org/reference/exp
 only two prototypical individuals are possible: A child in the treatment
 group (<code>treatment</code> = 1) and a child in the control group
 (<code>treatment</code> = 0).</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">prototypical_children</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tidyr.tidyverse.org/reference/expand.html" class="external-link">crossing</a></span><span class="op">(</span>treatment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>, age <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1.5</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">prototypical_children</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
@@ -952,7 +957,7 @@ our predictions, due to some <a href="https://github.com/bbolker/broom.mixed/iss
 behaviour</a> in <code>augment.merMod()</code> when making predictions
 on new data for models (although in this specific example the
 <code><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment()</a></code> approach would have worked as well).</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">prototypical_children</span> <span class="op">&lt;-</span> <span class="va">prototypical_children</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
 <span>    treatment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">treatment</span><span class="op">)</span>,</span>
@@ -972,7 +977,7 @@ on new data for models (although in this specific example the
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 1           1.5           104. </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 1           2              97.1</span></span></code></pre></div>
 <p>Finally, we can plot the fitted change trajectories as usual.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Figure 3.5, page 71:</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">prototypical_children</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">age</span>, y <span class="op">=</span> <span class="va">cognitive_score</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>linetype <span class="op">=</span> <span class="va">treatment</span>, group <span class="op">=</span> <span class="va">treatment</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
