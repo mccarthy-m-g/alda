@@ -10,8 +10,8 @@ A person-period data frame with 140 rows and
 
 \describe{
 \item{\code{id}}{Participant ID.}
-\item{\code{time}}{Time of measurement.}
 \item{\code{wave}}{Wave of measurement.}
+\item{\code{time}}{Wave of measurement centred at time 0.}
 \item{\code{opposites_naming_score}}{Score on the "opposites naming" task.}
 \item{\code{baseline_cognitive_score}}{Baseline score on a standardized instrument assessing general cognitive skill.}
 }

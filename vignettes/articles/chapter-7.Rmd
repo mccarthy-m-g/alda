@@ -1,15 +1,13 @@
 ---
-title: "Chapter-7: Examining the Multilevel Model’s Error Covariance Structure"
+title: "Chapter 7: Examining the Multilevel Model's Error Covariance Structure"
 ---
-
-::: {.alert .alert-warning}
-This chapter is under construction.
-:::
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE
 )
 ggplot2::theme_set(ggplot2::theme_bw())
 ggplot2::theme_update(
@@ -22,70 +20,401 @@ ggplot2::theme_update(
 library(alda)
 library(dplyr)
 library(tidyr)
-library(glmmTMB)
+library(purrr)
+library(nlme)
+library(lme4)
+library(broom.mixed)
+library(modelsummary)
+library(gt)
 ```
 
-## 7.1 The "Standard" Specification of the Multilevel Model for Change
+## 7.1 The "standard" specification of the multilevel model for change
 
-Table 7.1:
+In Chapter 7 Singer and Willett (2003) examine the **generalized least squares** approach to modelling change using artificial data created by Willett (1988), who simulated changes in performance on a hypothetical "opposites naming" task over a four week period in a sample of 35 people.
+
+For this example we use the `opposites_naming` data set, a person-period data frame with 140 rows and 5 columns:
+
+- `id`: Participant ID.
+- `wave`: Wave of measurement.
+- `time`: Wave of measurement centred at time 0.
+- `opposites_naming_score`: Score on the "opposites naming" task.
+- `baseline_cognitive_score`: Baseline score on a standardized instrument assessing general cognitive skill.
 
 ```{r}
-opposites_naming |>
+opposites_naming
+```
+
+As the person-level version of the `opposites_naming` data below shows, this is a time-structured data set with four measurements per participant, and a time-invariant predictor reflecting participant's cognitive skill at baseline.
+
+```{r}
+opposites_naming_pl <- opposites_naming |>
   select(-time) |>
   pivot_wider(
     names_from = wave,
     values_from = opposites_naming_score,
     names_prefix = "opp_"
   ) |>
-  relocate(baseline_cognitive_score, .after = everything()) |>
-  head(10)
+  relocate(baseline_cognitive_score, .after = everything())
+
+# Table 7.1:
+head(opposites_naming_pl, 10)
 ```
 
-Table 7.2, page 246:
+We begin by fitting a "standard" multilevel model for change to the `opposites_naming` data, which will serve as a point of comparison against alternative models with different error covariance structures from the "standard" model. Our "standard" model for the `opposites_naming` data takes the familiar form:
+
+$$
+\begin{alignat}{2}
+\text{Level 1:} \\
+  &\text{opposites_naming_score}_{ij} =
+  \pi_{0i} + \pi_{1i} \text{time}_{ij} + \epsilon_{ij} \\ 
+\text{Level 2:} \\
+  &\pi_{0i} =
+  \gamma_{00} + \gamma_{01} (\text{baseline_cognitive_score}_i - 113.4571) + \zeta_{0i} \\
+  &\pi_{1i} =
+  \gamma_{10} + \gamma_{11} (\text{baseline_cognitive_score}_i - 113.4571) + \zeta_{1i}.
+\end{alignat}
+$$
+
+where
+
+$$
+\epsilon_{ij} \stackrel{iid}{\sim} \operatorname{Normal}(0, \sigma_\epsilon),
+$$
+
+and
+
+$$
+\begin{bmatrix}
+\zeta_{0i} \\ \zeta_{1i}
+\end{bmatrix}
+\stackrel{iid}{\sim}
+\begin{pmatrix}
+N
+\begin{bmatrix}
+0 \\ 0
+\end{bmatrix},
+\begin{bmatrix}
+\sigma^2_0 & \ \sigma_{10} \\ \ \sigma_{10} & \sigma^2_1
+\end{bmatrix}
+\end{pmatrix}.
+$$
+
+As Singer and Willett (2003) discuss, because the focus of this chapter is on the error covariance structure of the multilevel model for change, we fit this model using restricted maximum likelihood so that the its goodness-of-fit statistics reflect only the stochastic portion of the model's fit.
+
+Additionally, we will use the `lme()` function from the **nlme** package instead of lme4's `lmer()` function to fit this model, because the former has methods that make examining the fitted model's the error covariance structure easier. The API for the `lme()` function is similar to that of the `lmer()` function, except that the fixed and random effects are specified in separate formulas rather than a single formula.
 
 ```{r}
-mucog <- mean(opposites_naming$baseline_cognitive_score)
-
-opposites_fit_A <- glmmTMB(
-  opposites_naming_score ~
-    time * I(baseline_cognitive_score - mucog) + (time | id),
+# Fit model -------------------------------------------------------------------
+opposites_naming_fit_standard <- lme(
+  opposites_naming_score ~ time * I(baseline_cognitive_score - 113.4571),
+  random = ~ time | id,
   data = opposites_naming,
-  REML = TRUE
+  method = "REML"
 )
 
-summary(opposites_fit_A)
+# Make table ------------------------------------------------------------------
+options(modelsummary_get = "all")
+
+# Table 7.2, page 246:
+opposites_naming_fit_standard |>
+  list() |>
+  set_names("Estimate") |>
+  modelsummary(
+    fmt = 2,
+    statistic = NULL,
+    effects = c("var_model", "ran_pars", "fixed"),
+    scales = c("vcov", "vcov", NA),
+    coef_map = c(
+      "(Intercept)",
+      "I(baseline_cognitive_score - 113.4571)",
+      "time",
+      "time:I(baseline_cognitive_score - 113.4571)",
+      "var_Observation",
+      "var_(Intercept)",
+      "var_time",
+      "cov_time.(Intercept)"
+    ),
+    gof_map = list(
+      list(
+        raw = "logLik",
+        clean = "Deviance",
+        fmt = \(.x) vec_fmt_number(
+          -2*as.numeric(.x), decimals = 1, sep_mark = ""
+        )
+      ),
+      list(
+        raw = "AIC",
+        clean = "AIC",
+        fmt = fmt_decimal(1)
+      ),
+      list(
+        raw = "BIC",
+        clean = "BIC",
+        fmt = fmt_decimal(1)
+      )
+    ),
+    output = "gt"
+  ) |>
+  tab_row_group(label = "Goodness-of-Fit", rows = 9:11) |>
+  tab_row_group(label = "Variance Components", rows = 5:8) |>
+  tab_row_group(label = "Fixed Effects", rows = 1:4)
 ```
 
-## 7.2 Using the Composite Model to Understand Assumptions about the Error Covariance Matrix
+## 7.2 Using the composite model to understand assumptions about the error covariance matrix
 
-## 7.3 Postulating an Alternative Error Covariance Structure
+In Section 7.2 Singer and Willett (2003) examine the error covariance structure implied by the "standard" multilevel model for change, given its random effects specification. To do so, we begin substituting the level-2 equations into level-1, yielding a composite representation of the "standard" model:
 
-Table 7.3, page 258-259:
+$$
+\text{opp}_{ij} = 
+    \gamma_{00}
+    + \gamma_{10}\text{time}_{ij}
+    + \gamma_{01}(\text{cog}_i - 113.4571)
+    + \gamma_{11}\text{time}_{ij}(\text{cog}_i - 113.4571)
+    + r_{ij},
+$$
+
+where the **composite residual**, $r_{ij}$, represents the weighted linear combination of the model's original three random effects:
+
+$$
+r_{ij} = \epsilon_{ij} + \zeta_{0i} + \zeta_{1i} \text{time}_{ij}.
+$$
+
+Notice that the composite model now looks like a typical multiple regression model---with the usual error term, $\epsilon_i$, replaced by the composite residual, $r_{ij}$. Following from this observation, we can reexpress the distributional assumptions for all the residuals of the "standard" multilevel model for change in one grand statement based on the composite residual:
+
+$$
+r \sim N
+\begin{pmatrix}
+\mathbf 0,
+\begin{bmatrix}
+\mathbf{\Sigma}_r & \mathbf 0 & \mathbf 0 & \dots & \mathbf 0 \\
+\mathbf 0 & \mathbf{\Sigma}_r & \mathbf 0 & \dots & \mathbf 0 \\
+\mathbf 0 & \mathbf 0 & \mathbf{\Sigma}_r & \dots & \mathbf 0 \\
+\vdots & \vdots & \vdots & \ddots & \mathbf 0 \\
+\mathbf 0 & \mathbf 0 & \mathbf 0 & \mathbf 0 & \mathbf{\Sigma}_r
+\end{bmatrix}
+\end{pmatrix},
+$$
+
+where $\mathbf{\Sigma}_r$ represents a **block diagonal** error covariance sub-matrix whose dimensions reflect the design of the `opposites_naming` data, given by:
+
+$$
+\begin{align}
+\mathbf{\Sigma}_r & = \begin{bmatrix}
+  \sigma_{r_1}^2 & \sigma_{r_1 r_2} & \sigma_{r_1 r_3} & \sigma_{r_1 r_4} \\
+  \sigma_{r_2 r_1} & \sigma_{r_2}^2 & \sigma_{r_2 r_3} & \sigma_{r_2 r_4} \\
+  \sigma_{r_3 r_1} & \sigma_{r_3 r_2} & \sigma_{r_3}^2 & \sigma_{r_3 r_4} \\
+  \sigma_{r_4 r_1} & \sigma_{r_4 r_2} & \sigma_{r_4 r_3} & \sigma_{r_4}^2 \end{bmatrix},
+
+\end{align}
+$$
+
+with occasion-specific composite residual variances
+
+$$
+\begin{align}
+\sigma_{r_j}^2 &= \operatorname{Var} \left(
+  \epsilon_{ij} + \zeta_{0i} + \zeta_{1i} \text{time}_j
+\right) \\
+&= \sigma_\epsilon^2
+ + \sigma_0^2
+ + 2 \sigma_{01} \text{time}_j
+ + \sigma_1^2 \text{time}_j^2,
+\end{align}
+$$
+
+and occasion-specific composite residual covariances
+
+$$
+\sigma_{r_j, r_{j'}} = \sigma_0^2 + \sigma_{01} (\text{time}_j + \text{time}_{j'}) + \sigma_1^2 \text{time}_j \text{time}_{j'},
+$$
+
+where all the terms have their usual meanings. We can retrieve the error covariance sub-matrix, $\mathbf{\Sigma}_r$, for the `opposites_naming_fit_standard` fit using the `getVarCov()` function from the nlme package. To emphasize that $\mathbf{\Sigma}_r$ is the same for each participant, we retrieve it here for both the first and last participants in the data.
 
 ```{r}
+opposites_naming_varcov_standard <- opposites_naming_fit_standard |>
+  getVarCov(type = "marginal", individuals = c(1, 35))
 
+opposites_naming_varcov_standard
 ```
 
-Table 7.4, page 265:
+For descriptive purposes, we can also convert $\mathbf{\Sigma}_r$ into a correlation matrix using the `cov2cor()` function, to examine the residual autocorrelation between measurement occasions.
 
 ```{r}
-summary(opposites_fit_A)
-
-# Toeplitz
-opposites_fit_B <- update(
-  opposites_fit_A,
-  . ~ . - (time | id) + toep(time + 0 | id),
-  dispformula = ~ 0
-)
-
-summary(opposites_fit_B)
-
-# Unstructured
-opposites_fit_C <- update(
-  opposites_fit_A,
-  . ~ . - (time | id) + us(time + 0 | id),
-  dispformula = ~ 0
-)
-
-summary(opposites_fit_C)
+cov2cor(opposites_naming_varcov_standard[[1]])
 ```
+
+As Singer and Willett (2003) discuss, examining the equations and outputs above reveals two important properties about the occasion-specific residuals of the "standard" multilevel model for change:
+
+- They can be both **heteroscedastic** and **autocorrelated** within participants (but remember that across participants, they are *identically* heteroscedastic and autocorrelated under the homogeneity assumption).
+- They have a powerful dependence on time. Specifically, the residual variances, $\sigma_{r_j}^2$, have a **quadratic** dependence on time that will be at its minimum at time $\text{time} = -(\sigma_{01} / \sigma_1^2)$ and will increase parabolically and symmetrically over time on either side of this minimum; and the residual covariances, $\sigma_{r_j, r_{j'}}$, have an (imperfect) **band diagonal** structure wherein the overall magnitude of the residual covariances tends to decline in diagonal "bands" out from the main diagonal.
+
+The first of these properties---allowing for heteroscedasticity and autocorrelation among the composite residuals---is a necessity given the anticipated demands of longitudinal data. Not all longitudinal data sets will be heteroscedastic or autocorrelated, but a credible model for change should should allow for *potential* heteroscedasticity and autocorrelation.
+
+One advantage of the "standard" multilevel model for change is that---although its composite residuals have a powerful dependence on time---it is also capable of adapting itself relatively smoothly to many common empirical situations, accommodating automatically for certain kinds of complex error structure. Nonetheless, Singer and Willett (2003) conclude by questioning whether the the hypothesized structure of the error covariance matrix implied by the "standard" model can be applied ubiquitously, or if there may be empirical situations where directly modelling alternative error covariance structures may be preferable.
+
+## 7.3 Postulating an alternative error covariance structure
+
+In section 7.3 Singer and Willett (2003) discuss how alternative error covariance structures can be modelled *directly* using an **extended linear model for change** with heteroscedastic, correlated errors fitted by **generalized least squares** regression. See Chapter 5 of Pinheiro and Bates (2010) for discussion of the extended linear model.
+
+We can fit the extended linear model for change with the `gls()` function from the nlme package, which allows us to model the within-group heteroscedasticity and correlation structures via the `weights` and `correlation` arguments, respectively.
+
+Here we will fit six models to the `opposites_naming` data with the following error covariance structures: unstructured, compound symmetric, heterogeneous compound symmetric, autoregressive, heterogeneous autoregressive, and Toeplitz. Notice that unlike the multilevel model for change, the extended linear model for change has no random effects.
+
+<details>
+<summary>Equation Code</summary>
+We need these equations for the table below---but there's nothing interesting to look at here---hence why this section is collapsed.
+
+```{r}
+hypothesized_varcov <- list(
+  unstructured = r"($$\mathbf{\Sigma}_r = \begin{bmatrix}\sigma_1^2 & \sigma_{12} & \sigma_{13} & \sigma_{14} \\ \sigma_{21} & \sigma_2^2 & \sigma_{23} & \sigma_{24} \\ \sigma_{31} & \sigma_{32} & \sigma_3^2 & \sigma_{34} \\ \sigma_{41} & \sigma_{42} & \sigma_{43} & \sigma_4^2 \end{bmatrix}$$)",
+  compsymm = r"($$\mathbf{\Sigma}_r = \begin{bmatrix} \sigma^2 + \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 \\ \sigma_1^2 & \sigma^2 + \sigma_1^2 & \sigma_1^2 & \sigma_1^2 \\ \sigma_1^2 & \sigma_1^2 & \sigma^2 + \sigma_1^2 & \sigma_1^2 \\ \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma^2 + \sigma_1^2 \end{bmatrix}$$)",
+  hetcompsymm = r"($$\mathbf{\Sigma}_r = \begin{bmatrix} \sigma_1^2 & \sigma_1 \sigma_2 \rho & \sigma_1 \sigma_3 \rho & \sigma_1 \sigma_4 \rho \\ \sigma_2 \sigma_1 \rho & \sigma_1^2 & \sigma_2 \sigma_3 \rho & \sigma_2 \sigma_4 \rho \\ \sigma_3 \sigma_1 \rho & \sigma_3 \sigma_2 \rho & \sigma_3^2 & \sigma_3 \sigma_4 \rho \\ \sigma_4 \sigma_1 \rho & \sigma_4 \sigma_2 \rho & \sigma_4 \sigma_3 \rho & \sigma_4^2 \end{bmatrix}$$)",
+  ar = r"($$\mathbf{\Sigma}_r = \begin{bmatrix} \sigma^2 & \sigma^2 \rho & \sigma^2 \rho^2 & \sigma^2 \rho^3 \\ \sigma^2 \rho & \sigma^2 & \sigma^2 \rho & \sigma^2 \rho^2 \\ \sigma^2 \rho^2 & \sigma^2 \rho & \sigma^2 & \sigma^2 \rho \\ \sigma^2 \rho^3 & \sigma^2 \rho^2 & \sigma^2 \rho & \sigma^2 \end{bmatrix}$$)",
+  hetar = r"($$\mathbf{\Sigma}_r = \begin{bmatrix} \sigma_1^2 & \sigma_1 \sigma_2 \rho & \sigma_1 \sigma_3 \rho^2 & \sigma_1 \sigma_4 \rho^3 \\ \sigma_2 \sigma_1 \rho & \sigma_2^2 & \sigma_2 \sigma_3 \rho & \sigma_2 \sigma_4 \rho^2 \\ \sigma_3 \sigma_1 \rho^2 & \sigma_3 \sigma_2 \rho & \sigma_3^2 & \sigma_3 \sigma_4 \rho \\ \sigma_4 \sigma_1 \rho^3 & \sigma_4 \sigma_2 \rho^2 & \sigma_4 \sigma_3 \rho & \sigma_4^2 \end{bmatrix}
+$$)",
+  toeplitz = r"($$\mathbf{\Sigma}_r = \begin{bmatrix}\sigma^2 & \sigma_1 & \sigma_2 & \sigma_3 \\ \sigma_1 & \sigma^2 & \sigma_1 & \sigma_2 \\ \sigma_2 & \sigma_1 & \sigma^2 & \sigma_1 \\ \sigma_3 & \sigma_2 & \sigma_1 & \sigma^2 \end{bmatrix}
+$$)"
+)
+```
+</details>
+
+```{r}
+# Fit models ------------------------------------------------------------------
+
+# Start with a base model we can update with the alternative error covariance
+# structures. Note that we won't display this model in the table.
+opposites_naming_fit <- gls(
+  opposites_naming_score ~ time * I(baseline_cognitive_score - 113.4571),
+  method = "REML",
+  data = opposites_naming
+)
+
+# Unstructured:
+opposites_naming_fit_unstructured <- update(
+  opposites_naming_fit,
+  correlation = corSymm(form = ~ 1 | id),
+  weights = varIdent(form = ~ 1 | wave)
+)
+
+# Compound symmetry:
+opposites_naming_fit_compsymm <- update(
+  opposites_naming_fit,
+  correlation = corCompSymm(form = ~ 1 | id)
+)
+
+# Heterogeneous compound symmetry:
+opposites_naming_fit_hetcompsymm <- update(
+  opposites_naming_fit_compsymm,
+  weights = varIdent(form = ~ 1 | wave)
+)
+
+# Autoregressive:
+opposites_naming_fit_ar <- update(
+  opposites_naming_fit,
+  correlation = corAR1(form = ~ 1 | id)
+)
+
+# Heterogeneous autoregressive:
+opposites_naming_fit_hetar <- update(
+  opposites_naming_fit_ar,
+  weights = varIdent(form = ~ 1 | wave)
+)
+
+# Toeplitz:
+opposites_naming_fit_toeplitz <- update(
+  opposites_naming_fit,
+  correlation = corARMA(form = ~ 1 | id, p = 3,q = 0)
+)
+
+opposites_naming_fits <- list(
+  "Unstructured" = opposites_naming_fit_unstructured,
+  "Compound symmetry" = opposites_naming_fit_compsymm,
+  "Heterogeneous compound symmetry" = opposites_naming_fit_hetcompsymm,
+  "Autoregressive" = opposites_naming_fit_ar,
+  "Heterogeneous autoregressive" = opposites_naming_fit_hetar,
+  "Toeplitz" = opposites_naming_fit_toeplitz
+)
+
+# Make table ------------------------------------------------------------------
+
+# Table 7.3, page 258-259:
+opposites_naming_fits |>
+  map2(
+    # Note that this list was made in the collapsed code chunk above. It just
+    # contains the equations corresponding to each error covariance structure.
+    hypothesized_varcov, 
+    \(.fit, .hypothesized_varcov) {
+      format_varcov <- function(x) {
+        x <- round(getVarCov(x), digits = 1)
+        begin <- "$$\\begin{bmatrix}"
+        body <- apply(x, 1, \(.x) paste0(paste(.x, collapse = "&"), "\\\\"))
+        end <- "\\end{bmatrix}$$"
+        paste0(c(begin, body, end), collapse = "")
+      }
+      
+      gof <- .fit |>
+        glance() |>
+        mutate(
+          hypothesized_varcov = .hypothesized_varcov,
+          "-2LL" = as.numeric(-2 * logLik),
+          varcov = format_varcov(.fit),
+          across(where(is.numeric), \(.x) round(.x, digits = 1))
+        ) |>
+        select(hypothesized_varcov, "-2LL", AIC, BIC, varcov)
+    }
+  ) |>
+  list_rbind(names_to = "structure") |>
+  gt() |>
+  # Note: Math formatting in HTML currently requires gt version 0.10.1.9000
+  # (development version).
+  fmt_markdown(columns = c(hypothesized_varcov, varcov))
+```
+
+Comparing the deviance (-2LL), AIC, and BIC statistics for the alternative error covariance structures, we find that the unstructured and Toeplitz structures lead to the best-fitting models for the `opposites_naming` data.
+
+Finally, we can see what is gained and lost when modelling the error covariance structure directly (instead of indirectly through random effects) by comparing fixed effect estimates and goodness-of-fit statistics from the unstructured and Toeplitz models with those of the "standard" multilevel model for change.
+
+```{r}
+# Table 7.4, page 265:
+opposites_naming_fit_standard |>
+  list() |>
+  set_names("Standard") |>
+  c(keep_at(opposites_naming_fits, c("Toeplitz", "Unstructured"))) |>
+  (\(.x) .x[c("Standard", "Toeplitz", "Unstructured")])() |>
+  modelsummary(
+    fmt = fmt_statistic(estimate = 2, statistic = 3),
+    gof_map = list(
+      list(
+        raw = "logLik",
+        clean = "Deviance",
+        fmt = \(.x) vec_fmt_number(
+          -2*as.numeric(.x), decimals = 1, sep_mark = ""
+        )
+      ),
+      list(
+        raw = "AIC",
+        clean = "AIC",
+        fmt = fmt_decimal(1)
+      ),
+      list(
+        raw = "BIC",
+        clean = "BIC",
+        fmt = fmt_decimal(1)
+      )
+    ),
+    output = "gt"
+  ) |>
+  tab_row_group(label = "Goodness-of-Fit", rows = 13:15) |>
+  tab_row_group(label = "Variance Components", rows = 9:12) |>
+  tab_row_group(label = "Fixed Effects", rows = 1:8)
+```
+
+Singer and Willett (2003) observe that for the `opposites_naming` data:
+
+- The Toeplitz model fits *slightly* better than the "standard" model on all accounts, but not enough to reject the "standard" model.
+- The unstructured model fits best if we focus exclusively on the deviance statistic, but at the cost of losing more degrees of freedom than any other error covariance structure considered here.
+- The fixed effects estimates are similar between the "standard", Toeplitz, and unstructured models (except for `I(baseline_cognitive_score - 113.4571)`), but the precision of these estimates is *slightly* better for the Toeplitz and unstructured models, which better represent the error covariance structure of the data.
+
+Thus, for this data, we conclude that not much is gained by replacing the "standard" multilevel model for change with any of the extended linear models for change explored here.
+
+However, in other data sets, the magnitude of difference between these modelling approaches may be greater (depending on the study design, statistical model, choice of error covariance structure, and the nature of the phenomenon under study), which may lead us to prefer the extended linear model for change---if our inferential goal *exclusively* involves population-averaged interpretations of fixed effects, and we are not at all interested in addressing questions about individuals via random effects (For discussion, see McNeish, Stapleton, & Silverman, 2017; Muff, Held, & Keller, 2016).
