@@ -319,8 +319,8 @@ NULL
 #'
 #' \describe{
 #'   \item{`id`}{Participant ID.}
-#'   \item{`time`}{Time of measurement.}
 #'   \item{`wave`}{Wave of measurement.}
+#'   \item{`time`}{Wave of measurement centred at time 0.}
 #'   \item{`opposites_naming_score`}{Score on the "opposites naming" task.}
 #'   \item{`baseline_cognitive_score`}{Baseline score on a standardized instrument assessing general cognitive skill.}
 #' }

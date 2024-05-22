@@ -165,7 +165,7 @@ opposites_naming <- tidy_data$opposites_pp |>
     opposites_naming_score = opp,
     baseline_cognitive_score = cog
   ) |>
-  select(-ccog)
+  select(id, wave, time, opposites_naming_score, baseline_cognitive_score)
 
 # Chapter 8 -------------------------------------------------------------------
 
