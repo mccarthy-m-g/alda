@@ -6,12 +6,12 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="description" content="alda">
-<title>Chapter-7: Examining the Multilevel Model’s Error Covariance Structure • alda</title>
+<title>Chapter 7: Examining the Multilevel Model's Error Covariance Structure • alda</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js" integrity="sha512-7O5pXpc0oCRrxk8RUfDYFgn0nO1t+jLuIOQdOMRp4APB7uZ4vSjspzp5y6YDtDs4VzUSTbWzBFZ/LKJhnyFOKw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Chapter-7: Examining the Multilevel Model’s Error Covariance Structure">
+<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js" integrity="sha512-7O5pXpc0oCRrxk8RUfDYFgn0nO1t+jLuIOQdOMRp4APB7uZ4vSjspzp5y6YDtDs4VzUSTbWzBFZ/LKJhnyFOKw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Chapter 7: Examining the Multilevel Model's Error Covariance Structure">
 <meta property="og:description" content="alda">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -95,7 +95,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="" class="logo" alt=""><h1>Chapter-7: Examining the Multilevel Model’s Error Covariance Structure</h1>
+      <img src="" class="logo" alt=""><h1>Chapter 7: Examining the Multilevel Model's Error Covariance Structure</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/mccarthy-m-g/alda/blob/HEAD/vignettes/articles/chapter-7.Rmd" class="external-link"><code>vignettes/articles/chapter-7.Rmd</code></a></small>
@@ -104,38 +104,73 @@
 
     
     
-<div class="alert alert-warning">
-<p>This chapter is under construction.</p>
-</div>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mccarthy-m-g.github.io/alda/">alda</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'dplyr'</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     filter, lag</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:base':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span></code></pre></div>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/glmmTMB/glmmTMB" class="external-link">glmmTMB</a></span><span class="op">)</span></span></code></pre></div>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://svn.r-project.org/R-packages/trunk/nlme/" class="external-link">nlme</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/lme4/lme4/" class="external-link">lme4</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bbolker/broom.mixed" class="external-link">broom.mixed</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://modelsummary.com" class="external-link">modelsummary</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://gt.rstudio.com" class="external-link">gt</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
-<h2 id="the-standard-specification-of-the-multilevel-model-for-change">7.1 The “Standard” Specification of the Multilevel Model for
-Change<a class="anchor" aria-label="anchor" href="#the-standard-specification-of-the-multilevel-model-for-change"></a>
+<h2 id="the-standard-specification-of-the-multilevel-model-for-change">7.1 The “standard” specification of the multilevel model for
+change<a class="anchor" aria-label="anchor" href="#the-standard-specification-of-the-multilevel-model-for-change"></a>
 </h2>
-<p>Table 7.1:</p>
+<p>In Chapter 7 Singer and Willett (2003) examine the
+<strong>generalized least squares</strong> approach to modelling change
+using artificial data created by Willett (1988), who simulated changes
+in performance on a hypothetical “opposites naming” task over a four
+week period in a sample of 35 people.</p>
+<p>For this example we use the <code>opposites_naming</code> data set, a
+person-period data frame with 140 rows and 5 columns:</p>
+<ul>
+<li>
+<code>id</code>: Participant ID.</li>
+<li>
+<code>wave</code>: Wave of measurement.</li>
+<li>
+<code>time</code>: Wave of measurement centred at time 0.</li>
+<li>
+<code>opposites_naming_score</code>: Score on the “opposites naming”
+task.</li>
+<li>
+<code>baseline_cognitive_score</code>: Baseline score on a
+standardized instrument assessing general cognitive skill.</li>
+</ul>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">opposites_naming</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 140 × 5</span></span></span>
+<span><span class="co">#&gt;    id     wave  time opposites_naming_score baseline_cognitive_score</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1         1     0                    205                      137</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 1         2     1                    217                      137</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 1         3     2                    268                      137</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 1         4     3                    302                      137</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 2         1     0                    219                      123</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 2         2     1                    243                      123</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 2         3     2                    279                      123</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 2         4     3                    302                      123</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 3         1     0                    142                      129</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 3         2     1                    212                      129</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 130 more rows</span></span></span></code></pre></div>
+<p>As the person-level version of the <code>opposites_naming</code> data
+below shows, this is a time-structured data set with four measurements
+per participant, and a time-invariant predictor reflecting participant’s
+cognitive skill at baseline.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">opposites_naming</span> <span class="op">|&gt;</span></span>
+<code class="sourceCode R"><span><span class="va">opposites_naming_pl</span> <span class="op">&lt;-</span> <span class="va">opposites_naming</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">time</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html" class="external-link">pivot_wider</a></span><span class="op">(</span></span>
 <span>    names_from <span class="op">=</span> <span class="va">wave</span>,</span>
 <span>    values_from <span class="op">=</span> <span class="va">opposites_naming_score</span>,</span>
 <span>    names_prefix <span class="op">=</span> <span class="st">"opp_"</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/relocate.html" class="external-link">relocate</a></span><span class="op">(</span><span class="va">baseline_cognitive_score</span>, .after <span class="op">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/everything.html" class="external-link">everything</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/relocate.html" class="external-link">relocate</a></span><span class="op">(</span><span class="va">baseline_cognitive_score</span>, .after <span class="op">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/everything.html" class="external-link">everything</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Table 7.1:</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">opposites_naming_pl</span>, <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 10 × 6</span></span></span>
 <span><span class="co">#&gt;    id    opp_1 opp_2 opp_3 opp_4 baseline_cognitive_score</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
@@ -149,175 +184,2040 @@ Change<a class="anchor" aria-label="anchor" href="#the-standard-specification-of
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 8        96   131   159   213                      113</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 9       138   156   197   200                      104</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 10      216   252   274   298                       96</span></span></code></pre></div>
-<p>Table 7.2, page 246:</p>
+<p>We begin by fitting a “standard” multilevel model for change to the
+<code>opposites_naming</code> data, which will serve as a point of
+comparison against alternative models with different error covariance
+structures from the “standard” model. Our “standard” model for the
+<code>opposites_naming</code> data takes the familiar form:</p>
+<p><span class="math display">\[
+\begin{alignat}{2}
+\text{Level 1:} \\
+  &amp;\text{opposites_naming_score}_{ij} =
+  \pi_{0i} + \pi_{1i} \text{time}_{ij} + \epsilon_{ij} \\
+\text{Level 2:} \\
+  &amp;\pi_{0i} =
+  \gamma_{00} + \gamma_{01} (\text{baseline_cognitive_score}_i -
+113.4571) + \zeta_{0i} \\
+  &amp;\pi_{1i} =
+  \gamma_{10} + \gamma_{11} (\text{baseline_cognitive_score}_i -
+113.4571) + \zeta_{1i}.
+\end{alignat}
+\]</span></p>
+<p>where</p>
+<p><span class="math display">\[
+\epsilon_{ij} \stackrel{iid}{\sim} \operatorname{Normal}(0,
+\sigma_\epsilon),
+\]</span></p>
+<p>and</p>
+<p><span class="math display">\[
+\begin{bmatrix}
+\zeta_{0i} \\ \zeta_{1i}
+\end{bmatrix}
+\stackrel{iid}{\sim}
+\begin{pmatrix}
+N
+\begin{bmatrix}
+0 \\ 0
+\end{bmatrix},
+\begin{bmatrix}
+\sigma^2_0 &amp; \ \sigma_{10} \\ \ \sigma_{10} &amp; \sigma^2_1
+\end{bmatrix}
+\end{pmatrix}.
+\]</span></p>
+<p>As Singer and Willett (2003) discuss, because the focus of this
+chapter is on the error covariance structure of the multilevel model for
+change, we fit this model using restricted maximum likelihood so that
+the its goodness-of-fit statistics reflect only the stochastic portion
+of the model’s fit.</p>
+<p>Additionally, we will use the <code><a href="https://rdrr.io/pkg/nlme/man/lme.html" class="external-link">lme()</a></code> function from the
+<strong>nlme</strong> package instead of lme4’s <code><a href="https://rdrr.io/pkg/lme4/man/lmer.html" class="external-link">lmer()</a></code>
+function to fit this model, because the former has methods that make
+examining the fitted model’s the error covariance structure easier. The
+API for the <code><a href="https://rdrr.io/pkg/nlme/man/lme.html" class="external-link">lme()</a></code> function is similar to that of the
+<code><a href="https://rdrr.io/pkg/lme4/man/lmer.html" class="external-link">lmer()</a></code> function, except that the fixed and random effects
+are specified in separate formulas rather than a single formula.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mucog</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">opposites_naming</span><span class="op">$</span><span class="va">baseline_cognitive_score</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">opposites_fit_A</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
-<span>  <span class="va">opposites_naming_score</span> <span class="op">~</span></span>
-<span>    <span class="va">time</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="va">baseline_cognitive_score</span> <span class="op">-</span> <span class="va">mucog</span><span class="op">)</span> <span class="op">+</span> <span class="op">(</span><span class="va">time</span> <span class="op">|</span> <span class="va">id</span><span class="op">)</span>,</span>
+<code class="sourceCode R"><span><span class="co"># Fit model -------------------------------------------------------------------</span></span>
+<span><span class="va">opposites_naming_fit_standard</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/nlme/man/lme.html" class="external-link">lme</a></span><span class="op">(</span></span>
+<span>  <span class="va">opposites_naming_score</span> <span class="op">~</span> <span class="va">time</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="va">baseline_cognitive_score</span> <span class="op">-</span> <span class="fl">113.4571</span><span class="op">)</span>,</span>
+<span>  random <span class="op">=</span> <span class="op">~</span> <span class="va">time</span> <span class="op">|</span> <span class="va">id</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">opposites_naming</span>,</span>
-<span>  REML <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  method <span class="op">=</span> <span class="st">"REML"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">opposites_fit_A</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
-<span><span class="co">#&gt; Formula:          opposites_naming_score ~ time * I(baseline_cognitive_score -  </span></span>
-<span><span class="co">#&gt;     mucog) + (time | id)</span></span>
-<span><span class="co">#&gt; Data: opposites_naming</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;      AIC      BIC   logLik deviance df.resid </span></span>
-<span><span class="co">#&gt;   1303.0   1326.6   -643.5   1287.0      136 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Random effects:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;  Groups   Name        Variance  Std.Dev.  Corr </span></span>
-<span><span class="co">#&gt;  id       (Intercept) 9.001e+02 3.000e+01      </span></span>
-<span><span class="co">#&gt;           time        5.781e-14 2.404e-07 0.99 </span></span>
-<span><span class="co">#&gt;  Residual             3.313e+02 1.820e+01      </span></span>
-<span><span class="co">#&gt; Number of obs: 140, groups:  id, 35</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Dispersion estimate for gaussian family (sigma^2):  331 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;                                          Estimate Std. Error z value Pr(&gt;|z|)</span></span>
-<span><span class="co">#&gt; (Intercept)                              164.3743     5.6870  28.903  &lt; 2e-16</span></span>
-<span><span class="co">#&gt; time                                      26.9600     1.3759  19.595  &lt; 2e-16</span></span>
-<span><span class="co">#&gt; I(baseline_cognitive_score - mucog)       -0.1136     0.4619  -0.246 0.805789</span></span>
-<span><span class="co">#&gt; time:I(baseline_cognitive_score - mucog)   0.4329     0.1117   3.874 0.000107</span></span>
-<span><span class="co">#&gt;                                             </span></span>
-<span><span class="co">#&gt; (Intercept)                              ***</span></span>
-<span><span class="co">#&gt; time                                     ***</span></span>
-<span><span class="co">#&gt; I(baseline_cognitive_score - mucog)         </span></span>
-<span><span class="co">#&gt; time:I(baseline_cognitive_score - mucog) ***</span></span>
-<span><span class="co">#&gt; ---</span></span>
-<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
+<span><span class="co"># Make table ------------------------------------------------------------------</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>modelsummary_get <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Table 7.2, page 246:</span></span>
+<span><span class="va">opposites_naming_fit_standard</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rlang.r-lib.org/reference/set_names.html" class="external-link">set_names</a></span><span class="op">(</span><span class="st">"Estimate"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://modelsummary.com/man/modelsummary.html" class="external-link">modelsummary</a></span><span class="op">(</span></span>
+<span>    fmt <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>    statistic <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>    effects <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"var_model"</span>, <span class="st">"ran_pars"</span>, <span class="st">"fixed"</span><span class="op">)</span>,</span>
+<span>    scales <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"vcov"</span>, <span class="st">"vcov"</span>, <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>    coef_map <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>      <span class="st">"(Intercept)"</span>,</span>
+<span>      <span class="st">"I(baseline_cognitive_score - 113.4571)"</span>,</span>
+<span>      <span class="st">"time"</span>,</span>
+<span>      <span class="st">"time:I(baseline_cognitive_score - 113.4571)"</span>,</span>
+<span>      <span class="st">"var_Observation"</span>,</span>
+<span>      <span class="st">"var_(Intercept)"</span>,</span>
+<span>      <span class="st">"var_time"</span>,</span>
+<span>      <span class="st">"cov_time.(Intercept)"</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    gof_map <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>        raw <span class="op">=</span> <span class="st">"logLik"</span>,</span>
+<span>        clean <span class="op">=</span> <span class="st">"Deviance"</span>,</span>
+<span>        fmt <span class="op">=</span> \<span class="op">(</span><span class="va">.x</span><span class="op">)</span> <span class="fu"><a href="https://gt.rstudio.com/reference/vec_fmt_number.html" class="external-link">vec_fmt_number</a></span><span class="op">(</span></span>
+<span>          <span class="op">-</span><span class="fl">2</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">.x</span><span class="op">)</span>, decimals <span class="op">=</span> <span class="fl">1</span>, sep_mark <span class="op">=</span> <span class="st">""</span></span>
+<span>        <span class="op">)</span></span>
+<span>      <span class="op">)</span>,</span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>        raw <span class="op">=</span> <span class="st">"AIC"</span>,</span>
+<span>        clean <span class="op">=</span> <span class="st">"AIC"</span>,</span>
+<span>        fmt <span class="op">=</span> <span class="fu"><a href="https://modelsummary.com/man/fmt_decimal.html" class="external-link">fmt_decimal</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
+<span>      <span class="op">)</span>,</span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>        raw <span class="op">=</span> <span class="st">"BIC"</span>,</span>
+<span>        clean <span class="op">=</span> <span class="st">"BIC"</span>,</span>
+<span>        fmt <span class="op">=</span> <span class="fu"><a href="https://modelsummary.com/man/fmt_decimal.html" class="external-link">fmt_decimal</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
+<span>      <span class="op">)</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    output <span class="op">=</span> <span class="st">"gt"</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://gt.rstudio.com/reference/tab_row_group.html" class="external-link">tab_row_group</a></span><span class="op">(</span>label <span class="op">=</span> <span class="st">"Goodness-of-Fit"</span>, rows <span class="op">=</span> <span class="fl">9</span><span class="op">:</span><span class="fl">11</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://gt.rstudio.com/reference/tab_row_group.html" class="external-link">tab_row_group</a></span><span class="op">(</span>label <span class="op">=</span> <span class="st">"Variance Components"</span>, rows <span class="op">=</span> <span class="fl">5</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://gt.rstudio.com/reference/tab_row_group.html" class="external-link">tab_row_group</a></span><span class="op">(</span>label <span class="op">=</span> <span class="st">"Fixed Effects"</span>, rows <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">)</span></span></code></pre></div>
+<div id="mwlefoodfi" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#mwlefoodfi table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#mwlefoodfi thead, #mwlefoodfi tbody, #mwlefoodfi tfoot, #mwlefoodfi tr, #mwlefoodfi td, #mwlefoodfi th {
+  border-style: none;
+}
+
+#mwlefoodfi p {
+  margin: 0;
+  padding: 0;
+}
+
+#mwlefoodfi .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#mwlefoodfi .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#mwlefoodfi .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#mwlefoodfi .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#mwlefoodfi .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#mwlefoodfi .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#mwlefoodfi .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#mwlefoodfi .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#mwlefoodfi .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#mwlefoodfi .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#mwlefoodfi .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#mwlefoodfi .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#mwlefoodfi .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#mwlefoodfi .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#mwlefoodfi .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#mwlefoodfi .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#mwlefoodfi .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#mwlefoodfi .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#mwlefoodfi .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#mwlefoodfi .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#mwlefoodfi .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#mwlefoodfi .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#mwlefoodfi .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#mwlefoodfi .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#mwlefoodfi .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#mwlefoodfi .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#mwlefoodfi .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#mwlefoodfi .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#mwlefoodfi .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#mwlefoodfi .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#mwlefoodfi .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#mwlefoodfi .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#mwlefoodfi .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#mwlefoodfi .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#mwlefoodfi .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#mwlefoodfi .gt_left {
+  text-align: left;
+}
+
+#mwlefoodfi .gt_center {
+  text-align: center;
+}
+
+#mwlefoodfi .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#mwlefoodfi .gt_font_normal {
+  font-weight: normal;
+}
+
+#mwlefoodfi .gt_font_bold {
+  font-weight: bold;
+}
+
+#mwlefoodfi .gt_font_italic {
+  font-style: italic;
+}
+
+#mwlefoodfi .gt_super {
+  font-size: 65%;
+}
+
+#mwlefoodfi .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#mwlefoodfi .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#mwlefoodfi .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#mwlefoodfi .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#mwlefoodfi .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#mwlefoodfi .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#mwlefoodfi .gt_indent_5 {
+  text-indent: 25px;
+}
+</style>
+<table class="table gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead><tr class="gt_col_headings">
+<th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id=" "> </th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="Estimate">Estimate</th>
+    </tr></thead>
+<tbody class="gt_table_body">
+<tr class="gt_group_heading_row">
+<th colspan="2" class="gt_group_heading" scope="colgroup" id="Fixed Effects">Fixed Effects</th>
+    </tr>
+<tr class="gt_row_group_first">
+<td headers="Fixed Effects   " class="gt_row gt_left">(Intercept)</td>
+<td headers="Fixed Effects  Estimate" class="gt_row gt_center">164.37</td>
+</tr>
+<tr>
+<td headers="Fixed Effects   " class="gt_row gt_left">I(baseline_cognitive_score - 113.4571)</td>
+<td headers="Fixed Effects  Estimate" class="gt_row gt_center">-0.11</td>
+</tr>
+<tr>
+<td headers="Fixed Effects   " class="gt_row gt_left">time</td>
+<td headers="Fixed Effects  Estimate" class="gt_row gt_center">26.96</td>
+</tr>
+<tr>
+<td headers="Fixed Effects   " class="gt_row gt_left">time:I(baseline_cognitive_score - 113.4571)</td>
+<td headers="Fixed Effects  Estimate" class="gt_row gt_center">0.43</td>
+</tr>
+<tr class="gt_group_heading_row">
+<th colspan="2" class="gt_group_heading" scope="colgroup" id="Variance Components">Variance Components</th>
+    </tr>
+<tr class="gt_row_group_first">
+<td headers="Variance Components   " class="gt_row gt_left">var_Observation</td>
+<td headers="Variance Components  Estimate" class="gt_row gt_center">159.48</td>
+</tr>
+<tr>
+<td headers="Variance Components   " class="gt_row gt_left">var_(Intercept)</td>
+<td headers="Variance Components  Estimate" class="gt_row gt_center">1236.42</td>
+</tr>
+<tr>
+<td headers="Variance Components   " class="gt_row gt_left">var_time</td>
+<td headers="Variance Components  Estimate" class="gt_row gt_center">107.25</td>
+</tr>
+<tr>
+<td headers="Variance Components   " class="gt_row gt_left" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;">cov_time.(Intercept)</td>
+<td headers="Variance Components  Estimate" class="gt_row gt_center" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;">-178.24</td>
+</tr>
+<tr class="gt_group_heading_row">
+<th colspan="2" class="gt_group_heading" scope="colgroup" id="Goodness-of-Fit">Goodness-of-Fit</th>
+    </tr>
+<tr class="gt_row_group_first">
+<td headers="Goodness-of-Fit   " class="gt_row gt_left">Deviance</td>
+<td headers="Goodness-of-Fit  Estimate" class="gt_row gt_center">1260.3</td>
+</tr>
+<tr>
+<td headers="Goodness-of-Fit   " class="gt_row gt_left">AIC</td>
+<td headers="Goodness-of-Fit  Estimate" class="gt_row gt_center">1276.3</td>
+</tr>
+<tr>
+<td headers="Goodness-of-Fit   " class="gt_row gt_left">BIC</td>
+<td headers="Goodness-of-Fit  Estimate" class="gt_row gt_center">1299.6</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <div class="section level2">
-<h2 id="using-the-composite-model-to-understand-assumptions-about-the-error-covariance-matrix">7.2 Using the Composite Model to Understand Assumptions about the
-Error Covariance Matrix<a class="anchor" aria-label="anchor" href="#using-the-composite-model-to-understand-assumptions-about-the-error-covariance-matrix"></a>
+<h2 id="using-the-composite-model-to-understand-assumptions-about-the-error-covariance-matrix">7.2 Using the composite model to understand assumptions about the
+error covariance matrix<a class="anchor" aria-label="anchor" href="#using-the-composite-model-to-understand-assumptions-about-the-error-covariance-matrix"></a>
 </h2>
-</div>
-<div class="section level2">
-<h2 id="postulating-an-alternative-error-covariance-structure">7.3 Postulating an Alternative Error Covariance Structure<a class="anchor" aria-label="anchor" href="#postulating-an-alternative-error-covariance-structure"></a>
-</h2>
-<p>Table 7.3, page 258-259:</p>
-<p>Table 7.4, page 265:</p>
+<p>In Section 7.2 Singer and Willett (2003) examine the error covariance
+structure implied by the “standard” multilevel model for change, given
+its random effects specification. To do so, we begin substituting the
+level-2 equations into level-1, yielding a composite representation of
+the “standard” model:</p>
+<p><span class="math display">\[
+\text{opp}_{ij} =
+    \gamma_{00}
+    + \gamma_{10}\text{time}_{ij}
+    + \gamma_{01}(\text{cog}_i - 113.4571)
+    + \gamma_{11}\text{time}_{ij}(\text{cog}_i - 113.4571)
+    + r_{ij},
+\]</span></p>
+<p>where the <strong>composite residual</strong>, <span class="math inline">\(r_{ij}\)</span>, represents the weighted linear
+combination of the model’s original three random effects:</p>
+<p><span class="math display">\[
+r_{ij} = \epsilon_{ij} + \zeta_{0i} + \zeta_{1i} \text{time}_{ij}.
+\]</span></p>
+<p>Notice that the composite model now looks like a typical multiple
+regression model—with the usual error term, <span class="math inline">\(\epsilon_i\)</span>, replaced by the composite
+residual, <span class="math inline">\(r_{ij}\)</span>. Following from
+this observation, we can reexpress the distributional assumptions for
+all the residuals of the “standard” multilevel model for change in one
+grand statement based on the composite residual:</p>
+<p><span class="math display">\[
+r \sim N
+\begin{pmatrix}
+\mathbf 0,
+\begin{bmatrix}
+\mathbf{\Sigma}_r &amp; \mathbf 0 &amp; \mathbf 0 &amp; \dots &amp;
+\mathbf 0 \\
+\mathbf 0 &amp; \mathbf{\Sigma}_r &amp; \mathbf 0 &amp; \dots &amp;
+\mathbf 0 \\
+\mathbf 0 &amp; \mathbf 0 &amp; \mathbf{\Sigma}_r &amp; \dots &amp;
+\mathbf 0 \\
+\vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \mathbf 0 \\
+\mathbf 0 &amp; \mathbf 0 &amp; \mathbf 0 &amp; \mathbf 0 &amp;
+\mathbf{\Sigma}_r
+\end{bmatrix}
+\end{pmatrix},
+\]</span></p>
+<p>where <span class="math inline">\(\mathbf{\Sigma}_r\)</span>
+represents a <strong>block diagonal</strong> error covariance sub-matrix
+whose dimensions reflect the design of the <code>opposites_naming</code>
+data, given by:</p>
+<p>$$ <span class="math display">\[\begin{align}
+\mathbf{\Sigma}_r &amp; = \begin{bmatrix}
+  \sigma_{r_1}^2 &amp; \sigma_{r_1 r_2} &amp; \sigma_{r_1 r_3} &amp;
+\sigma_{r_1 r_4} \\
+  \sigma_{r_2 r_1} &amp; \sigma_{r_2}^2 &amp; \sigma_{r_2 r_3} &amp;
+\sigma_{r_2 r_4} \\
+  \sigma_{r_3 r_1} &amp; \sigma_{r_3 r_2} &amp; \sigma_{r_3}^2 &amp;
+\sigma_{r_3 r_4} \\
+  \sigma_{r_4 r_1} &amp; \sigma_{r_4 r_2} &amp; \sigma_{r_4 r_3} &amp;
+\sigma_{r_4}^2 \end{bmatrix},
+
+\end{align}\]</span> $$</p>
+<p>with occasion-specific composite residual variances</p>
+<p><span class="math display">\[
+\begin{align}
+\sigma_{r_j}^2 &amp;= \operatorname{Var} \left(
+  \epsilon_{ij} + \zeta_{0i} + \zeta_{1i} \text{time}_j
+\right) \\
+&amp;= \sigma_\epsilon^2
++ \sigma_0^2
++ 2 \sigma_{01} \text{time}_j
++ \sigma_1^2 \text{time}_j^2,
+\end{align}
+\]</span></p>
+<p>and occasion-specific composite residual covariances</p>
+<p><span class="math display">\[
+\sigma_{r_j, r_{j'}} = \sigma_0^2 + \sigma_{01} (\text{time}_j +
+\text{time}_{j'}) + \sigma_1^2 \text{time}_j \text{time}_{j'},
+\]</span></p>
+<p>where all the terms have their usual meanings. We can retrieve the
+error covariance sub-matrix, <span class="math inline">\(\mathbf{\Sigma}_r\)</span>, for the
+<code>opposites_naming_fit_standard</code> fit using the
+<code><a href="https://rdrr.io/pkg/nlme/man/getVarCov.html" class="external-link">getVarCov()</a></code> function from the nlme package. To emphasize
+that <span class="math inline">\(\mathbf{\Sigma}_r\)</span> is the same
+for each participant, we retrieve it here for both the first and last
+participants in the data.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">opposites_fit_A</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
-<span><span class="co">#&gt; Formula:          opposites_naming_score ~ time * I(baseline_cognitive_score -  </span></span>
-<span><span class="co">#&gt;     mucog) + (time | id)</span></span>
-<span><span class="co">#&gt; Data: opposites_naming</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;      AIC      BIC   logLik deviance df.resid </span></span>
-<span><span class="co">#&gt;   1303.0   1326.6   -643.5   1287.0      136 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Random effects:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;  Groups   Name        Variance  Std.Dev.  Corr </span></span>
-<span><span class="co">#&gt;  id       (Intercept) 9.001e+02 3.000e+01      </span></span>
-<span><span class="co">#&gt;           time        5.781e-14 2.404e-07 0.99 </span></span>
-<span><span class="co">#&gt;  Residual             3.313e+02 1.820e+01      </span></span>
-<span><span class="co">#&gt; Number of obs: 140, groups:  id, 35</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Dispersion estimate for gaussian family (sigma^2):  331 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;                                          Estimate Std. Error z value Pr(&gt;|z|)</span></span>
-<span><span class="co">#&gt; (Intercept)                              164.3743     5.6870  28.903  &lt; 2e-16</span></span>
-<span><span class="co">#&gt; time                                      26.9600     1.3759  19.595  &lt; 2e-16</span></span>
-<span><span class="co">#&gt; I(baseline_cognitive_score - mucog)       -0.1136     0.4619  -0.246 0.805789</span></span>
-<span><span class="co">#&gt; time:I(baseline_cognitive_score - mucog)   0.4329     0.1117   3.874 0.000107</span></span>
-<span><span class="co">#&gt;                                             </span></span>
-<span><span class="co">#&gt; (Intercept)                              ***</span></span>
-<span><span class="co">#&gt; time                                     ***</span></span>
-<span><span class="co">#&gt; I(baseline_cognitive_score - mucog)         </span></span>
-<span><span class="co">#&gt; time:I(baseline_cognitive_score - mucog) ***</span></span>
-<span><span class="co">#&gt; ---</span></span>
-<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">opposites_naming_varcov_standard</span> <span class="op">&lt;-</span> <span class="va">opposites_naming_fit_standard</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/nlme/man/getVarCov.html" class="external-link">getVarCov</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"marginal"</span>, individuals <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">35</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">opposites_naming_varcov_standard</span></span>
+<span><span class="co">#&gt; id 1 </span></span>
+<span><span class="co">#&gt; Marginal variance covariance matrix</span></span>
+<span><span class="co">#&gt;         1       2       3       4</span></span>
+<span><span class="co">#&gt; 1 1395.90 1058.20  879.95  701.71</span></span>
+<span><span class="co">#&gt; 2 1058.20 1146.70  916.21  845.22</span></span>
+<span><span class="co">#&gt; 3  879.95  916.21 1111.90  988.73</span></span>
+<span><span class="co">#&gt; 4  701.71  845.22  988.73 1291.70</span></span>
+<span><span class="co">#&gt;   Standard Deviations: 37.362 33.863 33.346 35.94 </span></span>
+<span><span class="co">#&gt; id 35 </span></span>
+<span><span class="co">#&gt; Marginal variance covariance matrix</span></span>
+<span><span class="co">#&gt;         1       2       3       4</span></span>
+<span><span class="co">#&gt; 1 1395.90 1058.20  879.95  701.71</span></span>
+<span><span class="co">#&gt; 2 1058.20 1146.70  916.21  845.22</span></span>
+<span><span class="co">#&gt; 3  879.95  916.21 1111.90  988.73</span></span>
+<span><span class="co">#&gt; 4  701.71  845.22  988.73 1291.70</span></span>
+<span><span class="co">#&gt;   Standard Deviations: 37.362 33.863 33.346 35.94</span></span></code></pre></div>
+<p>For descriptive purposes, we can also convert <span class="math inline">\(\mathbf{\Sigma}_r\)</span> into a correlation
+matrix using the <code><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cov2cor()</a></code> function, to examine the
+residual autocorrelation between measurement occasions.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="co"># Toeplitz</span></span>
-<span><span class="va">opposites_fit_B</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span></span>
-<span>  <span class="va">opposites_fit_A</span>,</span>
-<span>  <span class="va">.</span> <span class="op">~</span> <span class="va">.</span> <span class="op">-</span> <span class="op">(</span><span class="va">time</span> <span class="op">|</span> <span class="va">id</span><span class="op">)</span> <span class="op">+</span> <span class="fu">toep</span><span class="op">(</span><span class="va">time</span> <span class="op">+</span> <span class="fl">0</span> <span class="op">|</span> <span class="va">id</span><span class="op">)</span>,</span>
-<span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">opposites_fit_B</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
-<span><span class="co">#&gt; Formula:          opposites_naming_score ~ time + I(baseline_cognitive_score -  </span></span>
-<span><span class="co">#&gt;     mucog) + (toep(time + 0 | id)) + time:I(baseline_cognitive_score -  </span></span>
-<span><span class="co">#&gt;     mucog)</span></span>
-<span><span class="co">#&gt; Dispersion:                              ~0</span></span>
-<span><span class="co">#&gt; Data: opposites_naming</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;           AIC           BIC        logLik      deviance      df.resid </span></span>
-<span><span class="co">#&gt;  5.013983e+12  5.013983e+12 -2.506992e+12  5.013983e+12           139 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Random effects:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;  Groups Name Variance Std.Dev. Corr</span></span>
-<span><span class="co">#&gt;  id     time 9.985    3.16         </span></span>
-<span><span class="co">#&gt; Number of obs: 140, groups:  id, 35</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;                                            Estimate Std. Error z value Pr(&gt;|z|)</span></span>
-<span><span class="co">#&gt; (Intercept)                               1.644e+02  1.726e-05 9521576   &lt;2e-16</span></span>
-<span><span class="co">#&gt; time                                      2.696e+01  5.341e-01      50   &lt;2e-16</span></span>
-<span><span class="co">#&gt; I(baseline_cognitive_score - mucog)      -1.136e-01  1.402e-06  -80993   &lt;2e-16</span></span>
-<span><span class="co">#&gt; time:I(baseline_cognitive_score - mucog)  4.329e-01  4.338e-02      10   &lt;2e-16</span></span>
-<span><span class="co">#&gt;                                             </span></span>
-<span><span class="co">#&gt; (Intercept)                              ***</span></span>
-<span><span class="co">#&gt; time                                     ***</span></span>
-<span><span class="co">#&gt; I(baseline_cognitive_score - mucog)      ***</span></span>
-<span><span class="co">#&gt; time:I(baseline_cognitive_score - mucog) ***</span></span>
-<span><span class="co">#&gt; ---</span></span>
-<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cov2cor</a></span><span class="op">(</span><span class="va">opposites_naming_varcov_standard</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co">#&gt;           1         2         3         4</span></span>
+<span><span class="co">#&gt; 1 1.0000000 0.8364012 0.7062988 0.5225751</span></span>
+<span><span class="co">#&gt; 2 0.8364012 1.0000000 0.8113955 0.6944913</span></span>
+<span><span class="co">#&gt; 3 0.7062988 0.8113955 1.0000000 0.8249967</span></span>
+<span><span class="co">#&gt; 4 0.5225751 0.6944913 0.8249967 1.0000000</span></span></code></pre></div>
+<p>As Singer and Willett (2003) discuss, examining the equations and
+outputs above reveals two important properties about the
+occasion-specific residuals of the “standard” multilevel model for
+change:</p>
+<ul>
+<li>They can be both <strong>heteroscedastic</strong> and
+<strong>autocorrelated</strong> within participants (but remember that
+across participants, they are <em>identically</em> heteroscedastic and
+autocorrelated under the homogeneity assumption).</li>
+<li>They have a powerful dependence on time. Specifically, the residual
+variances, <span class="math inline">\(\sigma_{r_j}^2\)</span>, have a
+<strong>quadratic</strong> dependence on time that will be at its
+minimum at time <span class="math inline">\(\text{time} = -(\sigma_{01}
+/ \sigma_1^2)\)</span> and will increase parabolically and symmetrically
+over time on either side of this minimum; and the residual covariances,
+<span class="math inline">\(\sigma_{r_j, r_{j'}}\)</span>, have an
+(imperfect) <strong>band diagonal</strong> structure wherein the overall
+magnitude of the residual covariances tends to decline in diagonal
+“bands” out from the main diagonal.</li>
+</ul>
+<p>The first of these properties—allowing for heteroscedasticity and
+autocorrelation among the composite residuals—is a necessity given the
+anticipated demands of longitudinal data. Not all longitudinal data sets
+will be heteroscedastic or autocorrelated, but a credible model for
+change should should allow for <em>potential</em> heteroscedasticity and
+autocorrelation.</p>
+<p>One advantage of the “standard” multilevel model for change is
+that—although its composite residuals have a powerful dependence on
+time—it is also capable of adapting itself relatively smoothly to many
+common empirical situations, accommodating automatically for certain
+kinds of complex error structure. Nonetheless, Singer and Willett (2003)
+conclude by questioning whether the the hypothesized structure of the
+error covariance matrix implied by the “standard” model can be applied
+ubiquitously, or if there may be empirical situations where directly
+modelling alternative error covariance structures may be preferable.</p>
+</div>
+<div class="section level2">
+<h2 id="postulating-an-alternative-error-covariance-structure">7.3 Postulating an alternative error covariance structure<a class="anchor" aria-label="anchor" href="#postulating-an-alternative-error-covariance-structure"></a>
+</h2>
+<p>In section 7.3 Singer and Willett (2003) discuss how alternative
+error covariance structures can be modelled <em>directly</em> using an
+<strong>extended linear model for change</strong> with heteroscedastic,
+correlated errors fitted by <strong>generalized least squares</strong>
+regression. See Chapter 5 of Pinheiro and Bates (2010) for discussion of
+the extended linear model.</p>
+<p>We can fit the extended linear model for change with the
+<code><a href="https://rdrr.io/pkg/nlme/man/gls.html" class="external-link">gls()</a></code> function from the nlme package, which allows us to
+model the within-group heteroscedasticity and correlation structures via
+the <code>weights</code> and <code>correlation</code> arguments,
+respectively.</p>
+<p>Here we will fit six models to the <code>opposites_naming</code> data
+with the following error covariance structures: unstructured, compound
+symmetric, heterogeneous compound symmetric, autoregressive,
+heterogeneous autoregressive, and Toeplitz. Notice that unlike the
+multilevel model for change, the extended linear model for change has no
+random effects.</p>
+<details><summary>
+Equation Code
+</summary><p>We need these equations for the table below—but there’s nothing
+interesting to look at here—hence why this section is collapsed.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="co"># Unstructured</span></span>
-<span><span class="va">opposites_fit_C</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span></span>
-<span>  <span class="va">opposites_fit_A</span>,</span>
-<span>  <span class="va">.</span> <span class="op">~</span> <span class="va">.</span> <span class="op">-</span> <span class="op">(</span><span class="va">time</span> <span class="op">|</span> <span class="va">id</span><span class="op">)</span> <span class="op">+</span> <span class="fu">us</span><span class="op">(</span><span class="va">time</span> <span class="op">+</span> <span class="fl">0</span> <span class="op">|</span> <span class="va">id</span><span class="op">)</span>,</span>
-<span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
+<code class="sourceCode R"><span><span class="va">hypothesized_varcov</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  unstructured <span class="op">=</span> <span class="st">r"($$\mathbf{\Sigma}_r = \begin{bmatrix}\sigma_1^2 &amp; \sigma_{12} &amp; \sigma_{13} &amp; \sigma_{14} \\ \sigma_{21} &amp; \sigma_2^2 &amp; \sigma_{23} &amp; \sigma_{24} \\ \sigma_{31} &amp; \sigma_{32} &amp; \sigma_3^2 &amp; \sigma_{34} \\ \sigma_{41} &amp; \sigma_{42} &amp; \sigma_{43} &amp; \sigma_4^2 \end{bmatrix}$$)"</span>,</span>
+<span>  compsymm <span class="op">=</span> <span class="st">r"($$\mathbf{\Sigma}_r = \begin{bmatrix} \sigma^2 + \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 \\ \sigma_1^2 &amp; \sigma^2 + \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 \\ \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma^2 + \sigma_1^2 &amp; \sigma_1^2 \\ \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma^2 + \sigma_1^2 \end{bmatrix}$$)"</span>,</span>
+<span>  hetcompsymm <span class="op">=</span> <span class="st">r"($$\mathbf{\Sigma}_r = \begin{bmatrix} \sigma_1^2 &amp; \sigma_1 \sigma_2 \rho &amp; \sigma_1 \sigma_3 \rho &amp; \sigma_1 \sigma_4 \rho \\ \sigma_2 \sigma_1 \rho &amp; \sigma_1^2 &amp; \sigma_2 \sigma_3 \rho &amp; \sigma_2 \sigma_4 \rho \\ \sigma_3 \sigma_1 \rho &amp; \sigma_3 \sigma_2 \rho &amp; \sigma_3^2 &amp; \sigma_3 \sigma_4 \rho \\ \sigma_4 \sigma_1 \rho &amp; \sigma_4 \sigma_2 \rho &amp; \sigma_4 \sigma_3 \rho &amp; \sigma_4^2 \end{bmatrix}$$)"</span>,</span>
+<span>  ar <span class="op">=</span> <span class="st">r"($$\mathbf{\Sigma}_r = \begin{bmatrix} \sigma^2 &amp; \sigma^2 \rho &amp; \sigma^2 \rho^2 &amp; \sigma^2 \rho^3 \\ \sigma^2 \rho &amp; \sigma^2 &amp; \sigma^2 \rho &amp; \sigma^2 \rho^2 \\ \sigma^2 \rho^2 &amp; \sigma^2 \rho &amp; \sigma^2 &amp; \sigma^2 \rho \\ \sigma^2 \rho^3 &amp; \sigma^2 \rho^2 &amp; \sigma^2 \rho &amp; \sigma^2 \end{bmatrix}$$)"</span>,</span>
+<span>  hetar <span class="op">=</span> <span class="st">r"($$\mathbf{\Sigma}_r = \begin{bmatrix} \sigma_1^2 &amp; \sigma_1 \sigma_2 \rho &amp; \sigma_1 \sigma_3 \rho^2 &amp; \sigma_1 \sigma_4 \rho^3 \\ \sigma_2 \sigma_1 \rho &amp; \sigma_2^2 &amp; \sigma_2 \sigma_3 \rho &amp; \sigma_2 \sigma_4 \rho^2 \\ \sigma_3 \sigma_1 \rho^2 &amp; \sigma_3 \sigma_2 \rho &amp; \sigma_3^2 &amp; \sigma_3 \sigma_4 \rho \\ \sigma_4 \sigma_1 \rho^3 &amp; \sigma_4 \sigma_2 \rho^2 &amp; \sigma_4 \sigma_3 \rho &amp; \sigma_4^2 \end{bmatrix}</span></span>
+<span><span class="st">$$)"</span>,</span>
+<span>  toeplitz <span class="op">=</span> <span class="st">r"($$\mathbf{\Sigma}_r = \begin{bmatrix}\sigma^2 &amp; \sigma_1 &amp; \sigma_2 &amp; \sigma_3 \\ \sigma_1 &amp; \sigma^2 &amp; \sigma_1 &amp; \sigma_2 \\ \sigma_2 &amp; \sigma_1 &amp; \sigma^2 &amp; \sigma_1 \\ \sigma_3 &amp; \sigma_2 &amp; \sigma_1 &amp; \sigma^2 \end{bmatrix}</span></span>
+<span><span class="st">$$)"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</details><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Fit models ------------------------------------------------------------------</span></span>
+<span></span>
+<span><span class="co"># Start with a base model we can update with the alternative error covariance</span></span>
+<span><span class="co"># structures. Note that we won't display this model in the table.</span></span>
+<span><span class="va">opposites_naming_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/nlme/man/gls.html" class="external-link">gls</a></span><span class="op">(</span></span>
+<span>  <span class="va">opposites_naming_score</span> <span class="op">~</span> <span class="va">time</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="va">baseline_cognitive_score</span> <span class="op">-</span> <span class="fl">113.4571</span><span class="op">)</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"REML"</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">opposites_naming</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">opposites_fit_C</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
-<span><span class="co">#&gt; Formula:          opposites_naming_score ~ time + I(baseline_cognitive_score -  </span></span>
-<span><span class="co">#&gt;     mucog) + (us(time + 0 | id)) + time:I(baseline_cognitive_score -  </span></span>
-<span><span class="co">#&gt;     mucog)</span></span>
-<span><span class="co">#&gt; Dispersion:                              ~0</span></span>
-<span><span class="co">#&gt; Data: opposites_naming</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;           AIC           BIC        logLik      deviance      df.resid </span></span>
-<span><span class="co">#&gt;  5.013983e+12  5.013983e+12 -2.506992e+12  5.013983e+12           139 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Random effects:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;  Groups Name Variance Std.Dev.</span></span>
-<span><span class="co">#&gt;  id     time 9.985    3.16    </span></span>
-<span><span class="co">#&gt; Number of obs: 140, groups:  id, 35</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;                                            Estimate Std. Error z value Pr(&gt;|z|)</span></span>
-<span><span class="co">#&gt; (Intercept)                               1.644e+02  1.726e-05 9521576   &lt;2e-16</span></span>
-<span><span class="co">#&gt; time                                      2.696e+01  5.341e-01      50   &lt;2e-16</span></span>
-<span><span class="co">#&gt; I(baseline_cognitive_score - mucog)      -1.136e-01  1.402e-06  -80993   &lt;2e-16</span></span>
-<span><span class="co">#&gt; time:I(baseline_cognitive_score - mucog)  4.329e-01  4.338e-02      10   &lt;2e-16</span></span>
-<span><span class="co">#&gt;                                             </span></span>
-<span><span class="co">#&gt; (Intercept)                              ***</span></span>
-<span><span class="co">#&gt; time                                     ***</span></span>
-<span><span class="co">#&gt; I(baseline_cognitive_score - mucog)      ***</span></span>
-<span><span class="co">#&gt; time:I(baseline_cognitive_score - mucog) ***</span></span>
-<span><span class="co">#&gt; ---</span></span>
-<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
+<span><span class="co"># Unstructured:</span></span>
+<span><span class="va">opposites_naming_fit_unstructured</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span></span>
+<span>  <span class="va">opposites_naming_fit</span>,</span>
+<span>  correlation <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/nlme/man/corSymm.html" class="external-link">corSymm</a></span><span class="op">(</span>form <span class="op">=</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">|</span> <span class="va">id</span><span class="op">)</span>,</span>
+<span>  weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/nlme/man/varIdent.html" class="external-link">varIdent</a></span><span class="op">(</span>form <span class="op">=</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">|</span> <span class="va">wave</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Compound symmetry:</span></span>
+<span><span class="va">opposites_naming_fit_compsymm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span></span>
+<span>  <span class="va">opposites_naming_fit</span>,</span>
+<span>  correlation <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/nlme/man/corCompSymm.html" class="external-link">corCompSymm</a></span><span class="op">(</span>form <span class="op">=</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">|</span> <span class="va">id</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Heterogeneous compound symmetry:</span></span>
+<span><span class="va">opposites_naming_fit_hetcompsymm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span></span>
+<span>  <span class="va">opposites_naming_fit_compsymm</span>,</span>
+<span>  weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/nlme/man/varIdent.html" class="external-link">varIdent</a></span><span class="op">(</span>form <span class="op">=</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">|</span> <span class="va">wave</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Autoregressive:</span></span>
+<span><span class="va">opposites_naming_fit_ar</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span></span>
+<span>  <span class="va">opposites_naming_fit</span>,</span>
+<span>  correlation <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/nlme/man/corAR1.html" class="external-link">corAR1</a></span><span class="op">(</span>form <span class="op">=</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">|</span> <span class="va">id</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Heterogeneous autoregressive:</span></span>
+<span><span class="va">opposites_naming_fit_hetar</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span></span>
+<span>  <span class="va">opposites_naming_fit_ar</span>,</span>
+<span>  weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/nlme/man/varIdent.html" class="external-link">varIdent</a></span><span class="op">(</span>form <span class="op">=</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">|</span> <span class="va">wave</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Toeplitz:</span></span>
+<span><span class="va">opposites_naming_fit_toeplitz</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span></span>
+<span>  <span class="va">opposites_naming_fit</span>,</span>
+<span>  correlation <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/nlme/man/corARMA.html" class="external-link">corARMA</a></span><span class="op">(</span>form <span class="op">=</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">|</span> <span class="va">id</span>, p <span class="op">=</span> <span class="fl">3</span>,q <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">opposites_naming_fits</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  <span class="st">"Unstructured"</span> <span class="op">=</span> <span class="va">opposites_naming_fit_unstructured</span>,</span>
+<span>  <span class="st">"Compound symmetry"</span> <span class="op">=</span> <span class="va">opposites_naming_fit_compsymm</span>,</span>
+<span>  <span class="st">"Heterogeneous compound symmetry"</span> <span class="op">=</span> <span class="va">opposites_naming_fit_hetcompsymm</span>,</span>
+<span>  <span class="st">"Autoregressive"</span> <span class="op">=</span> <span class="va">opposites_naming_fit_ar</span>,</span>
+<span>  <span class="st">"Heterogeneous autoregressive"</span> <span class="op">=</span> <span class="va">opposites_naming_fit_hetar</span>,</span>
+<span>  <span class="st">"Toeplitz"</span> <span class="op">=</span> <span class="va">opposites_naming_fit_toeplitz</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Make table ------------------------------------------------------------------</span></span>
+<span></span>
+<span><span class="co"># Table 7.3, page 258-259:</span></span>
+<span><span class="va">opposites_naming_fits</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/map2.html" class="external-link">map2</a></span><span class="op">(</span></span>
+<span>    <span class="co"># Note that this list was made in the collapsed code chunk above. It just</span></span>
+<span>    <span class="co"># contains the equations corresponding to each error covariance structure.</span></span>
+<span>    <span class="va">hypothesized_varcov</span>, </span>
+<span>    \<span class="op">(</span><span class="va">.fit</span>, <span class="va">.hypothesized_varcov</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="va">format_varcov</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
+<span>        <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/nlme/man/getVarCov.html" class="external-link">getVarCov</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, digits <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span>        <span class="va">begin</span> <span class="op">&lt;-</span> <span class="st">"$$\\begin{bmatrix}"</span></span>
+<span>        <span class="va">body</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">1</span>, \<span class="op">(</span><span class="va">.x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">.x</span>, collapse <span class="op">=</span> <span class="st">"&amp;"</span><span class="op">)</span>, <span class="st">"\\\\"</span><span class="op">)</span><span class="op">)</span></span>
+<span>        <span class="va">end</span> <span class="op">&lt;-</span> <span class="st">"\\end{bmatrix}$$"</span></span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">begin</span>, <span class="va">body</span>, <span class="va">end</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
+<span>      <span class="op">}</span></span>
+<span>      </span>
+<span>      <span class="va">gof</span> <span class="op">&lt;-</span> <span class="va">.fit</span> <span class="op">|&gt;</span></span>
+<span>        <span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>        <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>          hypothesized_varcov <span class="op">=</span> <span class="va">.hypothesized_varcov</span>,</span>
+<span>          <span class="st">"-2LL"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2</span> <span class="op">*</span> <span class="va">logLik</span><span class="op">)</span>,</span>
+<span>          varcov <span class="op">=</span> <span class="fu">format_varcov</span><span class="op">(</span><span class="va">.fit</span><span class="op">)</span>,</span>
+<span>          <span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">across</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/where.html" class="external-link">where</a></span><span class="op">(</span><span class="va">is.numeric</span><span class="op">)</span>, \<span class="op">(</span><span class="va">.x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">.x</span>, digits <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span>        <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>        <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">hypothesized_varcov</span>, <span class="st">"-2LL"</span>, <span class="va">AIC</span>, <span class="va">BIC</span>, <span class="va">varcov</span><span class="op">)</span></span>
+<span>    <span class="op">}</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html" class="external-link">list_rbind</a></span><span class="op">(</span>names_to <span class="op">=</span> <span class="st">"structure"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://gt.rstudio.com/reference/gt.html" class="external-link">gt</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="co"># Note: Math formatting in HTML currently requires gt version 0.10.1.9000</span></span>
+<span>  <span class="co"># (development version).</span></span>
+<span>  <span class="fu"><a href="https://gt.rstudio.com/reference/fmt_markdown.html" class="external-link">fmt_markdown</a></span><span class="op">(</span>columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">hypothesized_varcov</span>, <span class="va">varcov</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div id="eexombwkke" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#eexombwkke table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#eexombwkke thead, #eexombwkke tbody, #eexombwkke tfoot, #eexombwkke tr, #eexombwkke td, #eexombwkke th {
+  border-style: none;
+}
+
+#eexombwkke p {
+  margin: 0;
+  padding: 0;
+}
+
+#eexombwkke .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#eexombwkke .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#eexombwkke .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#eexombwkke .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#eexombwkke .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#eexombwkke .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#eexombwkke .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#eexombwkke .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#eexombwkke .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#eexombwkke .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#eexombwkke .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#eexombwkke .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#eexombwkke .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#eexombwkke .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#eexombwkke .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#eexombwkke .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#eexombwkke .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#eexombwkke .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#eexombwkke .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#eexombwkke .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#eexombwkke .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#eexombwkke .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#eexombwkke .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#eexombwkke .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#eexombwkke .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#eexombwkke .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#eexombwkke .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#eexombwkke .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#eexombwkke .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#eexombwkke .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#eexombwkke .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#eexombwkke .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#eexombwkke .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#eexombwkke .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#eexombwkke .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#eexombwkke .gt_left {
+  text-align: left;
+}
+
+#eexombwkke .gt_center {
+  text-align: center;
+}
+
+#eexombwkke .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#eexombwkke .gt_font_normal {
+  font-weight: normal;
+}
+
+#eexombwkke .gt_font_bold {
+  font-weight: bold;
+}
+
+#eexombwkke .gt_font_italic {
+  font-style: italic;
+}
+
+#eexombwkke .gt_super {
+  font-size: 65%;
+}
+
+#eexombwkke .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#eexombwkke .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#eexombwkke .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#eexombwkke .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#eexombwkke .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#eexombwkke .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#eexombwkke .gt_indent_5 {
+  text-indent: 25px;
+}
+</style>
+<table class="table gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead><tr class="gt_col_headings">
+<th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="structure">structure</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="hypothesized_varcov">hypothesized_varcov</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="-2LL">-2LL</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="AIC">AIC</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="BIC">BIC</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="varcov">varcov</th>
+    </tr></thead>
+<tbody class="gt_table_body">
+<tr>
+<td headers="structure" class="gt_row gt_left">Unstructured</td>
+<td headers="hypothesized_varcov" class="gt_row gt_left"><div class="gt_from_md">
+<p>$$\mathbf{\Sigma}_r = \begin{bmatrix}\sigma_1^2 &amp; \sigma_{12} &amp; \sigma_{13} &amp; \sigma_{14} \\ \sigma_{21} &amp; \sigma_2^2 &amp; \sigma_{23} &amp; \sigma_{24} \\ \sigma_{31} &amp; \sigma_{32} &amp; \sigma_3^2 &amp; \sigma_{34} \\ \sigma_{41} &amp; \sigma_{42} &amp; \sigma_{43} &amp; \sigma_4^2 \end{bmatrix}$$</p>
+</div></td>
+<td headers="-2LL" class="gt_row gt_right">1255.8</td>
+<td headers="AIC" class="gt_row gt_right">1283.8</td>
+<td headers="BIC" class="gt_row gt_right">1324.6</td>
+<td headers="varcov" class="gt_row gt_left"><div class="gt_from_md">
+<p>$$\begin{bmatrix}1345.1&amp;1005.8&amp;946.2&amp;583.2\\1005.8&amp;1150.5&amp;1028.5&amp;846.6\\946.2&amp;1028.5&amp;1235.8&amp;969.3\\583.2&amp;846.6&amp;969.3&amp;1206\\\end{bmatrix}$$</p>
+</div></td>
+</tr>
+<tr>
+<td headers="structure" class="gt_row gt_left">Compound symmetry</td>
+<td headers="hypothesized_varcov" class="gt_row gt_left"><div class="gt_from_md">
+<p>$$\mathbf{\Sigma}_r = \begin{bmatrix} \sigma^2 + \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 \\ \sigma_1^2 &amp; \sigma^2 + \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 \\ \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma^2 + \sigma_1^2 &amp; \sigma_1^2 \\ \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma^2 + \sigma_1^2 \end{bmatrix}$$</p>
+</div></td>
+<td headers="-2LL" class="gt_row gt_right">1287.0</td>
+<td headers="AIC" class="gt_row gt_right">1299.0</td>
+<td headers="BIC" class="gt_row gt_right">1316.5</td>
+<td headers="varcov" class="gt_row gt_left"><div class="gt_from_md">
+<p>$$\begin{bmatrix}1231.4&amp;900.1&amp;900.1&amp;900.1\\900.1&amp;1231.4&amp;900.1&amp;900.1\\900.1&amp;900.1&amp;1231.4&amp;900.1\\900.1&amp;900.1&amp;900.1&amp;1231.4\\\end{bmatrix}$$</p>
+</div></td>
+</tr>
+<tr>
+<td headers="structure" class="gt_row gt_left">Heterogeneous compound symmetry</td>
+<td headers="hypothesized_varcov" class="gt_row gt_left"><div class="gt_from_md">
+<p>$$\mathbf{\Sigma}_r = \begin{bmatrix} \sigma_1^2 &amp; \sigma_1 \sigma_2 \rho &amp; \sigma_1 \sigma_3 \rho &amp; \sigma_1 \sigma_4 \rho \\ \sigma_2 \sigma_1 \rho &amp; \sigma_1^2 &amp; \sigma_2 \sigma_3 \rho &amp; \sigma_2 \sigma_4 \rho \\ \sigma_3 \sigma_1 \rho &amp; \sigma_3 \sigma_2 \rho &amp; \sigma_3^2 &amp; \sigma_3 \sigma_4 \rho \\ \sigma_4 \sigma_1 \rho &amp; \sigma_4 \sigma_2 \rho &amp; \sigma_4 \sigma_3 \rho &amp; \sigma_4^2 \end{bmatrix}$$</p>
+</div></td>
+<td headers="-2LL" class="gt_row gt_right">1285.0</td>
+<td headers="AIC" class="gt_row gt_right">1303.0</td>
+<td headers="BIC" class="gt_row gt_right">1329.2</td>
+<td headers="varcov" class="gt_row gt_left"><div class="gt_from_md">
+<p>$$\begin{bmatrix}1438.1&amp;912.9&amp;946.6&amp;1009.5\\912.9&amp;1067.8&amp;815.7&amp;869.9\\946.6&amp;815.7&amp;1148&amp;902\\1009.5&amp;869.9&amp;902&amp;1305.7\\\end{bmatrix}$$</p>
+</div></td>
+</tr>
+<tr>
+<td headers="structure" class="gt_row gt_left">Autoregressive</td>
+<td headers="hypothesized_varcov" class="gt_row gt_left"><div class="gt_from_md">
+<p>$$\mathbf{\Sigma}_r = \begin{bmatrix} \sigma^2 &amp; \sigma^2 \rho &amp; \sigma^2 \rho^2 &amp; \sigma^2 \rho^3 \\ \sigma^2 \rho &amp; \sigma^2 &amp; \sigma^2 \rho &amp; \sigma^2 \rho^2 \\ \sigma^2 \rho^2 &amp; \sigma^2 \rho &amp; \sigma^2 &amp; \sigma^2 \rho \\ \sigma^2 \rho^3 &amp; \sigma^2 \rho^2 &amp; \sigma^2 \rho &amp; \sigma^2 \end{bmatrix}$$</p>
+</div></td>
+<td headers="-2LL" class="gt_row gt_right">1265.9</td>
+<td headers="AIC" class="gt_row gt_right">1277.9</td>
+<td headers="BIC" class="gt_row gt_right">1295.4</td>
+<td headers="varcov" class="gt_row gt_left"><div class="gt_from_md">
+<p>$$\begin{bmatrix}1256.7&amp;1037.2&amp;856&amp;706.5\\1037.2&amp;1256.7&amp;1037.2&amp;856\\856&amp;1037.2&amp;1256.7&amp;1037.2\\706.5&amp;856&amp;1037.2&amp;1256.7\\\end{bmatrix}$$</p>
+</div></td>
+</tr>
+<tr>
+<td headers="structure" class="gt_row gt_left">Heterogeneous autoregressive</td>
+<td headers="hypothesized_varcov" class="gt_row gt_left"><div class="gt_from_md">
+<p>`qZ$$\mathbf{\Sigma}_r = \begin{bmatrix} \sigma_1^2 &amp; \sigma_1 \sigma_2 \rho &amp; \sigma_1 \sigma_3 \rho^2 &amp; \sigma_1 \sigma_4 \rho^3 \ \sigma_2 \sigma_1 \rho &amp; \sigma_2^2 &amp; \sigma_2 \sigma_3 \rho &amp; \sigma_2 \sigma_4 \rho^2 \ \sigma_3 \sigma_1 \rho^2 &amp; \sigma_3 \sigma_2 \rho &amp; \sigma_3^2 &amp; \sigma_3 \sigma_4 \rho \ \sigma_4 \sigma_1 \rho^3 &amp; \sigma_4 \sigma_2 \rho^2 &amp; \sigma_4 \sigma_3 \rho &amp; \sigma_4^2 \end{bmatrix}
+$$</p>
+</div></td>
+<td headers="-2LL" class="gt_row gt_right">1264.8</td>
+<td headers="AIC" class="gt_row gt_right">1282.8</td>
+<td headers="BIC" class="gt_row gt_right">1309.1</td>
+<td headers="varcov" class="gt_row gt_left"><div class="gt_from_md">
+<p>$$\begin{bmatrix}1340.7&amp;1000.7&amp;857.3&amp;708.9\\1000.7&amp;1111.2&amp;952&amp;787.1\\857.3&amp;952&amp;1213.3&amp;1003.2\\708.9&amp;787.1&amp;1003.2&amp;1234\\\end{bmatrix}$$</p>
+</div></td>
+</tr>
+<tr>
+<td headers="structure" class="gt_row gt_left">Toeplitz</td>
+<td headers="hypothesized_varcov" class="gt_row gt_left"><div class="gt_from_md">
+<p>`aH$$\mathbf{\Sigma}_r = \begin{bmatrix}\sigma^2 &amp; \sigma_1 &amp; \sigma_2 &amp; \sigma_3 \ \sigma_1 &amp; \sigma^2 &amp; \sigma_1 &amp; \sigma_2 \ \sigma_2 &amp; \sigma_1 &amp; \sigma^2 &amp; \sigma_1 \ \sigma_3 &amp; \sigma_2 &amp; \sigma_1 &amp; \sigma^2 \end{bmatrix}
+$$</p>
+</div></td>
+<td headers="-2LL" class="gt_row gt_right">1258.1</td>
+<td headers="AIC" class="gt_row gt_right">1274.1</td>
+<td headers="BIC" class="gt_row gt_right">1297.4</td>
+<td headers="varcov" class="gt_row gt_left"><div class="gt_from_md">
+<p>$$\begin{bmatrix}1246.9&amp;1029.3&amp;896.6&amp;624\\1029.3&amp;1246.9&amp;1029.3&amp;896.6\\896.6&amp;1029.3&amp;1246.9&amp;1029.3\\624&amp;896.6&amp;1029.3&amp;1246.9\\\end{bmatrix}$$</p>
+</div></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Comparing the deviance (-2LL), AIC, and BIC statistics for the
+alternative error covariance structures, we find that the unstructured
+and Toeplitz structures lead to the best-fitting models for the
+<code>opposites_naming</code> data.</p>
+<p>Finally, we can see what is gained and lost when modelling the error
+covariance structure directly (instead of indirectly through random
+effects) by comparing fixed effect estimates and goodness-of-fit
+statistics from the unstructured and Toeplitz models with those of the
+“standard” multilevel model for change.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Table 7.4, page 265:</span></span>
+<span><span class="va">opposites_naming_fit_standard</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rlang.r-lib.org/reference/set_names.html" class="external-link">set_names</a></span><span class="op">(</span><span class="st">"Standard"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/keep_at.html" class="external-link">keep_at</a></span><span class="op">(</span><span class="va">opposites_naming_fits</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Toeplitz"</span>, <span class="st">"Unstructured"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="op">(</span>\<span class="op">(</span><span class="va">.x</span><span class="op">)</span> <span class="va">.x</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Standard"</span>, <span class="st">"Toeplitz"</span>, <span class="st">"Unstructured"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://modelsummary.com/man/modelsummary.html" class="external-link">modelsummary</a></span><span class="op">(</span></span>
+<span>    fmt <span class="op">=</span> <span class="fu"><a href="https://modelsummary.com/man/fmt_statistic.html" class="external-link">fmt_statistic</a></span><span class="op">(</span>estimate <span class="op">=</span> <span class="fl">2</span>, statistic <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>,</span>
+<span>    gof_map <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>        raw <span class="op">=</span> <span class="st">"logLik"</span>,</span>
+<span>        clean <span class="op">=</span> <span class="st">"Deviance"</span>,</span>
+<span>        fmt <span class="op">=</span> \<span class="op">(</span><span class="va">.x</span><span class="op">)</span> <span class="fu"><a href="https://gt.rstudio.com/reference/vec_fmt_number.html" class="external-link">vec_fmt_number</a></span><span class="op">(</span></span>
+<span>          <span class="op">-</span><span class="fl">2</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">.x</span><span class="op">)</span>, decimals <span class="op">=</span> <span class="fl">1</span>, sep_mark <span class="op">=</span> <span class="st">""</span></span>
+<span>        <span class="op">)</span></span>
+<span>      <span class="op">)</span>,</span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>        raw <span class="op">=</span> <span class="st">"AIC"</span>,</span>
+<span>        clean <span class="op">=</span> <span class="st">"AIC"</span>,</span>
+<span>        fmt <span class="op">=</span> <span class="fu"><a href="https://modelsummary.com/man/fmt_decimal.html" class="external-link">fmt_decimal</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
+<span>      <span class="op">)</span>,</span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>        raw <span class="op">=</span> <span class="st">"BIC"</span>,</span>
+<span>        clean <span class="op">=</span> <span class="st">"BIC"</span>,</span>
+<span>        fmt <span class="op">=</span> <span class="fu"><a href="https://modelsummary.com/man/fmt_decimal.html" class="external-link">fmt_decimal</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
+<span>      <span class="op">)</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    output <span class="op">=</span> <span class="st">"gt"</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://gt.rstudio.com/reference/tab_row_group.html" class="external-link">tab_row_group</a></span><span class="op">(</span>label <span class="op">=</span> <span class="st">"Goodness-of-Fit"</span>, rows <span class="op">=</span> <span class="fl">13</span><span class="op">:</span><span class="fl">15</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://gt.rstudio.com/reference/tab_row_group.html" class="external-link">tab_row_group</a></span><span class="op">(</span>label <span class="op">=</span> <span class="st">"Variance Components"</span>, rows <span class="op">=</span> <span class="fl">9</span><span class="op">:</span><span class="fl">12</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://gt.rstudio.com/reference/tab_row_group.html" class="external-link">tab_row_group</a></span><span class="op">(</span>label <span class="op">=</span> <span class="st">"Fixed Effects"</span>, rows <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span></span></code></pre></div>
+<div id="jbfglzvneg" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#jbfglzvneg table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#jbfglzvneg thead, #jbfglzvneg tbody, #jbfglzvneg tfoot, #jbfglzvneg tr, #jbfglzvneg td, #jbfglzvneg th {
+  border-style: none;
+}
+
+#jbfglzvneg p {
+  margin: 0;
+  padding: 0;
+}
+
+#jbfglzvneg .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#jbfglzvneg .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#jbfglzvneg .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#jbfglzvneg .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#jbfglzvneg .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#jbfglzvneg .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#jbfglzvneg .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#jbfglzvneg .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#jbfglzvneg .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#jbfglzvneg .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#jbfglzvneg .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#jbfglzvneg .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#jbfglzvneg .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#jbfglzvneg .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#jbfglzvneg .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#jbfglzvneg .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#jbfglzvneg .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#jbfglzvneg .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#jbfglzvneg .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#jbfglzvneg .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#jbfglzvneg .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#jbfglzvneg .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#jbfglzvneg .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#jbfglzvneg .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#jbfglzvneg .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#jbfglzvneg .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#jbfglzvneg .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#jbfglzvneg .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#jbfglzvneg .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#jbfglzvneg .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#jbfglzvneg .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#jbfglzvneg .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#jbfglzvneg .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#jbfglzvneg .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#jbfglzvneg .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#jbfglzvneg .gt_left {
+  text-align: left;
+}
+
+#jbfglzvneg .gt_center {
+  text-align: center;
+}
+
+#jbfglzvneg .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#jbfglzvneg .gt_font_normal {
+  font-weight: normal;
+}
+
+#jbfglzvneg .gt_font_bold {
+  font-weight: bold;
+}
+
+#jbfglzvneg .gt_font_italic {
+  font-style: italic;
+}
+
+#jbfglzvneg .gt_super {
+  font-size: 65%;
+}
+
+#jbfglzvneg .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#jbfglzvneg .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#jbfglzvneg .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#jbfglzvneg .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#jbfglzvneg .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#jbfglzvneg .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#jbfglzvneg .gt_indent_5 {
+  text-indent: 25px;
+}
+</style>
+<table class="table gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead><tr class="gt_col_headings">
+<th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id=" "> </th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="Standard">Standard</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="Toeplitz">Toeplitz</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="Unstructured">Unstructured</th>
+    </tr></thead>
+<tbody class="gt_table_body">
+<tr class="gt_group_heading_row">
+<th colspan="4" class="gt_group_heading" scope="colgroup" id="Fixed Effects">Fixed Effects</th>
+    </tr>
+<tr class="gt_row_group_first">
+<td headers="Fixed Effects   " class="gt_row gt_left">(Intercept)</td>
+<td headers="Fixed Effects  Standard" class="gt_row gt_center">164.37</td>
+<td headers="Fixed Effects  Toeplitz" class="gt_row gt_center">165.10</td>
+<td headers="Fixed Effects  Unstructured" class="gt_row gt_center">165.83</td>
+</tr>
+<tr>
+<td headers="Fixed Effects   " class="gt_row gt_left"></td>
+<td headers="Fixed Effects  Standard" class="gt_row gt_center">(6.206)</td>
+<td headers="Fixed Effects  Toeplitz" class="gt_row gt_center">(5.922)</td>
+<td headers="Fixed Effects  Unstructured" class="gt_row gt_center">(5.953)</td>
+</tr>
+<tr>
+<td headers="Fixed Effects   " class="gt_row gt_left">time</td>
+<td headers="Fixed Effects  Standard" class="gt_row gt_center">26.96</td>
+<td headers="Fixed Effects  Toeplitz" class="gt_row gt_center">26.90</td>
+<td headers="Fixed Effects  Unstructured" class="gt_row gt_center">26.58</td>
+</tr>
+<tr>
+<td headers="Fixed Effects   " class="gt_row gt_left"></td>
+<td headers="Fixed Effects  Standard" class="gt_row gt_center">(1.994)</td>
+<td headers="Fixed Effects  Toeplitz" class="gt_row gt_center">(1.943)</td>
+<td headers="Fixed Effects  Unstructured" class="gt_row gt_center">(1.926)</td>
+</tr>
+<tr>
+<td headers="Fixed Effects   " class="gt_row gt_left">I(baseline_cognitive_score - 113.4571)</td>
+<td headers="Fixed Effects  Standard" class="gt_row gt_center">-0.11</td>
+<td headers="Fixed Effects  Toeplitz" class="gt_row gt_center">0.00</td>
+<td headers="Fixed Effects  Unstructured" class="gt_row gt_center">-0.07</td>
+</tr>
+<tr>
+<td headers="Fixed Effects   " class="gt_row gt_left"></td>
+<td headers="Fixed Effects  Standard" class="gt_row gt_center">(0.504)</td>
+<td headers="Fixed Effects  Toeplitz" class="gt_row gt_center">(0.481)</td>
+<td headers="Fixed Effects  Unstructured" class="gt_row gt_center">(0.483)</td>
+</tr>
+<tr>
+<td headers="Fixed Effects   " class="gt_row gt_left">time × I(baseline_cognitive_score - 113.4571)</td>
+<td headers="Fixed Effects  Standard" class="gt_row gt_center">0.43</td>
+<td headers="Fixed Effects  Toeplitz" class="gt_row gt_center">0.44</td>
+<td headers="Fixed Effects  Unstructured" class="gt_row gt_center">0.46</td>
+</tr>
+<tr>
+<td headers="Fixed Effects   " class="gt_row gt_left"></td>
+<td headers="Fixed Effects  Standard" class="gt_row gt_center">(0.162)</td>
+<td headers="Fixed Effects  Toeplitz" class="gt_row gt_center">(0.158)</td>
+<td headers="Fixed Effects  Unstructured" class="gt_row gt_center">(0.156)</td>
+</tr>
+<tr class="gt_group_heading_row">
+<th colspan="4" class="gt_group_heading" scope="colgroup" id="Variance Components">Variance Components</th>
+    </tr>
+<tr class="gt_row_group_first">
+<td headers="Variance Components   " class="gt_row gt_left">sd_(Intercept)</td>
+<td headers="Variance Components  Standard" class="gt_row gt_center">35.16</td>
+<td headers="Variance Components  Toeplitz" class="gt_row gt_center"></td>
+<td headers="Variance Components  Unstructured" class="gt_row gt_center"></td>
+</tr>
+<tr>
+<td headers="Variance Components   " class="gt_row gt_left">cor_time.(Intercept)</td>
+<td headers="Variance Components  Standard" class="gt_row gt_center">-0.49</td>
+<td headers="Variance Components  Toeplitz" class="gt_row gt_center"></td>
+<td headers="Variance Components  Unstructured" class="gt_row gt_center"></td>
+</tr>
+<tr>
+<td headers="Variance Components   " class="gt_row gt_left">sd_time</td>
+<td headers="Variance Components  Standard" class="gt_row gt_center">10.36</td>
+<td headers="Variance Components  Toeplitz" class="gt_row gt_center"></td>
+<td headers="Variance Components  Unstructured" class="gt_row gt_center"></td>
+</tr>
+<tr>
+<td headers="Variance Components   " class="gt_row gt_left" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;">sd_Observation</td>
+<td headers="Variance Components  Standard" class="gt_row gt_center" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;">12.63</td>
+<td headers="Variance Components  Toeplitz" class="gt_row gt_center" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;"></td>
+<td headers="Variance Components  Unstructured" class="gt_row gt_center" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;"></td>
+</tr>
+<tr class="gt_group_heading_row">
+<th colspan="4" class="gt_group_heading" scope="colgroup" id="Goodness-of-Fit">Goodness-of-Fit</th>
+    </tr>
+<tr class="gt_row_group_first">
+<td headers="Goodness-of-Fit   " class="gt_row gt_left">Deviance</td>
+<td headers="Goodness-of-Fit  Standard" class="gt_row gt_center">1260.3</td>
+<td headers="Goodness-of-Fit  Toeplitz" class="gt_row gt_center">1258.1</td>
+<td headers="Goodness-of-Fit  Unstructured" class="gt_row gt_center">1255.8</td>
+</tr>
+<tr>
+<td headers="Goodness-of-Fit   " class="gt_row gt_left">AIC</td>
+<td headers="Goodness-of-Fit  Standard" class="gt_row gt_center">1276.3</td>
+<td headers="Goodness-of-Fit  Toeplitz" class="gt_row gt_center">1274.1</td>
+<td headers="Goodness-of-Fit  Unstructured" class="gt_row gt_center">1283.8</td>
+</tr>
+<tr>
+<td headers="Goodness-of-Fit   " class="gt_row gt_left">BIC</td>
+<td headers="Goodness-of-Fit  Standard" class="gt_row gt_center">1299.6</td>
+<td headers="Goodness-of-Fit  Toeplitz" class="gt_row gt_center">1297.4</td>
+<td headers="Goodness-of-Fit  Unstructured" class="gt_row gt_center">1324.6</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Singer and Willett (2003) observe that for the
+<code>opposites_naming</code> data:</p>
+<ul>
+<li>The Toeplitz model fits <em>slightly</em> better than the “standard”
+model on all accounts, but not enough to reject the “standard”
+model.</li>
+<li>The unstructured model fits best if we focus exclusively on the
+deviance statistic, but at the cost of losing more degrees of freedom
+than any other error covariance structure considered here.</li>
+<li>The fixed effects estimates are similar between the “standard”,
+Toeplitz, and unstructured models (except for
+<code>I(baseline_cognitive_score - 113.4571)</code>), but the precision
+of these estimates is <em>slightly</em> better for the Toeplitz and
+unstructured models, which better represent the error covariance
+structure of the data.</li>
+</ul>
+<p>Thus, for this data, we conclude that not much is gained by replacing
+the “standard” multilevel model for change with any of the extended
+linear models for change explored here.</p>
+<p>However, in other data sets, the magnitude of difference between
+these modelling approaches may be greater (depending on the study
+design, statistical model, choice of error covariance structure, and the
+nature of the phenomenon under study), which may lead us to prefer the
+extended linear model for change—if our inferential goal
+<em>exclusively</em> involves population-averaged interpretations of
+fixed effects, and we are not at all interested in addressing questions
+about individuals via random effects (For discussion, see McNeish,
+Stapleton, &amp; Silverman, 2017; Muff, Held, &amp; Keller, 2016).</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
