@@ -1,15 +1,13 @@
 ---
-title: "Chapter 9: "
+title: "Chapter 9: A framework for investigating event occurrence"
 ---
-
-::: {.alert .alert-warning}
-This chapter is under construction.
-:::
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE
 )
 ggplot2::theme_set(ggplot2::theme_bw())
 ggplot2::theme_update(
@@ -21,24 +19,76 @@ ggplot2::theme_update(
 ```{r setup}
 library(alda)
 library(dplyr)
+library(purrr)
 library(ggplot2)
 ```
 
-## 9.1 Should You Conduct a Survival Analysis? The "Whether" and "When" Test
+## 9.1 Should you conduct a survival analysis? The "whether" and "when" test
+
+In Section 9.1 Singer and Willett (2003) introduce a simple mnemonic they refer to as the "whether" and "when" test to determine whether a research question may call for **survival analysis**: If your research questions includes the words "whether" or "when", then you likely need to use survival methods. To illustrate the range of research questions for which survival methods are suitable, they introduce three studies that pass the "whether" and "when" test:
+
+  - `alcohol_relapse`: A person-level data frame with 89 rows and 3 columns containing a subset of data from Cooney and colleagues (1991), who measured *whether* and (if so) *when* 89 recently treated alcoholics first relapsed to alcohol use.
+
+    ```{r}
+    alcohol_relapse
+    ```
+
+  - `teachers`: A person-level data frame with 3941 rows and 3 columns containing a subset of data from Singer (1993), who measured *whether* and (if so) *when* 3941 newly hired special educators in Michigan first stopped teaching in the state.
+
+    ```{r}
+    teachers
+    ```
+
+  - `suicide_ideation`: A person-level data frame with 391 rows and 4 columns containing a subset of data from Bolger and colleagues (1989), who measured *whether* and (if so) *when* 391 undergraduate students first experienced suicide ideation.
+
+    ```{r}
+    suicide_ideation
+    ```
+
+In later chapters, we will return to these data sets to explore different survival methods.
+
+## 9.2 Framing a research question about event occurrence
+
+In Section 9.2 Singer and Willett (2003) discuss the three methodological features that make a study suitable for survival analysis:
+
+- A **target event**, whose occurrence represents an individual's transition from one state to another state, where the set of states are precisely defined, mutually exclusive, and jointly exhaustive.
+- A **beginning of time**, when *everyone* in the population is (at least theoretically) **at risk** of experiencing the target event, and all individuals occupy only one of the possible non-event states. The temporal distance from the beginning of time until event occurrence is referred to as the **event time**.
+- A **metric for clocking time**, which provides a meaningful temporal scale to record event occurrence---in the smallest possible units relevant to the process under study. For analytical reasons, we further distinguish between **discrete time** and **continuous time**, depending on whether time is measured in discrete or continuous intervals.
+
+Each of the three example studies introduced above possesses these features.
+
+| Study | Target event | Beginning of time | Metric | Interval |
+|-------|--------------|-------------------|--------|----------|
+| `alcohol_relapse` | First relapse to alcohol use | Post-treatment | Weeks | Continuous |
+| `teachers` | Stopped teaching in Michigan | Hiring date | Years | Discrete |
+| `suicide_ideation` | First suicide ideation | Birth | Age (in years) | Discrete |
+
+## 9.3 Censoring: How complete are the data on event occurrence?
+
+In Section 9.3 Singer and Willett (2003) introduce the concept of **censoring** and **censored observations**, which occur when sample members have *unknown* event times---preventing you from knowing whether and (if so) when the target event occurs for a subset of the sample. Censoring is a hallmark feature of event occurrence data that makes new statistical methods necessary; it arises in different ways and rates, and has several different forms: 
+
+- Censoring occurs for two primary reasons: (1) some individuals will never experience the target event; and (2) some individuals will experience the target event outside the study's data collection period.
+- The amount of censoring in a study is related to two factors: (1) the rate at which the target event occurs in the population; and (2) the length of the data collection period.
+- There are two mechanisms behind censoring: (1) a **noninformative** mechanism, where censoring occurs for reasons independent of event occurrence and the risk of event occurrence; and (2) an **informative** mechanism, where censoring occurs for reasons related to event occurrence and the risk of event occurrence
+- There are two types of censoring: (1) **right-censoring** arises when an event time is unknown because event occurrence is not observed; and (2) **left-censoring** arises when an event time is unknown because the beginning of time is not observed.
+
+Each of the three example studies had different rates of censoring: 22.5% of the former alcoholics remained abstinent, 44.0% of the newly hired teachers were still teaching Michigan, and 29.7% of the undergraduates did not experience suicide ideation.
 
 ```{r}
-alcohol_relapse
-teachers
-suicide_ideation
+map(
+  list(
+    alcohol_relapse = alcohol_relapse,
+    teachers = teachers,
+    suicide_ideation = suicide_ideation
+  ),
+  \(.x) .x |> count(censor, name = "count") |> mutate(proportion = count / sum(count))
+)
 ```
 
-## 9.2 Framing a Research Question about Event Occurrence
-
-## 9.3 Censoring: How Complete Are the Data on Event Occurrence?
-
-Figure 9.1:
+As Singer and Willett (2003) discuss, the toll of censoring can be seen by plotting the event times and censored event times for the `teachers` data. Notice the discrepancy in sample distributions between those with known event times and those with censored event times---this is typical of event occurrence data, and makes summarizing time-to-event occurrence difficult to do adequately with traditional descriptive methods (e.g., measures of central tendency and dispersion).
 
 ```{r}
+# Figure 9.1, page 321:
 ggplot(teachers, aes(x = years)) +
   geom_bar() +
   geom_text(aes(label = after_stat(count)), stat = "count", vjust = -.5) +
@@ -46,3 +96,5 @@ ggplot(teachers, aes(x = years)) +
   coord_cartesian(ylim = c(0, 550)) +
   facet_wrap(vars(censor), nrow = 2, labeller = label_both)
 ```
+
+In the remaining chapters, we will explore several different methods for survival analysis: An alternative statistical approach that incorporates censored observations based on the information they provide about **event nonoccurrence**, allowing us to adequately summarize time-to-event occurrence by dealing evenhandedly with both known and censored event times.
