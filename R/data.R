@@ -415,7 +415,7 @@ NULL
 
 #' Age of first sexual intercourse
 #'
-#' A subset of data from Capaldi, Crosby, and Stoolmiller's (1996) measuring the
+#' A subset of data from Capaldi, Crosby, and Stoolmiller (1996) measuring the
 #' grade year of first sexual intercourse in a sample of 180 at-risk
 #' heterosexual adolescent males. Adolescent males were followed from Grade 7 up
 #' to Grade 12 or until they reported having had sexual intercourse for the
