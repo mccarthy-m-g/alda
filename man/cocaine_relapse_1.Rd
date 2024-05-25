@@ -25,7 +25,7 @@ Journal of Consulting and Clinical Psychology, 58, 175–181.
 cocaine_relapse_1
 }
 \description{
-A subset of data from Hall, Havassy, and Wasserman's (1990) measuring the
+A subset of data from Hall, Havassy, and Wasserman (1990) measuring the
 number of weeks of relapse to cocaine use in a sample of 104 former addicts
 released from an in-patient treatment program. In-patients were followed for
 up to 12 weeks or until they used cocaine for 7 consecutive days.
