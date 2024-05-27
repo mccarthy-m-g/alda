@@ -2,14 +2,12 @@
 title: "Chapter 10: Describing discrete-time event occurrence data"
 ---
 
-::: {.alert .alert-warning}
-This chapter is under construction.
-:::
-
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE
 )
 ggplot2::theme_set(ggplot2::theme_bw())
 ggplot2::theme_update(
@@ -22,157 +20,384 @@ ggplot2::theme_update(
 library(alda)
 library(dplyr)
 library(tidyr)
+library(purrr)
 library(ggplot2)
+library(patchwork)
 library(survival)
 library(broom)
 ```
 
-## 10.1 The Life Table
+## 10.1 The life table
 
-Table 10.1, page 327:
+In Section 10.1 Singer and Willett (2003) introduce the **life table**---the primary tool for for summarizing the sample distribution of event occurrence---using a subset of data from Singer (1993), who measured how many years 3941 newly hired special educators in Michigan stayed in teaching between 1972 and 1978. Teachers were followed for up to 13 years or until they stopped teaching in the state.
+
+For this example we return to the `teachers` data set introduced in Chapter 9, a person-level data frame with 3941 rows and 3 columns:
+
+- `id`: Teacher ID.
+- `years`: The number of years between a teacher's dates of hire and departure from the Michigan public schools.
+- `censor`: Censoring status.
 
 ```{r}
-# A life table is the tabular form of a survival curve, so begin by fitting a
-# Kaplan-Meir curve to the data.
+teachers
+```
+
+As Singer and Willett (2003) discuss, a life table tracks the event histories of a sample of individuals over a series of contiguous intervals---from the beginning of time through the end of data collection---by including information on the number of individuals who:
+
+- Entered each interval.
+- Experienced the target event during an interval.
+- Were censored at the end of an interval.
+
+We can either construct a life table "by hand" by first converting the person-level data set to a person-period data set, then cross-tabulating **time period** and **event-indicator** variables; or by using a prepackaged routine. Because we will be constructing a life table "by hand" in Section 10.5, here we demonstrate the prepackaged routine approach.
+
+Conceptually, the life table is simply the tabular form of a **survival function** (see Section 10.2); thus, an easy way to construct a life table is to first fit a survival function to the person-level data set, then use the summary of the fit as a starting point to construct the remainder of the table. 
+
+We can fit a survival function using the `survfit()` function from the **survival** package. The model formula for the `survfit()` function takes the form `response ~ terms`, where the response must be a "survival object" created by the `Surv()` function. For right-censored data, the survival object can be created by supplying two unnamed arguments to the `Surv()` function corresponding to `time` and `event` variables, in that order. Note that we can recode a `censor` variable into an `event` variable by reversing its values. For 0-1 coded data, we can write the event status as `event = censor - 1`. 
+
+```{r}
 teachers_fit <- survfit(Surv(years, 1 - censor) ~ 1, data = teachers)
 
-table_10.1 <- teachers_fit |>
-  # Add a starting time (time 0) for the table.
+summary(teachers_fit)
+```
+
+Next, we'll collect the summary information from the `survfit` object into a tibble using the `tidy()` function from the **broom** package. For now we will exclude any statistical summaries from the life table, focusing exclusively on columns related to the event histories of the `teachers` data. Note also that the summary information from the `survfit` object starts at the time of the first event, not the "beginning of time". We can add a "beginning of time" to the `survfit` object using the `survfit0()` function from the survival package, which (by default) adds a starting time of 0 to the life table.
+
+```{r}
+teachers_lifetable <- teachers_fit |>
   survfit0() |>
   tidy() |>
-  # The summary of the fit gives most of what we want, but to match Table 10.1
-  # we need to do a little more wrangling.
-  select(-c(std.error:conf.low)) |>
-  mutate(
-    interval = paste0("[", time, ", ", time + 1, ")"),
-    haz.estimate = n.event / n.risk
-  ) |>
-  rename(year = time, surv.estimate = estimate) |>
-  relocate(
-    year, interval, n.risk, n.event, n.censor, haz.estimate, surv.estimate
-  )
+  select(-c(estimate:conf.low)) |>
+  mutate(interval = paste0("[", time, ", ", time + 1, ")"), .after = time) |>
+  rename(year = time)
 
-table_10.1
+teachers_lifetable
 ```
 
-## 10.2 A Framework for Characterizing the Distribution of Discrete-Time Event Occurrence Data
+As Singer and Willett (2003) discuss, we interpret the columns of the life table as follows:
 
-Figure 10.1, page 333:
+- `year`: Defines the time of each interval using ordinal numbers.
+- `interval`: Defines precisely which event times appear in each interval using the **interval notation**, `[start, end)`, where each interval includes the starting time and excludes the ending time.
+- `n.risk`: Defines the **risk set** during each interval; that is, the number of (remaining) individuals who are eligible to experience the target event during an interval.
+- `n.event`: Defines the number of individuals who experienced the target event during an interval.
+- `n.censor`: Defines the number of individuals who were censored during an interval.
+
+Importantly, notice that once an individual experiences the target event or is censored during an interval, they drop out of the risk set in all future intervals; thus, the risk set is inherently irreversible.
+
+## 10.2 A framework for characterizing the distribution of discrete-time event occurrence data
+
+In Section 10.2 Singer and Willett (2003) introduce three statistics for summarizing the event history information of the life table, which can estimated directly from the life table:
+
+- **Hazard** is the fundamental quantity used to assess the risk of event occurrence in each discrete time period. The **discrete-time hazard function** is the *conditional probability* that the $i$th individual will experience the target event in the $j$th interval, given that they did not experience it in any prior interval: 
+
+  $$
+  h(t_{ij}) = \Pr[T_i = j \mid T \geq j],
+  $$
+  
+  whose maximum likelihood estimates are given by the proportion of each interval's risk set that experiences the event during that interval:
+
+  $$
+  \hat h(t_j) = \frac{n \text{ events}_j}{n \text{ at risk}_j}.
+  $$
+
+- The **survival function** is the *cumulative probability* that the $i$th individual will *not* experience the target event past the $j$th interval:
+  
+  $$
+  S(t_{ij}) = \Pr[T > j],
+  $$
+  
+  whose maximum likelihood estimates are given by the cumulative product of the complement of the estimated hazard probabilities across the current and all previous intervals:
+  
+  $$
+  \hat S(t_j) = [1 - \hat h(t_j)]
+                [1 - \hat h(t_{j-1})]
+                [1 - \hat h(t_{j-2})]
+                \dots
+                [1 - \hat h(t_1)].
+  $$
+
+- The **median lifetime** is a measure of central tendency identifying the point in time by which we estimate that half of the sample has experienced the target event and half has not, given by:
+
+  $$
+  \text{Estimated median lifetime} = m
+    + \Bigg[ \frac{\hat S(t_m) - .5}{\hat S(t_m) - \hat S(t_{m + 1})} \Bigg]
+    \big( (m + 1) - m \big),
+  $$
+  
+  where $m$ is the time interval immediately before the median lifetime, $\hat S(t_m)$ is the value of the survivor function in the $m$th interval, and $\hat S(t_{m + 1})$ is the value of the survivor function in the next interval. 
+
+First, the discrete-time hazard function and the survival function. Note the use of if-else statements to provide preset values for the "beginning of time", which by definition will always be `NA` for the discrete-time hazard function and `1` for the survival function.
 
 ```{r}
-ggplot(table_10.1, aes(x = year, y = haz.estimate)) +
-  geom_line() +
-  scale_x_continuous(breaks = 0:13, limits = c(1, 13)) +
-  scale_y_continuous(breaks = c(0, .05, .1, .15), limits = c(0, .15)) +
-  coord_cartesian(xlim = c(0, 13))
-
-# First interpolate median lifetime
-median_lifetime <- table_10.1 |>
-  # Get the row indices for the first survival estimate immediately below and
-  # immediately above 0.5. This will only work correctly if the values are in
-  # descending order, otherwise min() and max() must be swapped. By default, the
-  # survival estimates are in descending order, however, I've added the
-  # redundant step of ensuring they are here for demonstration purposes.
-  arrange(desc(surv.estimate)) |>
-  slice(min(which(surv.estimate <= .5)), max(which(surv.estimate >= .5))) |>
-  select(year, surv.estimate) |>
-  # Linearly interpolate between the two values of the survival estimates that
-  # bracket .5 following Miller's (1981) equation.
-  summarise(
-    year =
-      min(year) +
-      ((max(surv.estimate) - .5) /
-       (max(surv.estimate) - min(surv.estimate))) *
-      ((min(year) + 1) - min(year)),
-    surv.estimate = .5
+teachers_lifetable <- teachers_lifetable |>
+  mutate(
+    haz.estimate = if_else(year != 0, n.event / n.risk, NA),
+    surv.estimate = if_else(year != 0, 1 - haz.estimate, 1),
+    surv.estimate = cumprod(surv.estimate)
   )
 
-ggplot(table_10.1, aes(x = year, y = surv.estimate)) +
+# Table 10.1, page 327:
+teachers_lifetable
+```
+
+Then the median lifetime. Here we use the `slice()` function from the **dplyr** package to select the time intervals immediately before and after the median lifetime, then do a bit of wrangling to make applying the median lifetime equation easier and clearer.
+
+```{r}
+teachers_median_lifetime <- teachers_lifetable |>
+  slice(max(which(surv.estimate >= .5)), min(which(surv.estimate <= .5))) |>
+  mutate(m = c("before", "after")) |>
+  select(m, year, surv = surv.estimate) |>
+  pivot_wider(names_from = m, values_from = c(year, surv)) |>
+  summarise(
+    surv.estimate = .5,
+    year = year_before
+      + ((surv_before - .5) / (surv_before - surv_after))
+      * (year_after - year_before)
+  )
+  
+teachers_median_lifetime
+```
+
+A valuable way of examining these statistics is to plot their trajectories over time.
+
+```{r}
+teachers_haz <- ggplot(teachers_lifetable, aes(x = year, y = haz.estimate)) +
+  geom_line() +
+  scale_x_continuous(breaks = 0:13) +
+  coord_cartesian(xlim = c(0, 13), ylim = c(0, .15))
+
+teachers_surv <- ggplot(teachers_lifetable, aes(x = year, y = surv.estimate)) +
   geom_line() +
   geom_segment(
-    aes(xend = year, y = 0, yend = .5), data = median_lifetime, linetype = 2
+    aes(xend = year, y = 0, yend = .5),
+    data = teachers_median_lifetime,
+    linetype = 2
   ) +
   geom_segment(
-    aes(xend = 0, yend = .5), data = median_lifetime, linetype = 2
+    aes(xend = 0, yend = .5),
+    data = teachers_median_lifetime,
+    linetype = 2
   ) +
   scale_x_continuous(breaks = 0:13) +
-  scale_y_continuous(breaks = c(0, .5, 1), limits = c(0, 1)) +
+  scale_y_continuous(breaks = c(0, .5, 1)) +
   coord_cartesian(xlim = c(0, 13))
+
+# Figure 10.1, page 333:
+teachers_haz + teachers_surv + plot_layout(ncol = 1, axes = "collect")
 ```
 
-## 10.3 Developing Intuition About Hazard Functions, Survivor Functions, and Median Lifetimes
+When examining plots like these, Singer and Willett (2003) recommend looking for patterns in and between the trajectories to answer questions like:
 
-Figure 10.2, page 340:
+- What is the overall shape of the hazard function?
+- When are the time periods of high and low risk?
+- Are time periods with elevated risk likely to affect large or small numbers of people, given the value of the survivor function?
+
+## 10.3 Developing intuition about hazard functions, survivor functions, and median lifetimes
+
+In Section 10.3 Singer and Willett (2003) examine and describe the estimated discrete-time hazard functions, survivor functions, and median lifetimes from four studies that differ by their type of target event, metric for clocking time, and underlying profile of risk:
+
+  - `cocaine_relapse_1`: A person-level data frame with 104 rows and 4 columns containing a subset of data from Hall, Havassy, and Wasserman (1990), who measured the number of weeks of relapse to cocaine use in a sample of 104 former addicts released from an in-patient treatment program. In-patients were followed for up to 12 weeks or until they used cocaine for 7 consecutive days.
+
+    ```{r}
+    cocaine_relapse_1
+    ```
+
+  - `first_sex`: A person-level data frame with 180 rows and 5 columns containing a subset of data from Capaldi, Crosby, and Stoolmiller (1996), who measured the grade year of first sexual intercourse in a sample of 180 at-risk heterosexual adolescent males. Adolescent males were followed from Grade 7 up to Grade 12 or until they reported having had sexual intercourse for the first time.
+
+    ```{r}
+    first_sex
+    ```
+
+  - `suicide_ideation`: A person-level data frame with 391 rows and 4 columns containing a subset of data from Bolger and colleagues (1989) measuring age of first suicide ideation in a sample of 391 undergraduate students aged 16 to 22. Age of first suicide ideation was measured with a two-item survey asking respondents "Have you ever thought of committing suicide?" and if so, "At what age did the thought first occur to you?"
+
+    ```{r}
+    suicide_ideation
+    ```
+
+  - `congresswomen`: A person-level data frame with 168 rows and 5 columns containing data measuring how long all 168 women who were elected to the U.S. House of Representatives between 1919 and 1996 remained in office. Representatives were followed for up to eight terms or until 1998.
+
+    ```{r}
+    congresswomen
+    ```
+
+We can plot the discrete-time hazard functions, survivor functions, and median lifetimes from each of these four studies in a single call using the `pmap()` function from the **purrr** package.
 
 ```{r}
-relapse_fit <- survfit(Surv(weeks, 1 - censor) ~ 1, data = cocaine_relapse_1)
-relapse_tidy <- tidy(relapse_fit)
-relapse_summary <- glance(relapse_fit)
+#| fig.height: 10
+study_plots <- pmap(
+  list(
+      list("cocaine_relapse_1", "first_sex", "suicide_ideation", "congresswomen"),
+      list(cocaine_relapse_1, first_sex, suicide_ideation, congresswomen),
+      list("weeks", "grade", "age", "terms"),
+      list(0, 6, 5, 0)
+  ),
+  \(.title, .study, .time, .beginning) {
+    
+    # Get life table statistics.
+    study_fit <- survfit(Surv(.study[[.time]], 1 - censor) ~ 1, data = .study)
+    
+    study_lifetable <- study_fit |>
+      survfit0(start.time = .beginning) |>
+      tidy() |>
+      rename(surv.estimate = estimate) |>
+      mutate(haz.estimate = if_else(time != .beginning, n.event / n.risk, NA))
+    
+    study_median_lifetime <- study_lifetable |>
+      slice(max(which(surv.estimate >= .5)), min(which(surv.estimate <= .5))) |>
+      mutate(m = c("before", "after")) |>
+      select(m, time, surv = surv.estimate) |>
+      pivot_wider(names_from = m, values_from = c(time, surv)) |>
+      summarise(
+        surv.estimate = .5,
+        time = time_before
+          + ((surv_before - .5) / (surv_before - surv_after))
+          * (time_after - time_before)
+      )
+    
+    # Plot discrete-time hazard and survival functions.
+    study_haz <- ggplot(study_lifetable, aes(x = time, y = haz.estimate)) +
+      geom_line() +
+      xlab(.time)
+    
+    study_surv <- ggplot(study_lifetable, aes(x = time, y = surv.estimate)) +
+      geom_line() +
+      geom_segment(
+        aes(xend = time, y = 0, yend = .5),
+        data = study_median_lifetime,
+        linetype = 2
+      ) +
+      geom_segment(
+        aes(xend = .beginning, yend = .5),
+        data = study_median_lifetime,
+        linetype = 2
+      ) +
+      xlab(.time)
+    
+    wrap_elements(panel = (study_haz | study_surv)) + ggtitle(.title)
+  }
+)
+
+# Figure 10.2, page 340:
+wrap_plots(study_plots, ncol = 1)
 ```
 
-## 10.4 Quantifying the Effects of Sampling Variation
+Focusing on the overall shape of the discrete-time hazard functions, and contextualizing their shape against their respective survival functions, Singer and Willet (2003) make the following observations:
 
-Table 10.2, page 349:
+- `cocaine_relapse_1`: The discrete-time hazard function follows a **monotonically decreasing** pattern---peaking immediately after the "beginning of time" and decreasing thereafter---which is common when studying target events related to recurrence and relapse. This is reflected in the survival function, which drops rapidly in early time periods, then more slowly over time as the hazard decreases, indicating that the prevalence of relapse to cocaine use was greatest shortly after leaving treatment.
+
+- `first_sex`: The discrete-time hazard function follows a **monotonically increasing** pattern---starting low immediately after the "beginning of time" and increasing thereafter---which is common when studying target events that are ultimately inevitable or near universal. This is reflected in the survival function, which drops slowly in early time periods, then more rapidly over time as the hazard increases, indicating that the prevalence of first sexual intercourse in those still at risk progressively increased as time progressed.
+
+- `suicide_ideation`: The discrete-time hazard function follows a **nonmonotonic** pattern with multiple distinctive peaks and troughs, which generally arise in studies of long duration due to the data collection period being of sufficient length to capture reversals in otherwise seemingly monotonic trends. This is reflected in the survival function, which has multiple periods of slow and rapid decline, indicating that prevalence of suicide ideation was low during childhood, peaked during adolescence, and then declined near  early-childhood levels in late adolescence for those still at risk.
+
+- `congresswomen`: The discrete-time hazard function follows a **U-shaped** pattern---with periods of high risk immediately after the "beginning of time" and again at the end of time---which is common when studying target events that have different causes near the beginning and end of time. This is reflected in the survival function, which drops rapidly in early and late time periods, but more slowly in the middle, indicating that prevalence of leaving office was greatest shortly after their first election, and then after having served for a long period of time for those still at risk.
+
+## 10.4 Quantifying the effects of sampling variation
+
+In Section 10.4 Singer and Willett (2003) return to the `teachers` data to discuss standard errors for the estimated discrete-time hazard probabilities and survival probabilities, which can also estimated directly from the life table:
+
+- Because the estimated discrete-time hazard probability is simply a sample proportion, its standard error in the $j$th time period can be estimated using the usual formula for estimating the standard error of a proportion:
+
+  $$
+  se \big(\hat h(t_j) \big) =
+    \sqrt{\frac{\hat h(t_j) \big(1 - \hat h(t_j) \big)}{n \text{ at risk}_j}}.
+  $$
+
+- For risk sets greater than size 20, the standard error of the survival probability in the $j$th time period can be can be estimated using Greenwood's approximation:
+
+  $$
+  se \big(\hat S(t_j) \big) =
+    \hat S(t_j) \sqrt{
+      \frac{\hat h(t_1)}{n \text{ at risk}_1 \big(1 - \hat h(t_1) \big)}
+      + \frac{\hat h(t_2)}{n \text{ at risk}_2 \big(1 - \hat h(t_2) \big)}
+      + \cdots
+      + \frac{\hat h(t_j)}{n \text{ at risk}_j \big(1 - \hat h(t_j) \big)}
+    }.
+  $$
+
+We estimate these standard errors here using the `teachers_lifetable` from Section 10.2.
 
 ```{r}
-summary(teachers_fit)
-
-teachers_fit |>
-  tidy() |>
+# Table 10.2, page 349:
+teachers_lifetable |>
+  filter(year != 0) |>
   mutate(
-    # The tidy() method for survfit objects returns the standard error for the
-    # cumulative hazard instead of the survival probability. Multiplying the
-    # survival estimate with the cumulative hazard's standard error will return
-    # the standard error for the survival probability. Note that it is unlikely
-    # the tidy() method will ever change to return the the standard error for
-    # the survival probability instead. See:
-    # - https://github.com/tidymodels/broom/pull/1162
-    # Other transformations of the survival probability can be found here:
-    # - https://stat.ethz.ch/pipermail/r-help/2014-June/376247.html
-    surv.std.error = estimate * std.error,
-    haz.estimate = n.event / n.risk,
     haz.std.error = sqrt(haz.estimate * (1 - haz.estimate) / n.risk),
-    sqrt = (std.error)^2 / (estimate)^2
+    surv.std.error = surv.estimate * sqrt(
+      cumsum(haz.estimate / (n.risk * (1 - haz.estimate)))
+    )
   ) |>
-  select(
-    year = time,
-    n.risk,
-    haz.estimate,
-    haz.std.error,
-    surv.estimate = estimate,
-    sqrt,
-    surv.std.error
-  )
+  select(year, n.risk, starts_with("haz"), starts_with("surv"))
 ```
 
-## 10.5 A Simple and Useful Strategy for Constructing the Life Table
+## 10.5 A simple and useful strategy for constructing the life table
 
-Figure 10.4, page 353:
+In Section 10.5 Singer and Willett (2003) introduce the **person-period** format for event occurrence data, demonstrating how it can be used to construct the life table "by hand" using the **person-level** `teachers` data set.
+
+### The person-level data set
+
+In the person-level format for event occurrence data, each person has only one row of data with columns for their event time and censorship status, and (optionally) a participant identifier variable or any other variables of interest. This is demonstrated in the `teachers` data set, A person-level data frame with 3941 rows and 3 columns:
+
+- `id`: Teacher ID.
+- `years`: The number of years between a teacher's dates of hire and departure from the Michigan public schools.
+- `censor`: Censoring status.
 
 ```{r}
-filter(teachers, id %in% c(20, 126, 129))
+teachers
+```
 
+Note that unlike when modelling change, the person-level data set does not contain multiple columns for each time period; thus, as we will demonstrate below, a new strategy is needed to convert a person-level data set into a person-period data set. Additionally, and also unlike when modelling change, the person-level data set is often useful for analyzing event occurrence---as we have demonstrated through several examples in the current and previous chapter.
+
+### The person-period data set
+
+In the person-period format for event occurrence data, each person has one row of data for each **time period** when they were at risk, with a **participant identifier variable** for each person, and an **event-indicator variable** for each time period.
+
+We can use the `reframe()` function from the **dplyr** package to convert a person-level data set into a person-period data set. The `reframe()` function works similarly to dplyr's `summarise()` function, except that it can return an arbitrary number of rows per group. We take advantage of this property to add rows for each time period when individuals were at risk, then use the information stored in these new rows and the person-level data set to identify whether an event occurred in each individual's last period, given their censorship status.
+
+```{r}
 teachers_pp <- teachers |>
+  group_by(id) |>
   reframe(
-    year = 1:max(years),
-    event = if_else(year == years & censor == 0, 1, 0),
-    .by = id
+    year = 1:years,
+    event = if_else(year == years & censor == 0, true = 1, false = 0)
   )
+
+teachers_pp
+```
+
+Following similar logic, we can use the `summarise()` function from the dplyr package to convert a person-period data set to person-level data set.
+
+```{r}
+teachers_pl <- teachers_pp |>
+  group_by(id) |>
+  summarise(
+    years = max(year),
+    censor = if_else(all(event == 0), true = 1, false = 0)
+  )
+
+teachers_pl
+```
+
+The difference between the person-level and person-period formats is best seen by examining the data from a subset of individuals with different (censored) event times.
+
+```{r}
+# Figure 10.4, page 353:
+filter(teachers_pl, id %in% c(20, 126, 129))
 
 teachers_pp |>
   filter(id %in% c(20, 126, 129)) |>
   print(n = 27)
 ```
 
-Table 10.3, page 355:
+### Using the person-period data set to construct the life table
+
+The life table can be constructed using the person-period data set through cross-tabulation of the time period and event-indicator variables. This can be accomplished using a standard `df |> group_by(...) |> summarise(...)` statement with the dplyr package, where we count the number of individuals who were at risk, who experienced the target event, and who were censored for each time period. After this, statistics for summarizing the event history information of the life table can be estimated using the methods demonstrated in Section 10.2.
 
 ```{r}
+# Table 10.3, page 355:
 teachers_pp |>
   group_by(year) |>
-  count(event) |>
-  pivot_wider(names_from = event, names_prefix = "event_", values_from = n) |>
-  mutate(
-    total = event_0 + event_1,
-    p.event_1 = event_1 / total
+  summarise(
+    n.risk = n(),
+    n.event = sum(event == 1),
+    n.censor = sum(event == 0),
+    haz.estimate = n.event / n.risk
   )
 ```
