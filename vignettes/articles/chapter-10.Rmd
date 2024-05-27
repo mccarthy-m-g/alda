@@ -124,6 +124,8 @@ In Section 10.2 Singer and Willett (2003) introduce three statistics for summari
   
   where $m$ is the time interval immediately before the median lifetime, $\hat S(t_m)$ is the value of the survivor function in the $m$th interval, and $\hat S(t_{m + 1})$ is the value of the survivor function in the next interval. 
 
+### Using the life table to estimate hazard probability, survival probability, and median lifetime
+
 First, the discrete-time hazard function and the survival function. Note the use of if-else statements to provide preset values for the "beginning of time", which by definition will always be `NA` for the discrete-time hazard function and `1` for the survival function.
 
 ```{r}
