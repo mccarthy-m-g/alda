@@ -457,9 +457,9 @@ NULL
 #'
 #' \describe{
 #'   \item{`id`}{Participant ID.}
-#'   \item{`time`}{Reported age of first suicide ideation.}
+#'   \item{`age`}{Reported age of first suicide ideation.}
 #'   \item{`censor`}{Censoring status.}
-#'   \item{`age`}{Participant age at the time of the survey.}
+#'   \item{`age_now`}{Participant age at the time of the survey.}
 #' }
 #' @source
 #' Bolger, N., Downey, G., Walker, E., & Steininger, P. (1989). The onset of
@@ -480,7 +480,7 @@ NULL
 #' \describe{
 #'   \item{`id`}{Participant ID.}
 #'   \item{`name`}{Representative name.}
-#'   \item{`time`}{Number of terms in office.}
+#'   \item{`terms`}{Number of terms in office.}
 #'   \item{`censor`}{Censoring status.}
 #'   \item{`democrat`}{Party affiliation.}
 #' }

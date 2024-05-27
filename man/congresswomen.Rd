@@ -11,7 +11,7 @@ A person-level data frame with 168 rows and
 \describe{
 \item{\code{id}}{Participant ID.}
 \item{\code{name}}{Representative name.}
-\item{\code{time}}{Number of terms in office.}
+\item{\code{terms}}{Number of terms in office.}
 \item{\code{censor}}{Censoring status.}
 \item{\code{democrat}}{Party affiliation.}
 }
