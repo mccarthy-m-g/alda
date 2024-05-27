@@ -104,134 +104,89 @@
 
     
     
-<div class="alert alert-warning">
-<p>This chapter is under construction.</p>
-</div>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mccarthy-m-g.github.io/alda/">alda</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'dplyr'</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     filter, lag</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:base':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span></code></pre></div>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://broom.tidymodels.org/" class="external-link">broom</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
-<h2 id="the-life-table">10.1 The Life Table<a class="anchor" aria-label="anchor" href="#the-life-table"></a>
+<h2 id="the-life-table">10.1 The life table<a class="anchor" aria-label="anchor" href="#the-life-table"></a>
 </h2>
-<p>Table 10.1, page 327:</p>
+<p>In Section 10.1 Singer and Willett (2003) introduce the <strong>life
+table</strong>—the primary tool for for summarizing the sample
+distribution of event occurrence—using a subset of data from Singer
+(1993), who measured how many years 3941 newly hired special educators
+in Michigan stayed in teaching between 1972 and 1978. Teachers were
+followed for up to 13 years or until they stopped teaching in the
+state.</p>
+<p>For this example we return to the <code>teachers</code> data set
+introduced in Chapter 9, a person-level data frame with 3941 rows and 3
+columns:</p>
+<ul>
+<li>
+<code>id</code>: Teacher ID.</li>
+<li>
+<code>years</code>: The number of years between a teacher’s dates of
+hire and departure from the Michigan public schools.</li>
+<li>
+<code>censor</code>: Censoring status.</li>
+</ul>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">teachers</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3,941 × 3</span></span></span>
+<span><span class="co">#&gt;    id    years censor</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1         1      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 2         2      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 3         1      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 4         1      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 5        12      1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 6         1      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 7        12      1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 8         1      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 9         2      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 10        2      0</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3,931 more rows</span></span></span></code></pre></div>
+<p>As Singer and Willett (2003) discuss, a life table tracks the event
+histories of a sample of individuals over a series of contiguous
+intervals—from the beginning of time through the end of data
+collection—by including information on the number of individuals
+who:</p>
+<ul>
+<li>Entered each interval.</li>
+<li>Experienced the target event during an interval.</li>
+<li>Were censored at the end of an interval.</li>
+</ul>
+<p>We can either construct a life table “by hand” by first converting
+the person-level data set to a person-period data set, then
+cross-tabulating <strong>time period</strong> and
+<strong>event-indicator</strong> variables; or by using a prepackaged
+routine. Because we will be constructing a life table “by hand” in
+Section 10.5, here we demonstrate the prepackaged routine approach.</p>
+<p>Conceptually, the life table is simply the tabular form of a
+<strong>survival function</strong> (see Section 10.2); thus, an easy way
+to construct a life table is to first fit a survival function to the
+person-level data set, then use the summary of the fit as a starting
+point to construct the remainder of the table.</p>
+<p>We can fit a survival function using the <code><a href="https://rdrr.io/pkg/survival/man/survfit.html" class="external-link">survfit()</a></code>
+function from the <strong>survival</strong> package. The model formula
+for the <code><a href="https://rdrr.io/pkg/survival/man/survfit.html" class="external-link">survfit()</a></code> function takes the form
+<code>response ~ terms</code>, where the response must be a “survival
+object” created by the <code><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv()</a></code> function. For right-censored
+data, the survival object can be created by supplying two unnamed
+arguments to the <code><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv()</a></code> function corresponding to
+<code>time</code> and <code>event</code> variables, in that order. Note
+that we can recode a <code>censor</code> variable into an
+<code>event</code> variable by reversing its values. For 0-1 coded data,
+we can write the event status as <code>event = censor - 1</code>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># A life table is the tabular form of a survival curve, so begin by fitting a</span></span>
-<span><span class="co"># Kaplan-Meir curve to the data.</span></span>
-<span><span class="va">teachers_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/survfit.html" class="external-link">survfit</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="fl">1</span> <span class="op">-</span> <span class="va">censor</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">teachers</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">teachers_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/survfit.html" class="external-link">survfit</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="fl">1</span> <span class="op">-</span> <span class="va">censor</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">teachers</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">table_10.1</span> <span class="op">&lt;-</span> <span class="va">teachers_fit</span> <span class="op">|&gt;</span></span>
-<span>  <span class="co"># Add a starting time (time 0) for the table.</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/survival/man/survfit0.html" class="external-link">survfit0</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="co"># The summary of the fit gives most of what we want, but to match Table 10.1</span></span>
-<span>  <span class="co"># we need to do a little more wrangling.</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">std.error</span><span class="op">:</span><span class="va">conf.low</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>    interval <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"["</span>, <span class="va">time</span>, <span class="st">", "</span>, <span class="va">time</span> <span class="op">+</span> <span class="fl">1</span>, <span class="st">")"</span><span class="op">)</span>,</span>
-<span>    haz.estimate <span class="op">=</span> <span class="va">n.event</span> <span class="op">/</span> <span class="va">n.risk</span></span>
-<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>year <span class="op">=</span> <span class="va">time</span>, surv.estimate <span class="op">=</span> <span class="va">estimate</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/relocate.html" class="external-link">relocate</a></span><span class="op">(</span></span>
-<span>    <span class="va">year</span>, <span class="va">interval</span>, <span class="va">n.risk</span>, <span class="va">n.event</span>, <span class="va">n.censor</span>, <span class="va">haz.estimate</span>, <span class="va">surv.estimate</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span><span class="va">table_10.1</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 13 × 7</span></span></span>
-<span><span class="co">#&gt;     year interval n.risk n.event n.censor haz.estimate surv.estimate</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>     0 [0, 1)     <span style="text-decoration: underline;">3</span>941       0        0       0              1    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>     1 [1, 2)     <span style="text-decoration: underline;">3</span>941     456        0       0.116          0.884</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>     2 [2, 3)     <span style="text-decoration: underline;">3</span>485     384        0       0.110          0.787</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>     3 [3, 4)     <span style="text-decoration: underline;">3</span>101     359        0       0.116          0.696</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>     4 [4, 5)     <span style="text-decoration: underline;">2</span>742     295        0       0.108          0.621</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>     5 [5, 6)     <span style="text-decoration: underline;">2</span>447     218        0       0.089<span style="text-decoration: underline;">1</span>         0.566</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>     6 [6, 7)     <span style="text-decoration: underline;">2</span>229     184        0       0.082<span style="text-decoration: underline;">5</span>         0.519</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>     7 [7, 8)     <span style="text-decoration: underline;">2</span>045     123      280       0.060<span style="text-decoration: underline;">1</span>         0.488</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     8 [8, 9)     <span style="text-decoration: underline;">1</span>642      79      307       0.048<span style="text-decoration: underline;">1</span>         0.464</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>     9 [9, 10)    <span style="text-decoration: underline;">1</span>256      53      255       0.042<span style="text-decoration: underline;">2</span>         0.445</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>    10 [10, 11)    948      35      265       0.036<span style="text-decoration: underline;">9</span>         0.428</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>    11 [11, 12)    648      16      241       0.024<span style="text-decoration: underline;">7</span>         0.418</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span>    12 [12, 13)    391       5      386       0.012<span style="text-decoration: underline;">8</span>         0.412</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="a-framework-for-characterizing-the-distribution-of-discrete-time-event-occurrence-data">10.2 A Framework for Characterizing the Distribution of
-Discrete-Time Event Occurrence Data<a class="anchor" aria-label="anchor" href="#a-framework-for-characterizing-the-distribution-of-discrete-time-event-occurrence-data"></a>
-</h2>
-<p>Figure 10.1, page 333:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">table_10.1</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">year</span>, y <span class="op">=</span> <span class="va">haz.estimate</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span>breaks <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">13</span>, limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">13</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">.05</span>, <span class="fl">.1</span>, <span class="fl">.15</span><span class="op">)</span>, limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">.15</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_cartesian.html" class="external-link">coord_cartesian</a></span><span class="op">(</span>xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">13</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Removed 1 row containing missing values or values outside the scale range</span></span>
-<span><span class="co">#&gt; (`geom_line()`).</span></span></code></pre></div>
-<p><img src="chapter-10_files/figure-html/unnamed-chunk-3-1.png" width="700"></p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="co"># First interpolate median lifetime</span></span>
-<span><span class="va">median_lifetime</span> <span class="op">&lt;-</span> <span class="va">table_10.1</span> <span class="op">|&gt;</span></span>
-<span>  <span class="co"># Get the row indices for the first survival estimate immediately below and</span></span>
-<span>  <span class="co"># immediately above 0.5. This will only work correctly if the values are in</span></span>
-<span>  <span class="co"># descending order, otherwise min() and max() must be swapped. By default, the</span></span>
-<span>  <span class="co"># survival estimates are in descending order, however, I've added the</span></span>
-<span>  <span class="co"># redundant step of ensuring they are here for demonstration purposes.</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span><span class="va">surv.estimate</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">surv.estimate</span> <span class="op">&lt;=</span> <span class="fl">.5</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">surv.estimate</span> <span class="op">&gt;=</span> <span class="fl">.5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">year</span>, <span class="va">surv.estimate</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="co"># Linearly interpolate between the two values of the survival estimates that</span></span>
-<span>  <span class="co"># bracket .5 following Miller's (1981) equation.</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span></span>
-<span>    year <span class="op">=</span></span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">year</span><span class="op">)</span> <span class="op">+</span></span>
-<span>      <span class="op">(</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">surv.estimate</span><span class="op">)</span> <span class="op">-</span> <span class="fl">.5</span><span class="op">)</span> <span class="op">/</span></span>
-<span>       <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">surv.estimate</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">surv.estimate</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">*</span></span>
-<span>      <span class="op">(</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">year</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">year</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>    surv.estimate <span class="op">=</span> <span class="fl">.5</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">table_10.1</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">year</span>, y <span class="op">=</span> <span class="va">surv.estimate</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_segment.html" class="external-link">geom_segment</a></span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>xend <span class="op">=</span> <span class="va">year</span>, y <span class="op">=</span> <span class="fl">0</span>, yend <span class="op">=</span> <span class="fl">.5</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">median_lifetime</span>, linetype <span class="op">=</span> <span class="fl">2</span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_segment.html" class="external-link">geom_segment</a></span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>xend <span class="op">=</span> <span class="fl">0</span>, yend <span class="op">=</span> <span class="fl">.5</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">median_lifetime</span>, linetype <span class="op">=</span> <span class="fl">2</span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span>breaks <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">13</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">.5</span>, <span class="fl">1</span><span class="op">)</span>, limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_cartesian.html" class="external-link">coord_cartesian</a></span><span class="op">(</span>xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">13</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="chapter-10_files/figure-html/unnamed-chunk-3-2.png" width="700"></p>
-</div>
-<div class="section level2">
-<h2 id="developing-intuition-about-hazard-functions-survivor-functions-and-median-lifetimes">10.3 Developing Intuition About Hazard Functions, Survivor
-Functions, and Median Lifetimes<a class="anchor" aria-label="anchor" href="#developing-intuition-about-hazard-functions-survivor-functions-and-median-lifetimes"></a>
-</h2>
-<p>Figure 10.2, page 340:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">relapse_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/survfit.html" class="external-link">survfit</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">weeks</span>, <span class="fl">1</span> <span class="op">-</span> <span class="va">censor</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">cocaine_relapse_1</span><span class="op">)</span></span>
-<span><span class="va">relapse_tidy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">relapse_fit</span><span class="op">)</span></span>
-<span><span class="va">relapse_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">relapse_fit</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="quantifying-the-effects-of-sampling-variation">10.4 Quantifying the Effects of Sampling Variation<a class="anchor" aria-label="anchor" href="#quantifying-the-effects-of-sampling-variation"></a>
-</h2>
-<p>Table 10.2, page 349:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">teachers_fit</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">teachers_fit</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Call: survfit(formula = Surv(years, 1 - censor) ~ 1, data = teachers)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  time n.risk n.event survival std.err lower 95% CI upper 95% CI</span></span>
@@ -247,72 +202,627 @@ Functions, and Median Lifetimes<a class="anchor" aria-label="anchor" href="#deve
 <span><span class="co">#&gt;    10    948      35    0.428 0.00827        0.412        0.445</span></span>
 <span><span class="co">#&gt;    11    648      16    0.418 0.00848        0.401        0.435</span></span>
 <span><span class="co">#&gt;    12    391       5    0.412 0.00870        0.396        0.430</span></span></code></pre></div>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="va">teachers_fit</span> <span class="op">|&gt;</span></span>
+<p>Next, we’ll collect the summary information from the
+<code>survfit</code> object into a tibble using the <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code>
+function from the <strong>broom</strong> package. For now we will
+exclude any statistical summaries from the life table, focusing
+exclusively on columns related to the event histories of the
+<code>teachers</code> data. Note also that the summary information from
+the <code>survfit</code> object starts at the time of the first event,
+not the “beginning of time”. We can add a “beginning of time” to the
+<code>survfit</code> object using the <code><a href="https://rdrr.io/pkg/survival/man/survfit0.html" class="external-link">survfit0()</a></code> function
+from the survival package, which (by default) adds a starting time of 0
+to the life table.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">teachers_lifetable</span> <span class="op">&lt;-</span> <span class="va">teachers_fit</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/survival/man/survfit0.html" class="external-link">survfit0</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>    <span class="co"># The tidy() method for survfit objects returns the standard error for the</span></span>
-<span>    <span class="co"># cumulative hazard instead of the survival probability. Multiplying the</span></span>
-<span>    <span class="co"># survival estimate with the cumulative hazard's standard error will return</span></span>
-<span>    <span class="co"># the standard error for the survival probability. Note that it is unlikely</span></span>
-<span>    <span class="co"># the tidy() method will ever change to return the the standard error for</span></span>
-<span>    <span class="co"># the survival probability instead. See:</span></span>
-<span>    <span class="co"># - https://github.com/tidymodels/broom/pull/1162</span></span>
-<span>    <span class="co"># Other transformations of the survival probability can be found here:</span></span>
-<span>    <span class="co"># - https://stat.ethz.ch/pipermail/r-help/2014-June/376247.html</span></span>
-<span>    surv.std.error <span class="op">=</span> <span class="va">estimate</span> <span class="op">*</span> <span class="va">std.error</span>,</span>
-<span>    haz.estimate <span class="op">=</span> <span class="va">n.event</span> <span class="op">/</span> <span class="va">n.risk</span>,</span>
-<span>    haz.std.error <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">haz.estimate</span> <span class="op">*</span> <span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="va">haz.estimate</span><span class="op">)</span> <span class="op">/</span> <span class="va">n.risk</span><span class="op">)</span>,</span>
-<span>    sqrt <span class="op">=</span> <span class="op">(</span><span class="va">std.error</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span> <span class="op">/</span> <span class="op">(</span><span class="va">estimate</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span></span>
-<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span></span>
-<span>    year <span class="op">=</span> <span class="va">time</span>,</span>
-<span>    <span class="va">n.risk</span>,</span>
-<span>    <span class="va">haz.estimate</span>,</span>
-<span>    <span class="va">haz.std.error</span>,</span>
-<span>    surv.estimate <span class="op">=</span> <span class="va">estimate</span>,</span>
-<span>    <span class="va">sqrt</span>,</span>
-<span>    <span class="va">surv.std.error</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 12 × 7</span></span></span>
-<span><span class="co">#&gt;     year n.risk haz.estimate haz.std.error surv.estimate     sqrt surv.std.error</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>     1   <span style="text-decoration: underline;">3</span>941       0.116        0.005<span style="text-decoration: underline;">10</span>         0.884  4.25<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span>        0.005<span style="text-decoration: underline;">10</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>     2   <span style="text-decoration: underline;">3</span>485       0.110        0.005<span style="text-decoration: underline;">30</span>         0.787  1.11<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>        0.006<span style="text-decoration: underline;">52</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>     3   <span style="text-decoration: underline;">3</span>101       0.116        0.005<span style="text-decoration: underline;">75</span>         0.696  2.29<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>        0.007<span style="text-decoration: underline;">33</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>     4   <span style="text-decoration: underline;">2</span>742       0.108        0.005<span style="text-decoration: underline;">92</span>         0.621  4.02<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>        0.007<span style="text-decoration: underline;">73</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>     5   <span style="text-decoration: underline;">2</span>447       0.089<span style="text-decoration: underline;">1</span>       0.005<span style="text-decoration: underline;">76</span>         0.566  6.09<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>        0.007<span style="text-decoration: underline;">90</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>     6   <span style="text-decoration: underline;">2</span>229       0.082<span style="text-decoration: underline;">5</span>       0.005<span style="text-decoration: underline;">83</span>         0.519  8.74<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>        0.007<span style="text-decoration: underline;">96</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>     7   <span style="text-decoration: underline;">2</span>045       0.060<span style="text-decoration: underline;">1</span>       0.005<span style="text-decoration: underline;">26</span>         0.488  1.12<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span>        0.007<span style="text-decoration: underline;">96</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>     8   <span style="text-decoration: underline;">1</span>642       0.048<span style="text-decoration: underline;">1</span>       0.005<span style="text-decoration: underline;">28</span>         0.464  1.38<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span>        0.008<span style="text-decoration: underline;">00</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     9   <span style="text-decoration: underline;">1</span>256       0.042<span style="text-decoration: underline;">2</span>       0.005<span style="text-decoration: underline;">67</span>         0.445  1.68<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span>        0.008<span style="text-decoration: underline;">11</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>    10    948       0.036<span style="text-decoration: underline;">9</span>       0.006<span style="text-decoration: underline;">12</span>         0.428  2.03<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span>        0.008<span style="text-decoration: underline;">27</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>    11    648       0.024<span style="text-decoration: underline;">7</span>       0.006<span style="text-decoration: underline;">10</span>         0.418  2.36<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span>        0.008<span style="text-decoration: underline;">48</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>    12    391       0.012<span style="text-decoration: underline;">8</span>       0.005<span style="text-decoration: underline;">68</span>         0.412  2.62<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span>        0.008<span style="text-decoration: underline;">70</span></span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">estimate</span><span class="op">:</span><span class="va">conf.low</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>interval <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"["</span>, <span class="va">time</span>, <span class="st">", "</span>, <span class="va">time</span> <span class="op">+</span> <span class="fl">1</span>, <span class="st">")"</span><span class="op">)</span>, .after <span class="op">=</span> <span class="va">time</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>year <span class="op">=</span> <span class="va">time</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">teachers_lifetable</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 13 × 5</span></span></span>
+<span><span class="co">#&gt;     year interval n.risk n.event n.censor</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>     0 [0, 1)     <span style="text-decoration: underline;">3</span>941       0        0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>     1 [1, 2)     <span style="text-decoration: underline;">3</span>941     456        0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>     2 [2, 3)     <span style="text-decoration: underline;">3</span>485     384        0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>     3 [3, 4)     <span style="text-decoration: underline;">3</span>101     359        0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>     4 [4, 5)     <span style="text-decoration: underline;">2</span>742     295        0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>     5 [5, 6)     <span style="text-decoration: underline;">2</span>447     218        0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>     6 [6, 7)     <span style="text-decoration: underline;">2</span>229     184        0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>     7 [7, 8)     <span style="text-decoration: underline;">2</span>045     123      280</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     8 [8, 9)     <span style="text-decoration: underline;">1</span>642      79      307</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>     9 [9, 10)    <span style="text-decoration: underline;">1</span>256      53      255</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>    10 [10, 11)    948      35      265</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>    11 [11, 12)    648      16      241</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span>    12 [12, 13)    391       5      386</span></span></code></pre></div>
+<p>As Singer and Willett (2003) discuss, we interpret the columns of the
+life table as follows:</p>
+<ul>
+<li>
+<code>year</code>: Defines the time of each interval using ordinal
+numbers.</li>
+<li>
+<code>interval</code>: Defines precisely which event times appear in
+each interval using the <strong>interval notation</strong>,
+<code>[start, end)</code>, where each interval includes the starting
+time and excludes the ending time.</li>
+<li>
+<code>n.risk</code>: Defines the <strong>risk set</strong> during
+each interval; that is, the number of (remaining) individuals who are
+eligible to experience the target event during an interval.</li>
+<li>
+<code>n.event</code>: Defines the number of individuals who
+experienced the target event during an interval.</li>
+<li>
+<code>n.censor</code>: Defines the number of individuals who were
+censored during an interval.</li>
+</ul>
+<p>Importantly, notice that once an individual experiences the target
+event or is censored during an interval, they drop out of the risk set
+in all future intervals; thus, the risk set is inherently
+irreversible.</p>
 </div>
 <div class="section level2">
-<h2 id="a-simple-and-useful-strategy-for-constructing-the-life-table">10.5 A Simple and Useful Strategy for Constructing the Life
-Table<a class="anchor" aria-label="anchor" href="#a-simple-and-useful-strategy-for-constructing-the-life-table"></a>
+<h2 id="a-framework-for-characterizing-the-distribution-of-discrete-time-event-occurrence-data">10.2 A framework for characterizing the distribution of
+discrete-time event occurrence data<a class="anchor" aria-label="anchor" href="#a-framework-for-characterizing-the-distribution-of-discrete-time-event-occurrence-data"></a>
 </h2>
-<p>Figure 10.4, page 353:</p>
+<p>In Section 10.2 Singer and Willett (2003) introduce three statistics
+for summarizing the event history information of the life table, which
+can estimated directly from the life table:</p>
+<ul>
+<li>
+<p><strong>Hazard</strong> is the fundamental quantity used to
+assess the risk of event occurrence in each discrete time period. The
+<strong>discrete-time hazard function</strong> is the <em>conditional
+probability</em> that the <span class="math inline">\(i\)</span>th
+individual will experience the target event in the <span class="math inline">\(j\)</span>th interval, given that they did not
+experience it in any prior interval:</p>
+<p><span class="math display">\[
+h(t_{ij}) = \Pr[T_i = j \mid T \geq j],
+\]</span></p>
+<p>whose maximum likelihood estimates are given by the proportion of
+each interval’s risk set that experiences the event during that
+interval:</p>
+<p><span class="math display">\[
+\hat h(t_j) = \frac{n \text{ events}_j}{n \text{ at risk}_j}.
+\]</span></p>
+</li>
+<li>
+<p>The <strong>survival function</strong> is the <em>cumulative
+probability</em> that the <span class="math inline">\(i\)</span>th
+individual will <em>not</em> experience the target event past the <span class="math inline">\(j\)</span>th interval:</p>
+<p><span class="math display">\[
+S(t_{ij}) = \Pr[T &gt; j],
+\]</span></p>
+<p>whose maximum likelihood estimates are given by the cumulative
+product of the complement of the estimated hazard probabilities across
+the current and all previous intervals:</p>
+<p><span class="math display">\[
+\hat S(t_j) = [1 - \hat h(t_j)]
+              [1 - \hat h(t_{j-1})]
+              [1 - \hat h(t_{j-2})]
+              \dots
+              [1 - \hat h(t_1)].
+\]</span></p>
+</li>
+<li>
+<p>The <strong>median lifetime</strong> is a measure of central
+tendency identifying the point in time by which we estimate that half of
+the sample has experienced the target event and half has not, given
+by:</p>
+<p><span class="math display">\[
+\text{Estimated median lifetime} = m
+  + \Bigg[ \frac{\hat S(t_m) - .5}{\hat S(t_m) - \hat S(t_{m + 1})}
+\Bigg]
+  \big( (m + 1) - m \big),
+\]</span></p>
+<p>where <span class="math inline">\(m\)</span> is the time interval
+immediately before the median lifetime, <span class="math inline">\(\hat
+S(t_m)\)</span> is the value of the survivor function in the <span class="math inline">\(m\)</span>th interval, and <span class="math inline">\(\hat S(t_{m + 1})\)</span> is the value of the
+survivor function in the next interval.</p>
+</li>
+</ul>
+<div class="section level3">
+<h3 id="using-the-life-table-to-estimate-hazard-probability-survival-probability-and-median-lifetime">Using the life table to estimate hazard probability, survival
+probability, and median lifetime<a class="anchor" aria-label="anchor" href="#using-the-life-table-to-estimate-hazard-probability-survival-probability-and-median-lifetime"></a>
+</h3>
+<p>First, the discrete-time hazard function and the survival function.
+Note the use of if-else statements to provide preset values for the
+“beginning of time”, which by definition will always be <code>NA</code>
+for the discrete-time hazard function and <code>1</code> for the
+survival function.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">teachers_lifetable</span> <span class="op">&lt;-</span> <span class="va">teachers_lifetable</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>    haz.estimate <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="va">year</span> <span class="op">!=</span> <span class="fl">0</span>, <span class="va">n.event</span> <span class="op">/</span> <span class="va">n.risk</span>, <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>    surv.estimate <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="va">year</span> <span class="op">!=</span> <span class="fl">0</span>, <span class="fl">1</span> <span class="op">-</span> <span class="va">haz.estimate</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>    surv.estimate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumprod</a></span><span class="op">(</span><span class="va">surv.estimate</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Table 10.1, page 327:</span></span>
+<span><span class="va">teachers_lifetable</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 13 × 7</span></span></span>
+<span><span class="co">#&gt;     year interval n.risk n.event n.censor haz.estimate surv.estimate</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>     0 [0, 1)     <span style="text-decoration: underline;">3</span>941       0        0      <span style="color: #BB0000;">NA</span>              1    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>     1 [1, 2)     <span style="text-decoration: underline;">3</span>941     456        0       0.116          0.884</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>     2 [2, 3)     <span style="text-decoration: underline;">3</span>485     384        0       0.110          0.787</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>     3 [3, 4)     <span style="text-decoration: underline;">3</span>101     359        0       0.116          0.696</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>     4 [4, 5)     <span style="text-decoration: underline;">2</span>742     295        0       0.108          0.621</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>     5 [5, 6)     <span style="text-decoration: underline;">2</span>447     218        0       0.089<span style="text-decoration: underline;">1</span>         0.566</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>     6 [6, 7)     <span style="text-decoration: underline;">2</span>229     184        0       0.082<span style="text-decoration: underline;">5</span>         0.519</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>     7 [7, 8)     <span style="text-decoration: underline;">2</span>045     123      280       0.060<span style="text-decoration: underline;">1</span>         0.488</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     8 [8, 9)     <span style="text-decoration: underline;">1</span>642      79      307       0.048<span style="text-decoration: underline;">1</span>         0.464</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>     9 [9, 10)    <span style="text-decoration: underline;">1</span>256      53      255       0.042<span style="text-decoration: underline;">2</span>         0.445</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>    10 [10, 11)    948      35      265       0.036<span style="text-decoration: underline;">9</span>         0.428</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>    11 [11, 12)    648      16      241       0.024<span style="text-decoration: underline;">7</span>         0.418</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span>    12 [12, 13)    391       5      386       0.012<span style="text-decoration: underline;">8</span>         0.412</span></span></code></pre></div>
+<p>Then the median lifetime. Here we use the <code><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice()</a></code>
+function from the <strong>dplyr</strong> package to select the time
+intervals immediately before and after the median lifetime, then do a
+bit of wrangling to make applying the median lifetime equation easier
+and clearer.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">teachers_median_lifetime</span> <span class="op">&lt;-</span> <span class="va">teachers_lifetable</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">surv.estimate</span> <span class="op">&gt;=</span> <span class="fl">.5</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">surv.estimate</span> <span class="op">&lt;=</span> <span class="fl">.5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>m <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"before"</span>, <span class="st">"after"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">m</span>, <span class="va">year</span>, surv <span class="op">=</span> <span class="va">surv.estimate</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html" class="external-link">pivot_wider</a></span><span class="op">(</span>names_from <span class="op">=</span> <span class="va">m</span>, values_from <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">year</span>, <span class="va">surv</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span></span>
+<span>    surv.estimate <span class="op">=</span> <span class="fl">.5</span>,</span>
+<span>    year <span class="op">=</span> <span class="va">year_before</span></span>
+<span>      <span class="op">+</span> <span class="op">(</span><span class="op">(</span><span class="va">surv_before</span> <span class="op">-</span> <span class="fl">.5</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="va">surv_before</span> <span class="op">-</span> <span class="va">surv_after</span><span class="op">)</span><span class="op">)</span></span>
+<span>      <span class="op">*</span> <span class="op">(</span><span class="va">year_after</span> <span class="op">-</span> <span class="va">year_before</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span>  </span>
+<span><span class="va">teachers_median_lifetime</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 2</span></span></span>
+<span><span class="co">#&gt;   surv.estimate  year</span></span>
+<span><span class="co">#&gt;           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           0.5  6.61</span></span></code></pre></div>
+<p>A valuable way of examining these statistics is to plot their
+trajectories over time.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">teachers_haz</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">teachers_lifetable</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">year</span>, y <span class="op">=</span> <span class="va">haz.estimate</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span>breaks <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">13</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_cartesian.html" class="external-link">coord_cartesian</a></span><span class="op">(</span>xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">13</span><span class="op">)</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">.15</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">teachers_surv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">teachers_lifetable</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">year</span>, y <span class="op">=</span> <span class="va">surv.estimate</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_segment.html" class="external-link">geom_segment</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>xend <span class="op">=</span> <span class="va">year</span>, y <span class="op">=</span> <span class="fl">0</span>, yend <span class="op">=</span> <span class="fl">.5</span><span class="op">)</span>,</span>
+<span>    data <span class="op">=</span> <span class="va">teachers_median_lifetime</span>,</span>
+<span>    linetype <span class="op">=</span> <span class="fl">2</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_segment.html" class="external-link">geom_segment</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>xend <span class="op">=</span> <span class="fl">0</span>, yend <span class="op">=</span> <span class="fl">.5</span><span class="op">)</span>,</span>
+<span>    data <span class="op">=</span> <span class="va">teachers_median_lifetime</span>,</span>
+<span>    linetype <span class="op">=</span> <span class="fl">2</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span>breaks <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">13</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">.5</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_cartesian.html" class="external-link">coord_cartesian</a></span><span class="op">(</span>xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">13</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Figure 10.1, page 333:</span></span>
+<span><span class="va">teachers_haz</span> <span class="op">+</span> <span class="va">teachers_surv</span> <span class="op">+</span> <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html" class="external-link">plot_layout</a></span><span class="op">(</span>ncol <span class="op">=</span> <span class="fl">1</span>, axes <span class="op">=</span> <span class="st">"collect"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="chapter-10_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
+<p>When examining plots like these, Singer and Willett (2003) recommend
+looking for patterns in and between the trajectories to answer questions
+like:</p>
+<ul>
+<li>What is the overall shape of the hazard function?</li>
+<li>When are the time periods of high and low risk?</li>
+<li>Are time periods with elevated risk likely to affect large or small
+numbers of people, given the value of the survivor function?</li>
+</ul>
+</div>
+</div>
+<div class="section level2">
+<h2 id="developing-intuition-about-hazard-functions-survivor-functions-and-median-lifetimes">10.3 Developing intuition about hazard functions, survivor
+functions, and median lifetimes<a class="anchor" aria-label="anchor" href="#developing-intuition-about-hazard-functions-survivor-functions-and-median-lifetimes"></a>
+</h2>
+<p>In Section 10.3 Singer and Willett (2003) examine and describe the
+estimated discrete-time hazard functions, survivor functions, and median
+lifetimes from four studies that differ by their type of target event,
+metric for clocking time, and underlying profile of risk:</p>
+<ul>
+<li>
+<p><code>cocaine_relapse_1</code>: A person-level data frame with
+104 rows and 4 columns containing a subset of data from Hall, Havassy,
+and Wasserman (1990), who measured the number of weeks of relapse to
+cocaine use in a sample of 104 former addicts released from an
+in-patient treatment program. In-patients were followed for up to 12
+weeks or until they used cocaine for 7 consecutive days.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cocaine_relapse_1</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 104 × 4</span></span></span>
+<span><span class="co">#&gt;    id    weeks censor needle</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 501       2      0      1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 502      12      1      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 503       1      0      1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 505       9      0      1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 507       3      0      1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 508       2      0      1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 509      12      1      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 510      12      1      1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 511       1      0      1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 512       2      0      1</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 94 more rows</span></span></span></code></pre></div>
+</li>
+<li>
+<p><code>first_sex</code>: A person-level data frame with 180 rows
+and 5 columns containing a subset of data from Capaldi, Crosby, and
+Stoolmiller (1996), who measured the grade year of first sexual
+intercourse in a sample of 180 at-risk heterosexual adolescent males.
+Adolescent males were followed from Grade 7 up to Grade 12 or until they
+reported having had sexual intercourse for the first time.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">teachers</span>, <span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">126</span>, <span class="fl">129</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">first_sex</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 180 × 5</span></span></span>
+<span><span class="co">#&gt;    id    grade censor parental_transition parental_antisociality</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1         9      0                   0                  1.98 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 2        12      1                   1                 -<span style="color: #BB0000;">0.545</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 3        12      1                   0                 -<span style="color: #BB0000;">1.40</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 5        12      0                   1                  0.974</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 6        11      0                   0                 -<span style="color: #BB0000;">0.636</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 7         9      0                   1                 -<span style="color: #BB0000;">0.243</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 9        12      1                   0                 -<span style="color: #BB0000;">0.869</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 10       11      0                   0                  0.454</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 11       12      1                   1                  0.802</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 12       11      0                   1                 -<span style="color: #BB0000;">0.746</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 170 more rows</span></span></span></code></pre></div>
+</li>
+<li>
+<p><code>suicide_ideation</code>: A person-level data frame with 391
+rows and 4 columns containing a subset of data from Bolger and
+colleagues (1989) measuring age of first suicide ideation in a sample of
+391 undergraduate students aged 16 to 22. Age of first suicide ideation
+was measured with a two-item survey asking respondents “Have you ever
+thought of committing suicide?” and if so, “At what age did the thought
+first occur to you?”</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">suicide_ideation</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 391 × 4</span></span></span>
+<span><span class="co">#&gt;    id      age censor age_now</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1        16      0      18</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 2        10      0      19</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 3        16      0      19</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 4        20      0      22</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 6        15      0      22</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 7        10      0      19</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 8        22      1      22</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 9        22      1      22</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 10       15      0      20</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 11       10      0      19</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 381 more rows</span></span></span></code></pre></div>
+</li>
+<li>
+<p><code>congresswomen</code>: A person-level data frame with 168
+rows and 5 columns containing data measuring how long all 168 women who
+were elected to the U.S. House of Representatives between 1919 and 1996
+remained in office. Representatives were followed for up to eight terms
+or until 1998.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">congresswomen</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 168 × 5</span></span></span>
+<span><span class="co">#&gt;    id    name                   terms censor democrat</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1     Abzug, Bella               3      0        1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 2     Andrews, Elizabeth         1      0        1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 3     Ashbrook, Jean             1      0        0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 4     Baker, Irene               1      0        0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 5     Bentley, Helen             5      0        0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 6     Blitch, Iris               4      0        1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 7     Boggs, Corinne             8      1        1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 8     Boland, Veronica Grace     1      0        1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 9     Bolton, Frances            8      1        0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 10    Bosone, Reva               2      0        1</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 158 more rows</span></span></span></code></pre></div>
+</li>
+</ul>
+<p>We can plot the discrete-time hazard functions, survivor functions,
+and median lifetimes from each of these four studies in a single call
+using the <code><a href="https://purrr.tidyverse.org/reference/pmap.html" class="external-link">pmap()</a></code> function from the <strong>purrr</strong>
+package.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">study_plots</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/pmap.html" class="external-link">pmap</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"cocaine_relapse_1"</span>, <span class="st">"first_sex"</span>, <span class="st">"suicide_ideation"</span>, <span class="st">"congresswomen"</span><span class="op">)</span>,</span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">cocaine_relapse_1</span>, <span class="va">first_sex</span>, <span class="va">suicide_ideation</span>, <span class="va">congresswomen</span><span class="op">)</span>,</span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"weeks"</span>, <span class="st">"grade"</span>, <span class="st">"age"</span>, <span class="st">"terms"</span><span class="op">)</span>,</span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">6</span>, <span class="fl">5</span>, <span class="fl">0</span><span class="op">)</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  \<span class="op">(</span><span class="va">.title</span>, <span class="va">.study</span>, <span class="va">.time</span>, <span class="va">.beginning</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    </span>
+<span>    <span class="co"># Get life table statistics.</span></span>
+<span>    <span class="va">study_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/survfit.html" class="external-link">survfit</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">.study</span><span class="op">[[</span><span class="va">.time</span><span class="op">]</span><span class="op">]</span>, <span class="fl">1</span> <span class="op">-</span> <span class="va">censor</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">.study</span><span class="op">)</span></span>
+<span>    </span>
+<span>    <span class="va">study_lifetable</span> <span class="op">&lt;-</span> <span class="va">study_fit</span> <span class="op">|&gt;</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/pkg/survival/man/survfit0.html" class="external-link">survfit0</a></span><span class="op">(</span>start.time <span class="op">=</span> <span class="va">.beginning</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>      <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>surv.estimate <span class="op">=</span> <span class="va">estimate</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>haz.estimate <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="va">time</span> <span class="op">!=</span> <span class="va">.beginning</span>, <span class="va">n.event</span> <span class="op">/</span> <span class="va">n.risk</span>, <span class="cn">NA</span><span class="op">)</span><span class="op">)</span></span>
+<span>    </span>
+<span>    <span class="va">study_median_lifetime</span> <span class="op">&lt;-</span> <span class="va">study_lifetable</span> <span class="op">|&gt;</span></span>
+<span>      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">surv.estimate</span> <span class="op">&gt;=</span> <span class="fl">.5</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">surv.estimate</span> <span class="op">&lt;=</span> <span class="fl">.5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>m <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"before"</span>, <span class="st">"after"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">m</span>, <span class="va">time</span>, surv <span class="op">=</span> <span class="va">surv.estimate</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>      <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html" class="external-link">pivot_wider</a></span><span class="op">(</span>names_from <span class="op">=</span> <span class="va">m</span>, values_from <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">surv</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span></span>
+<span>        surv.estimate <span class="op">=</span> <span class="fl">.5</span>,</span>
+<span>        time <span class="op">=</span> <span class="va">time_before</span></span>
+<span>          <span class="op">+</span> <span class="op">(</span><span class="op">(</span><span class="va">surv_before</span> <span class="op">-</span> <span class="fl">.5</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="va">surv_before</span> <span class="op">-</span> <span class="va">surv_after</span><span class="op">)</span><span class="op">)</span></span>
+<span>          <span class="op">*</span> <span class="op">(</span><span class="va">time_after</span> <span class="op">-</span> <span class="va">time_before</span><span class="op">)</span></span>
+<span>      <span class="op">)</span></span>
+<span>    </span>
+<span>    <span class="co"># Plot discrete-time hazard and survival functions.</span></span>
+<span>    <span class="va">study_haz</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">study_lifetable</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span>, y <span class="op">=</span> <span class="va">haz.estimate</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="va">.time</span><span class="op">)</span></span>
+<span>    </span>
+<span>    <span class="va">study_surv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">study_lifetable</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span>, y <span class="op">=</span> <span class="va">surv.estimate</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_segment.html" class="external-link">geom_segment</a></span><span class="op">(</span></span>
+<span>        <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>xend <span class="op">=</span> <span class="va">time</span>, y <span class="op">=</span> <span class="fl">0</span>, yend <span class="op">=</span> <span class="fl">.5</span><span class="op">)</span>,</span>
+<span>        data <span class="op">=</span> <span class="va">study_median_lifetime</span>,</span>
+<span>        linetype <span class="op">=</span> <span class="fl">2</span></span>
+<span>      <span class="op">)</span> <span class="op">+</span></span>
+<span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_segment.html" class="external-link">geom_segment</a></span><span class="op">(</span></span>
+<span>        <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>xend <span class="op">=</span> <span class="va">.beginning</span>, yend <span class="op">=</span> <span class="fl">.5</span><span class="op">)</span>,</span>
+<span>        data <span class="op">=</span> <span class="va">study_median_lifetime</span>,</span>
+<span>        linetype <span class="op">=</span> <span class="fl">2</span></span>
+<span>      <span class="op">)</span> <span class="op">+</span></span>
+<span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="va">.time</span><span class="op">)</span></span>
+<span>    </span>
+<span>    <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/wrap_elements.html" class="external-link">wrap_elements</a></span><span class="op">(</span>panel <span class="op">=</span> <span class="op">(</span><span class="va">study_haz</span> <span class="op">|</span> <span class="va">study_surv</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="va">.title</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Figure 10.2, page 340:</span></span>
+<span><span class="fu"><a href="https://patchwork.data-imaginist.com/reference/wrap_plots.html" class="external-link">wrap_plots</a></span><span class="op">(</span><span class="va">study_plots</span>, ncol <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<p><img src="chapter-10_files/figure-html/unnamed-chunk-12-1.png" width="700"></p>
+<p>Focusing on the overall shape of the discrete-time hazard functions,
+and contextualizing their shape against their respective survival
+functions, Singer and Willet (2003) make the following observations:</p>
+<ul>
+<li><p><code>cocaine_relapse_1</code>: The discrete-time hazard function
+follows a <strong>monotonically decreasing</strong> pattern—peaking
+immediately after the “beginning of time” and decreasing
+thereafter—which is common when studying target events related to
+recurrence and relapse. This is reflected in the survival function,
+which drops rapidly in early time periods, then more slowly over time as
+the hazard decreases, indicating that the prevalence of relapse to
+cocaine use was greatest shortly after leaving treatment.</p></li>
+<li><p><code>first_sex</code>: The discrete-time hazard function follows
+a <strong>monotonically increasing</strong> pattern—starting low
+immediately after the “beginning of time” and increasing
+thereafter—which is common when studying target events that are
+ultimately inevitable or near universal. This is reflected in the
+survival function, which drops slowly in early time periods, then more
+rapidly over time as the hazard increases, indicating that the
+prevalence of first sexual intercourse in those still at risk
+progressively increased as time progressed.</p></li>
+<li><p><code>suicide_ideation</code>: The discrete-time hazard function
+follows a <strong>nonmonotonic</strong> pattern with multiple
+distinctive peaks and troughs, which generally arise in studies of long
+duration due to the data collection period being of sufficient length to
+capture reversals in otherwise seemingly monotonic trends. This is
+reflected in the survival function, which has multiple periods of slow
+and rapid decline, indicating that prevalence of suicide ideation was
+low during childhood, peaked during adolescence, and then declined near
+early-childhood levels in late adolescence for those still at
+risk.</p></li>
+<li><p><code>congresswomen</code>: The discrete-time hazard function
+follows a <strong>U-shaped</strong> pattern—with periods of high risk
+immediately after the “beginning of time” and again at the end of
+time—which is common when studying target events that have different
+causes near the beginning and end of time. This is reflected in the
+survival function, which drops rapidly in early and late time periods,
+but more slowly in the middle, indicating that prevalence of leaving
+office was greatest shortly after their first election, and then after
+having served for a long period of time for those still at
+risk.</p></li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="quantifying-the-effects-of-sampling-variation">10.4 Quantifying the effects of sampling variation<a class="anchor" aria-label="anchor" href="#quantifying-the-effects-of-sampling-variation"></a>
+</h2>
+<p>In Section 10.4 Singer and Willett (2003) return to the
+<code>teachers</code> data to discuss standard errors for the estimated
+discrete-time hazard probabilities and survival probabilities, which can
+also estimated directly from the life table:</p>
+<ul>
+<li>
+<p>Because the estimated discrete-time hazard probability is simply
+a sample proportion, its standard error in the <span class="math inline">\(j\)</span>th time period can be estimated using
+the usual formula for estimating the standard error of a proportion:</p>
+<p><span class="math display">\[
+se \big(\hat h(t_j) \big) =
+  \sqrt{\frac{\hat h(t_j) \big(1 - \hat h(t_j) \big)}{n \text{ at
+risk}_j}}.
+\]</span></p>
+</li>
+<li>
+<p>For risk sets greater than size 20, the standard error of the
+survival probability in the <span class="math inline">\(j\)</span>th
+time period can be can be estimated using Greenwood’s approximation:</p>
+<p><span class="math display">\[
+se \big(\hat S(t_j) \big) =
+  \hat S(t_j) \sqrt{
+    \frac{\hat h(t_1)}{n \text{ at risk}_1 \big(1 - \hat h(t_1) \big)}
+    + \frac{\hat h(t_2)}{n \text{ at risk}_2 \big(1 - \hat h(t_2) \big)}
+    + \cdots
+    + \frac{\hat h(t_j)}{n \text{ at risk}_j \big(1 - \hat h(t_j) \big)}
+  }.
+\]</span></p>
+</li>
+</ul>
+<p>We estimate these standard errors here using the
+<code>teachers_lifetable</code> from Section 10.2.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Table 10.2, page 349:</span></span>
+<span><span class="va">teachers_lifetable</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">year</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>    haz.std.error <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">haz.estimate</span> <span class="op">*</span> <span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="va">haz.estimate</span><span class="op">)</span> <span class="op">/</span> <span class="va">n.risk</span><span class="op">)</span>,</span>
+<span>    surv.std.error <span class="op">=</span> <span class="va">surv.estimate</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum</a></span><span class="op">(</span><span class="va">haz.estimate</span> <span class="op">/</span> <span class="op">(</span><span class="va">n.risk</span> <span class="op">*</span> <span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="va">haz.estimate</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">year</span>, <span class="va">n.risk</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"haz"</span><span class="op">)</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"surv"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 12 × 6</span></span></span>
+<span><span class="co">#&gt;     year n.risk haz.estimate haz.std.error surv.estimate surv.std.error</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>     1   <span style="text-decoration: underline;">3</span>941       0.116        0.005<span style="text-decoration: underline;">10</span>         0.884        0.005<span style="text-decoration: underline;">10</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>     2   <span style="text-decoration: underline;">3</span>485       0.110        0.005<span style="text-decoration: underline;">30</span>         0.787        0.006<span style="text-decoration: underline;">52</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>     3   <span style="text-decoration: underline;">3</span>101       0.116        0.005<span style="text-decoration: underline;">75</span>         0.696        0.007<span style="text-decoration: underline;">33</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>     4   <span style="text-decoration: underline;">2</span>742       0.108        0.005<span style="text-decoration: underline;">92</span>         0.621        0.007<span style="text-decoration: underline;">73</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>     5   <span style="text-decoration: underline;">2</span>447       0.089<span style="text-decoration: underline;">1</span>       0.005<span style="text-decoration: underline;">76</span>         0.566        0.007<span style="text-decoration: underline;">90</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>     6   <span style="text-decoration: underline;">2</span>229       0.082<span style="text-decoration: underline;">5</span>       0.005<span style="text-decoration: underline;">83</span>         0.519        0.007<span style="text-decoration: underline;">96</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>     7   <span style="text-decoration: underline;">2</span>045       0.060<span style="text-decoration: underline;">1</span>       0.005<span style="text-decoration: underline;">26</span>         0.488        0.007<span style="text-decoration: underline;">96</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>     8   <span style="text-decoration: underline;">1</span>642       0.048<span style="text-decoration: underline;">1</span>       0.005<span style="text-decoration: underline;">28</span>         0.464        0.008<span style="text-decoration: underline;">00</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     9   <span style="text-decoration: underline;">1</span>256       0.042<span style="text-decoration: underline;">2</span>       0.005<span style="text-decoration: underline;">67</span>         0.445        0.008<span style="text-decoration: underline;">11</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>    10    948       0.036<span style="text-decoration: underline;">9</span>       0.006<span style="text-decoration: underline;">12</span>         0.428        0.008<span style="text-decoration: underline;">27</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>    11    648       0.024<span style="text-decoration: underline;">7</span>       0.006<span style="text-decoration: underline;">10</span>         0.418        0.008<span style="text-decoration: underline;">48</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>    12    391       0.012<span style="text-decoration: underline;">8</span>       0.005<span style="text-decoration: underline;">68</span>         0.412        0.008<span style="text-decoration: underline;">70</span></span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="a-simple-and-useful-strategy-for-constructing-the-life-table">10.5 A simple and useful strategy for constructing the life
+table<a class="anchor" aria-label="anchor" href="#a-simple-and-useful-strategy-for-constructing-the-life-table"></a>
+</h2>
+<p>In Section 10.5 Singer and Willett (2003) introduce the
+<strong>person-period</strong> format for event occurrence data,
+demonstrating how it can be used to construct the life table “by hand”
+using the <strong>person-level</strong> <code>teachers</code> data
+set.</p>
+<div class="section level3">
+<h3 id="the-person-level-data-set">The person-level data set<a class="anchor" aria-label="anchor" href="#the-person-level-data-set"></a>
+</h3>
+<p>In the person-level format for event occurrence data, each person has
+only one row of data with columns for their event time and censorship
+status, and (optionally) a participant identifier variable or any other
+variables of interest. This is demonstrated in the <code>teachers</code>
+data set, A person-level data frame with 3941 rows and 3 columns:</p>
+<ul>
+<li>
+<code>id</code>: Teacher ID.</li>
+<li>
+<code>years</code>: The number of years between a teacher’s dates of
+hire and departure from the Michigan public schools.</li>
+<li>
+<code>censor</code>: Censoring status.</li>
+</ul>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">teachers</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3,941 × 3</span></span></span>
+<span><span class="co">#&gt;    id    years censor</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1         1      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 2         2      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 3         1      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 4         1      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 5        12      1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 6         1      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 7        12      1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 8         1      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 9         2      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 10        2      0</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3,931 more rows</span></span></span></code></pre></div>
+<p>Note that unlike when modelling change, the person-level data set
+does not contain multiple columns for each time period; thus, as we will
+demonstrate below, a new strategy is needed to convert a person-level
+data set into a person-period data set. Additionally, and also unlike
+when modelling change, the person-level data set is often useful for
+analyzing event occurrence—as we have demonstrated through several
+examples in the current and previous chapter.</p>
+</div>
+<div class="section level3">
+<h3 id="the-person-period-data-set">The person-period data set<a class="anchor" aria-label="anchor" href="#the-person-period-data-set"></a>
+</h3>
+<p>In the person-period format for event occurrence data, each person
+has one row of data for each <strong>time period</strong> when they were
+at risk, with a <strong>participant identifier variable</strong> for
+each person, and an <strong>event-indicator variable</strong> for each
+time period.</p>
+<p>We can use the <code><a href="https://dplyr.tidyverse.org/reference/reframe.html" class="external-link">reframe()</a></code> function from the
+<strong>dplyr</strong> package to convert a person-level data set into a
+person-period data set. The <code><a href="https://dplyr.tidyverse.org/reference/reframe.html" class="external-link">reframe()</a></code> function works
+similarly to dplyr’s <code><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise()</a></code> function, except that it
+can return an arbitrary number of rows per group. We take advantage of
+this property to add rows for each time period when individuals were at
+risk, then use the information stored in these new rows and the
+person-level data set to identify whether an event occurred in each
+individual’s last period, given their censorship status.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">teachers_pp</span> <span class="op">&lt;-</span> <span class="va">teachers</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/reframe.html" class="external-link">reframe</a></span><span class="op">(</span></span>
+<span>    year <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="va">years</span>,</span>
+<span>    event <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="va">year</span> <span class="op">==</span> <span class="va">years</span> <span class="op">&amp;</span> <span class="va">censor</span> <span class="op">==</span> <span class="fl">0</span>, true <span class="op">=</span> <span class="fl">1</span>, false <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="va">teachers_pp</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 24,875 × 3</span></span></span>
+<span><span class="co">#&gt;    id     year event</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1         1     1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 2         1     0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 2         2     1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 3         1     1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 4         1     1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 5         1     0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 5         2     0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 5         3     0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 5         4     0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 5         5     0</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 24,865 more rows</span></span></span></code></pre></div>
+<p>Following similar logic, we can use the <code><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise()</a></code>
+function from the dplyr package to convert a person-period data set to
+person-level data set.</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">teachers_pl</span> <span class="op">&lt;-</span> <span class="va">teachers_pp</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span></span>
+<span>    years <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">year</span><span class="op">)</span>,</span>
+<span>    censor <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="va">event</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span>, true <span class="op">=</span> <span class="fl">1</span>, false <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="va">teachers_pl</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3,941 × 3</span></span></span>
+<span><span class="co">#&gt;    id    years censor</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1         1      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 2         2      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 3         1      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 4         1      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 5        12      1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 6         1      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 7        12      1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 8         1      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 9         2      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 10        2      0</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3,931 more rows</span></span></span></code></pre></div>
+<p>The difference between the person-level and person-period formats is
+best seen by examining the data from a subset of individuals with
+different (censored) event times.</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Figure 10.4, page 353:</span></span>
+<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">teachers_pl</span>, <span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">126</span>, <span class="fl">129</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 3</span></span></span>
 <span><span class="co">#&gt;   id    years censor</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 20        3      0</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 126      12      0</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 129      12      1</span></span></code></pre></div>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
-<span><span class="va">teachers_pp</span> <span class="op">&lt;-</span> <span class="va">teachers</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/reframe.html" class="external-link">reframe</a></span><span class="op">(</span></span>
-<span>    year <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">years</span><span class="op">)</span>,</span>
-<span>    event <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="va">year</span> <span class="op">==</span> <span class="va">years</span> <span class="op">&amp;</span> <span class="va">censor</span> <span class="op">==</span> <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span>,</span>
-<span>    .by <span class="op">=</span> <span class="va">id</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
 <span><span class="va">teachers_pp</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">126</span>, <span class="fl">129</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">27</span><span class="op">)</span></span>
@@ -346,32 +856,45 @@ Table<a class="anchor" aria-label="anchor" href="#a-simple-and-useful-strategy-f
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">25</span> 129      10     0</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">26</span> 129      11     0</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">27</span> 129      12     0</span></span></code></pre></div>
-<p>Table 10.3, page 355:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">teachers_pp</span> <span class="op">|&gt;</span></span>
+</div>
+<div class="section level3">
+<h3 id="using-the-person-period-data-set-to-construct-the-life-table">Using the person-period data set to construct the life table<a class="anchor" aria-label="anchor" href="#using-the-person-period-data-set-to-construct-the-life-table"></a>
+</h3>
+<p>The life table can be constructed using the person-period data set
+through cross-tabulation of the time period and event-indicator
+variables. This can be accomplished using a standard
+<code>df |&gt; group_by(...) |&gt; summarise(...)</code> statement with
+the dplyr package, where we count the number of individuals who were at
+risk, who experienced the target event, and who were censored for each
+time period. After this, statistics for summarizing the event history
+information of the life table can be estimated using the methods
+demonstrated in Section 10.2.</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Table 10.3, page 355:</span></span>
+<span><span class="va">teachers_pp</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">year</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">event</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html" class="external-link">pivot_wider</a></span><span class="op">(</span>names_from <span class="op">=</span> <span class="va">event</span>, names_prefix <span class="op">=</span> <span class="st">"event_"</span>, values_from <span class="op">=</span> <span class="va">n</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>    total <span class="op">=</span> <span class="va">event_0</span> <span class="op">+</span> <span class="va">event_1</span>,</span>
-<span>    p.event_1 <span class="op">=</span> <span class="va">event_1</span> <span class="op">/</span> <span class="va">total</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span></span>
+<span>    n.risk <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    n.event <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">event</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>    n.censor <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">event</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span>,</span>
+<span>    haz.estimate <span class="op">=</span> <span class="va">n.event</span> <span class="op">/</span> <span class="va">n.risk</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 12 × 5</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># Groups:   year [12]</span></span></span>
-<span><span class="co">#&gt;     year event_0 event_1 total p.event_1</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>     1    <span style="text-decoration: underline;">3</span>485     456  <span style="text-decoration: underline;">3</span>941    0.116 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>     2    <span style="text-decoration: underline;">3</span>101     384  <span style="text-decoration: underline;">3</span>485    0.110 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>     3    <span style="text-decoration: underline;">2</span>742     359  <span style="text-decoration: underline;">3</span>101    0.116 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>     4    <span style="text-decoration: underline;">2</span>447     295  <span style="text-decoration: underline;">2</span>742    0.108 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>     5    <span style="text-decoration: underline;">2</span>229     218  <span style="text-decoration: underline;">2</span>447    0.089<span style="text-decoration: underline;">1</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>     6    <span style="text-decoration: underline;">2</span>045     184  <span style="text-decoration: underline;">2</span>229    0.082<span style="text-decoration: underline;">5</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>     7    <span style="text-decoration: underline;">1</span>922     123  <span style="text-decoration: underline;">2</span>045    0.060<span style="text-decoration: underline;">1</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>     8    <span style="text-decoration: underline;">1</span>563      79  <span style="text-decoration: underline;">1</span>642    0.048<span style="text-decoration: underline;">1</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     9    <span style="text-decoration: underline;">1</span>203      53  <span style="text-decoration: underline;">1</span>256    0.042<span style="text-decoration: underline;">2</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>    10     913      35   948    0.036<span style="text-decoration: underline;">9</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>    11     632      16   648    0.024<span style="text-decoration: underline;">7</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>    12     386       5   391    0.012<span style="text-decoration: underline;">8</span></span></span></code></pre></div>
+<span><span class="co">#&gt;     year n.risk n.event n.censor haz.estimate</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>     1   <span style="text-decoration: underline;">3</span>941     456     <span style="text-decoration: underline;">3</span>485       0.116 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>     2   <span style="text-decoration: underline;">3</span>485     384     <span style="text-decoration: underline;">3</span>101       0.110 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>     3   <span style="text-decoration: underline;">3</span>101     359     <span style="text-decoration: underline;">2</span>742       0.116 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>     4   <span style="text-decoration: underline;">2</span>742     295     <span style="text-decoration: underline;">2</span>447       0.108 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>     5   <span style="text-decoration: underline;">2</span>447     218     <span style="text-decoration: underline;">2</span>229       0.089<span style="text-decoration: underline;">1</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>     6   <span style="text-decoration: underline;">2</span>229     184     <span style="text-decoration: underline;">2</span>045       0.082<span style="text-decoration: underline;">5</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>     7   <span style="text-decoration: underline;">2</span>045     123     <span style="text-decoration: underline;">1</span>922       0.060<span style="text-decoration: underline;">1</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>     8   <span style="text-decoration: underline;">1</span>642      79     <span style="text-decoration: underline;">1</span>563       0.048<span style="text-decoration: underline;">1</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     9   <span style="text-decoration: underline;">1</span>256      53     <span style="text-decoration: underline;">1</span>203       0.042<span style="text-decoration: underline;">2</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>    10    948      35      913       0.036<span style="text-decoration: underline;">9</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>    11    648      16      632       0.024<span style="text-decoration: underline;">7</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>    12    391       5      386       0.012<span style="text-decoration: underline;">8</span></span></span></code></pre></div>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
