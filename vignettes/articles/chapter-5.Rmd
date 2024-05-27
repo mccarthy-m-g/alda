@@ -259,7 +259,7 @@ The multilevel model may fail to converge or be unable to estimate one or more v
 - **Removing boundary constraints**, where the software is permitted to obtain negative variance components.
 - **Fixing rates of change**, where the model is simplified by removing the varying slope change.
 
-For this example we a subset of the `dropout_wages` data purposefully constructed to be severely unbalanced.
+For this example we use a subset of the `dropout_wages` data purposefully constructed to be severely unbalanced.
 
 ```{r}
 dropout_wages_subset

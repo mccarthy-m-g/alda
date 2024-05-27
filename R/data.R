@@ -391,7 +391,7 @@ NULL
 
 #' Weeks to cocaine relapse after treatment
 #'
-#' A subset of data from Hall, Havassy, and Wasserman's (1990) measuring the
+#' A subset of data from Hall, Havassy, and Wasserman (1990) measuring the
 #' number of weeks of relapse to cocaine use in a sample of 104 former addicts
 #' released from an in-patient treatment program. In-patients were followed for
 #' up to 12 weeks or until they used cocaine for 7 consecutive days.
@@ -415,7 +415,7 @@ NULL
 
 #' Age of first sexual intercourse
 #'
-#' A subset of data from Capaldi, Crosby, and Stoolmiller's (1996) measuring the
+#' A subset of data from Capaldi, Crosby, and Stoolmiller (1996) measuring the
 #' grade year of first sexual intercourse in a sample of 180 at-risk
 #' heterosexual adolescent males. Adolescent males were followed from Grade 7 up
 #' to Grade 12 or until they reported having had sexual intercourse for the
@@ -457,9 +457,9 @@ NULL
 #'
 #' \describe{
 #'   \item{`id`}{Participant ID.}
-#'   \item{`time`}{Reported age of first suicide ideation.}
+#'   \item{`age`}{Reported age of first suicide ideation.}
 #'   \item{`censor`}{Censoring status.}
-#'   \item{`age`}{Participant age at the time of the survey.}
+#'   \item{`age_now`}{Participant age at the time of the survey.}
 #' }
 #' @source
 #' Bolger, N., Downey, G., Walker, E., & Steininger, P. (1989). The onset of
@@ -480,7 +480,7 @@ NULL
 #' \describe{
 #'   \item{`id`}{Participant ID.}
 #'   \item{`name`}{Representative name.}
-#'   \item{`time`}{Number of terms in office.}
+#'   \item{`terms`}{Number of terms in office.}
 #'   \item{`censor`}{Censoring status.}
 #'   \item{`democrat`}{Party affiliation.}
 #' }

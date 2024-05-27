@@ -196,10 +196,11 @@ first_sex <- tidy_data$firstsex |>
     parental_antisociality = pas
   )
 
-suicide_ideation <- tidy_data$suicide_orig
+suicide_ideation <- tidy_data$suicide_orig |>
+  rename(age_now = age, age = time)
 
 congresswomen <- tidy_data$congress_orig |>
-  rename(democrat = dem)
+  rename(terms = time, democrat = dem)
 
 # Chapter 11 ------------------------------------------------------------------
 

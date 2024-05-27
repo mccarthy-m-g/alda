@@ -10,9 +10,9 @@ A person-level data frame with 391 rows and
 
 \describe{
 \item{\code{id}}{Participant ID.}
-\item{\code{time}}{Reported age of first suicide ideation.}
+\item{\code{age}}{Reported age of first suicide ideation.}
 \item{\code{censor}}{Censoring status.}
-\item{\code{age}}{Participant age at the time of the survey.}
+\item{\code{age_now}}{Participant age at the time of the survey.}
 }
 }
 \source{

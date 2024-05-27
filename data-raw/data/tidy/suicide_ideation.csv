@@ -1,4 +1,4 @@
-id,time,censor,age
+id,age,censor,age_now
 1,16,0,18
 2,10,0,19
 3,16,0,19
