@@ -1,5 +1,5 @@
 ---
-title: "Chapter 6: Modeling Discontinuous and Nonlinear Change"
+title: "Chapter 6: Modelling discontinuous and nonlinear change"
 ---
 
 ```{r, include = FALSE}
@@ -32,7 +32,7 @@ library(modelsummary)
 library(gt)
 ```
 
-## 6.1 Discontinuous Individual Change
+## 6.1 Discontinuous individual change
 
 In Section 6.1, Singer and Willett (2003) discuss strategies for fitting **discontinuous individual change trajectories** using a subset of data from the National Longitudinal Study of Youth tracking the labour market experiences of male high school dropouts (Murnane, Boudett, & Willett, 1999).
 
@@ -346,7 +346,7 @@ ggplot(prototypical_dropout_wages_F, aes(x = experience, y = log_wages)) +
   facet_wrap(vars(highest_grade), labeller = label_both)
 ```
 
-## 6.2 Using Transformations to Model Nonlinear Individual Change
+## 6.2 Using transformations to model nonlinear individual change
 
 In Section 6.2, Singer and Willett (2003) discuss strategies for transforming outcome and time-indicator variables to model **nonlinear individual change trajectories** using a subset of data from Curran, Stice, and Chassin (1997), who measured the relation between changes in alcohol use and changes in peer alcohol use over a 3-year period in a community-based sample of Hispanic and Caucasian adolescents.
 
@@ -504,7 +504,7 @@ Singer and Willett (2003) recommend using two approaches for selecting among com
 - Examining empirical growth plots to identify the highest order polynomial change trajectory suggested by the data.
 - Comparing goodness-of-fit statistics across a series of polynomial level-1 models.
 
-### Using a polynomial trajectory to summarize each person’s empirical growth record
+### Using a polynomial trajectory to summarize each person's empirical growth record
 
 We begin by examining empirical growth plots for a subset of children whose trajectories span the wide array of individual change patterns in the `externalizing_behaviour` data.
 
@@ -585,7 +585,7 @@ externalizing_behaviour_empgrowth +
   )
 ```
 
-### Testing Higher Order Terms in a Polynomial Level-1 Model
+### Testing higher order terms in a polynomial level-1 model
 
 To select a "final" polynomial trajectory, Singer and Willett (2003) suggest fitting a series of level-1 individual growth models of increasing polynomial complexity, stopping when goodness-of-fit statistics suggest there is no need to add further polynomial predictors to the model. 
 
@@ -674,7 +674,7 @@ externalizing_behaviour_fits |>
   tidy()
 ```
 
-## 6.4 Truly Nonlinear Trajectories
+## 6.4 Truly nonlinear trajectories
 
 In Section 6.4, Singer and Willett (2003) discuss strategies for fitting **truly nonlinear change trajectories** using data from Tivnan (1980), who measured changes in cognitive growth over a three-week period in a sample of 17 first and second-graders. Childrens' cognitive growth was based on improvement in the number of moves completed in a two-person checkerboard game, Fox n' Geese, before making a catastrophic error.
 

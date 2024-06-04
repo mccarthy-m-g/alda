@@ -192,7 +192,7 @@ $$
 }_{\text{Random Effects}}
 $$
 
-## 4.3 Methods of Estimation, Revisited
+## 4.3 Methods of estimation, revisited
 
 In Section 4.3 Singer and Willett (2003) discuss two methods of estimation available to frequentist multilevel models, which must be selected *before* fitting the model:
 
@@ -203,7 +203,7 @@ Because generalized least squares and maximum likelihood estimation use differen
 
 Additionally, maximum likelihood estimation can be further distinguished into two types: **full** and **restricted**. As Singer and Willett (2003) explain, under **full maximum likelihood** (FML) the likelihood of the *sample data* is maximized, and goodness-of-fit statistics refer to the fit of the entire model (fixed and random effects); under **restricted maximum likelihood** (REML) the likelihood of the *sample residuals* is maximized, and goodness-of-fit statistics refer to the fit of only the random effects. Consequently, statistical tests comparing the goodness-of-fit statistics from FML models can be used to test hypotheses about either fixed or random effect parameters, whereas those from REML models can be used only to test hypotheses about random effect parameters.
 
-## 4.4 First Steps: Fitting Two Unconditional Multilevel Models for Change
+## 4.4 First steps: Fitting two unconditional multilevel models for change
 
 In Section 4.4 Singer and Willett (2003) introduce a new **model building** workflow for the multilevel model for change that begins by fitting two unconditional multilevel models for change before including any substantive predictors:
 
@@ -314,7 +314,7 @@ model_B |>
     labs(linewidth = "trajectory")
 ```
 
-## 4.5 Practical Data Analytic Strategies for Model Building
+## 4.5 Practical data analytic strategies for model building
 
 In Section 4.5 Singer and Willett (2003) present their data analytic strategy for model building, which focuses on building a systematic sequence of models that, as a set, address your research questions in a meaningful way. They refer to this sequence as a **taxonomy of statistical models**, where:
 
@@ -477,7 +477,7 @@ alcohol_use_1_fits_r2 <- r2_yy |>
 alcohol_use_1_fits_r2
 ```
 
-### Interpreting Fitted Models
+### Interpreting fitted models
 
 To systematically compare fitted models---describing what happens as predictors are added and removed---Singer and Willett (2003) suggest placing them side-by-side in a table, which allows you to more easily inspect and compare estimated fixed effects, variance components, and goodness-of-fit statistics from one model to the next. We can construct such a table using the `modelsummary()` function from the **modelsummary** package. To better match the table in the text, we will set the table `output` to `"gt"` so we can post-process it using the **gt** package.
 
@@ -525,7 +525,7 @@ alcohol_use_1_fits |>
   cols_hide(effect)
 ```
 
-### Displaying Prototypical Change Trajectories
+### Displaying prototypical change trajectories
 
 In addition to numerical summaries, Singer and Willett (2003) suggest plotting fitted trajectories for **prototypical individuals** to describe the results of model fitting, with prototypical values of predictors selected using one or more of the following strategies:
 
@@ -583,7 +583,7 @@ prototypical_alcohol_use |>
 
 Note that depending on the number of predictors across different models, it may be preferable to instead create separate plots (which could be later added together using the **patchwork** package).
 
-## 4.6 Comparing Models Using Deviance Statistics
+## 4.6 Comparing models using deviance statistics
 
 In Section 4.6 Singer and Willett (2003) introduce the **deviance** statistic, which quantifies how much worse the current model fit is in comparison to a saturated model that fits the observed data perfectly by comparing log-likelihood statistics for the two models:
 
@@ -610,11 +610,11 @@ with(
 
 Note that by default the `anova()` function will refit objects of class `merMod` with FML before comparing models if they have been estimated with REML to prevent the common mistake of inappropriately comparing REML-fitted models with different fixed effects, whose likelihoods are not directly comparable. For REML-fitted models with identical fixed effects and different random effects, the `refit` argument can be set to `FALSE` to directly compare the REML-fitted models.
 
-## 4.7 Using Wald Statistics to Test Composite Hypotheses About Fixed Effects
+## 4.7 Using Wald statistics to test composite hypotheses about fixed effects
 
 This section is intentionally left blank.
 
-## 4.8 Evaluating the Tenability of a Model’s Assumptions
+## 4.8 Evaluating the tenability of a model's assumptions
 
 In Section 4.8 Singer and Willett (2003) offer strategies for checking the following assumptions of the multilevel model for change:
 
@@ -622,7 +622,7 @@ In Section 4.8 Singer and Willett (2003) offer strategies for checking the follo
 2. The level-1 and level-2 residuals are all **normally distributed**.
 3. The level-1 and level-2 residuals have **equal variances** at each level of every predictor.
 
-### Checking Functional Form
+### Checking functional Form
 
 The functional form assumption of the multilevel model for change can be assessed by inspecting "outcome versus predictors" plots at each level.
 
@@ -670,7 +670,7 @@ wrap_plots(alcohol_use_1_ovp) +
   plot_layout(axes = "collect")
 ```
 
-### Checking Normality
+### Checking normality
 
 The normality assumption of the multilevel model for change can be assessed by inspecting Q-Q plots of the level-1 and level-2 residuals, and also (optionally) with statistical tests of normality. The `check_normality()` function from the **performance** package can perform both of these tasks.
 
@@ -705,7 +705,7 @@ model_F |>
 ```
 -->
 
-### Checking Homoscedasticity
+### Checking homoscedasticity
 
 The homoscedasticity assumption of the multilevel model for change can be assessed by inspecting "residual versus predictors" plots at each level to see if residual variability is approximately equal at *every* predictor value.
 
@@ -749,7 +749,7 @@ alcohol_use_1_rvp <- map(
 wrap_plots(alcohol_use_1_rvp) + plot_layout(axes = "collect")
 ```
 
-## 4.9 Model-Based Estimates of the Individual Growth Parameters
+## 4.9 Model-based estimates of the individual growth parameters
 
 In Section 4.9 Singer and Willett (2003) discuss how to use **model-based estimates** to display individual growth trajectories, which are simply the partial pooling trajectories we previously discussed in Chapter 3.
 

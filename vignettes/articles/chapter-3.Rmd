@@ -27,7 +27,7 @@ library(lme4)
 library(broom.mixed)
 ```
 
-## 3.1 What Is the Purpose of the Multilevel Model for Change?
+## 3.1 What is the purpose of the multilevel model for change?
 
 In Chapter 3 Singer and Willett (2003) develop and explain the **multilevel model for change** using a subset of data from Burchinal, Campbell, Bryant, Wasik, and Ramey (1997), who measured the effect of early educational intervention on cognitive performance in a sample of African-American children at ages 12, 18, and 24 months (i.e., 1.0, 1.5, and 2.0 years).
 
@@ -89,7 +89,7 @@ As Singer and Willett (2003) discuss, the kind of statistical model needed to re
 
 Together, these two components form a **multilevel model** (also known as a **linear mixed-effects model** or **mixed model**) for change.
 
-## 3.2 The Level-1 Submodel for Individual Change
+## 3.2 The level-1 submodel for individual change
 
 In Section 3.2 Singer and Willett (2003) introduce the level-1 component of the multilevel model for change: The **submodel for individual change**---also known as the **individual growth model**---which represents the individual change in the outcome variable that we expect will occur during each time period under study.
 
@@ -128,7 +128,7 @@ Here $\text{age}$ has been **centred** to $(\text{age} - 1)$ so that the model i
 
 Finally, the model slope, $\pi_{1i}$, represents the true **rate of change** in the $i$th child's true $\text{cognitive_score}$ over time---in this case, their true *annual* rate of change.
 
-### Relating the Level-1 Submodel to the Exploratory Methods of Chapter 2
+### Relating the level-1 submodel to the exploratory methods of Chapter 2
 
 Before fitting this model, we find it helpful to introduce Gelman and Hill's (2006) concepts of complete pooling, no pooling, and partial pooling in relation to the exploratory linear models we fit in Chapter 2 to summarize both average and individual patterns of change over time.
 
@@ -289,7 +289,7 @@ early_intervention_fit_1 |>
     labs(linewidth = "trajectory")
 ```
 
-## 3.3 The Level-2 Submodel for Systematic Interindividual Differences in Change
+## 3.3 The level-2 submodel for systematic interindividual differences in change
 
 In Section 3.3 Singer and Willett (2003) introduce the level-2 component of the multilevel model for change---the **submodel for systematic interindividual differences in change**---which is defined by four specific features:
 
@@ -342,7 +342,7 @@ $$
 \end{align}
 $$
 
-## 3.4 Fitting the Multilevel Model for Change to Data
+## 3.4 Fitting the multilevel model for change to data
 
 Putting the level-1 and level-2 submodels together, our multilevel model for change for the `early_intervention` data looks like:
 
@@ -411,7 +411,7 @@ early_intervention_fit <- lmer(
 summary(early_intervention_fit)
 ```
 
-## 3.5 Examining Estimated Fixed Effects
+## 3.5 Examining estimated fixed effects
 
 In Section 3.5 Singer and Willett (2003) explain two ways to interpret the fixed effects estimates of the multilevel model for change:
 

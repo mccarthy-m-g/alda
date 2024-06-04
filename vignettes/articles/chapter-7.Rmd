@@ -1,5 +1,5 @@
 ---
-title: "Chapter 7: Examining the Multilevel Model's Error Covariance Structure"
+title: "Chapter 7: Examining the multilevel model's error covariance structure"
 ---
 
 ```{r, include = FALSE}

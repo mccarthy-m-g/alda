@@ -35,7 +35,7 @@ In Section 2.1 Singer and Willett (2003) introduce two distinct formats of data 
 
 For this example we illustrate the difference between the two formats using the `deviant_tolerance_pl` and `deviant_tolerance_pp` data sets, which correspond to the adolescent tolerance of deviant behaviour data organized in the person-level and person-period formats, respectively.
 
-### The Person-Level Data Set
+### The person-Level data set
 
 In the person-level format (also known as **wide** or **multivariate** format), each person has only one row of data and multiple columns containing data from each measurement occasion for any time-varying variables. This is demonstrated in the `deviant_tolerance_pl` data set, a person-level data frame with 16 rows and 8 columns:
 
@@ -76,7 +76,7 @@ deviant_tolerance_pl |>
 
 Considered together, these disadvantages make the person-level format ill-suited for most longitudinal data analyses. Fortunately, each of the disadvantages of the person-level format can be addressed by a simple conversion to the person-period format.
 
-### The Person-Period Data Set
+### The person-period data set
 
 In the person-period format (also known as **long** or **univariate** format), each person has one row of data for each measurement occasion, with a **participant identifier variable** for each person, and a **time-indicator variable** for each measurement occasion. In this format, time-invariant variables have identical values across each measurement occasion; whereas time-varying variables have potentially differing values. This is demonstrated in the `deviant_tolerance_pp` data set, a person-period data frame with 80 rows and 5 columns:
 
@@ -104,7 +104,7 @@ Indeed, most R functions are designed to work with data in the person-period for
 
 Thus, the person-period format is simply a special case of the tidy data format, which distinguishes itself through its longitudinal nature and requirements for explicit participant identifier and time-indicator variables.
 
-### Converting Between Person-Level and Person-Period Data Sets
+### Converting between person-level and person-period data sets
 
 Unfortunately, longitudinal data is often initially stored as a person-level data set, meaning that most real analyses will require at least a little tidying to get your data into a person-period format. There are a few reasons for this:
 
@@ -163,7 +163,7 @@ To learn more about the principles of tidy data and how pivoting works, see the 
 
 In Section 2.2 Singer and Willett (2003) use the `deviant_tolerance_pp` data set to demonstrate how the person-period format facilitates exploratory analyses that describe how individuals in the data set change over time, revealing the nature and idiosyncrasies of each person’s temporal pattern of change. 
 
-### Empirical Growth Plots
+### Empirical growth plots
 
 **Empirical growth plots** show, for each individual, the sequence of change in a time-varying variable. Here change can be evaluated in either absolute terms against the scale of the variable of interest, or in relative terms in comparison to other sample members. Singer and Willett (2003) identify several questions that are helpful to answer when examining empirical growth plots:
 
@@ -209,7 +209,7 @@ deviant_tolerance_pp |>
   list_rbind()
 ```
 
-### Using a Trajectory to Summarize Each Person’s Empirical Growth Record
+### Using a trajectory to summarize each person's empirical growth record
 
 Each person's empirical growth record can be summarized by applying two standardized approaches:
 
@@ -218,7 +218,7 @@ Each person's empirical growth record can be summarized by applying two standard
 
 Singer and Willett (2003) recommend using both approaches---beginning with the nonparametric approach---as examining the smoothed trajectories will help you select a common functional form for the trajectories in the parametric approach.
 
-#### The Nonparametric Approach
+#### The nonparametric approach
 
 The `stat_smooth()` function can be used to add a nonparametric smooth layer to the empirical growth record plot. The choice of a particular smoothing algorithm is primarily a matter of convenience, so we'll use the default loess smoother. The `span` argument controls the amount of smoothing for the default loess smoother---with smaller numbers producing wigglier lines and larger numbers producing smoother lines; here choose a value that creates a similar smooth to the textbook figure.
 
@@ -238,7 +238,7 @@ Singer and Willett (2003) recommend focusing on the elevation, shape, and tilt o
 
 Answering the last question is particularly important, as it will help you select a common functional form for the trajectories in the parametric approach.
 
-#### The Parametric Approach
+#### The parametric approach
 
 For the parametric approach, Singer and Willett (2003) suggest using the following three-step process:
 

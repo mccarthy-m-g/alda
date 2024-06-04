@@ -30,7 +30,7 @@ library(modelsummary)
 library(gt)
 ```
 
-## 5.1 Variably Spaced Measurement Occasions
+## 5.1 Variably spaced measurement occasions
 
 In Section 5.1 Singer and Willett (2003) demonstrate how you can fit the multilevel model for change for data with **variably spaced measurement occasions** using a subset of data from the Children of the National Longitudinal Study of Youth (US Bureau of Labor and Statistics), which measured changes in the reading subtest of the Peabody Individual Achievement Test (PIAT) in a sample of 89 African-American children across three waves around the ages of 6, 8, and 10.
 
@@ -128,7 +128,7 @@ reading_scores_fits |>
 
 Comparing these models, we see that the `age` model fits the data better than the `age_group` model---with less unexplained variation in initial status and rates of change, and smaller AIC and BIC statistics.  
 
-## 5.2 Varying Numbers of Measurement Occasions
+## 5.2 Varying numbers of measurement occasions
 
 In Section 5.2 Singer and Willett (2003) demonstrate how you can fit the multilevel model for change for data with **varying numbers of measurement occasions** (i.e., unbalanced data) using a subset of data from the National Longitudinal Study of Youth tracking the labour market experiences of male high school dropouts (Murnane, Boudett, & Willett, 1999).
 
@@ -252,7 +252,7 @@ ggplot(prototypical_dropout_wages, aes(x = experience, y = log_wages)) +
   coord_cartesian(ylim = c(1.6, 2.4))
 ```
 
-### 5.2.2 Practical Problems That May Arise When Analyzing Unbalanced Data Sets
+### 5.2.2 Practical problems that may arise when analyzing unbalanced data sets
 
 The multilevel model may fail to converge or be unable to estimate one or more variance components for data sets that are severely unbalanced, or if too few people have enough waves of data. In Section 5.2.2 Singer and Willett (2003) discuss two strategies for addressing these problems:
 
@@ -326,7 +326,7 @@ dropout_wages_fits_subset |>
   cols_hide(effect)
 ```
 
-## 5.3 Time-Varying Predictors
+## 5.3 Time-varying predictors
 
 In Section 5.3 Singer and Willett (2003) demonstrate how to fit the multilevel model for change for data with **time-varying predictors** using a subset of data from Ginexi, Howe, and Caplan (2000), who measured changes in depressive symptoms after job loss in a sample of 254 recently unemployed men and women. Interviews were conducted in three waves at around 1, 5, and 12 months after job loss.
 
