@@ -265,7 +265,7 @@ dropout_wages_anovas |>
   list_rbind(names_to = "model") |>
   select(model, term, npar, deviance, statistic, df, p.value) |>
   mutate(
-    term = stringr::str_remove(term, "dropout_wages_fit_"),
+    term = str_remove(term, "dropout_wages_fit_"),
     across(c(npar, df), as.integer)
   ) |>
   group_by(model) |>
