@@ -436,7 +436,7 @@ deviant_tolerance_grptraj_by <- map(
 wrap_plots(deviant_tolerance_grptraj_by, ncol = 1, guides = "collect")
 ```
 
-When examining plots like these, Singer and Willett (2003) recommend recommend looking for systematic patterns in the trajectories to answer questions like:
+When examining plots like these, Singer and Willett (2003) recommend looking for systematic patterns in the trajectories to answer questions like:
 
 - Do the observed trajectories differ across groups?
 - Do observed differences appear more in the intercepts or in the slopes?
