@@ -24,7 +24,7 @@ tenure
 \description{
 Data from Gamse and Conger (1997) measuring the number of years to receiving
 tenure in a sample of 260 semifinalists and fellowship recipients in the
-National Academy of Education–Spencer Foundation PostDoctoral Fellowship
+National Academy of Education--Spencer Foundation Post-Doctoral Fellowship
 Program who took an academic job after earning a doctorate. Academics were
 followed for up to nine years or until they received tenure.
 }
