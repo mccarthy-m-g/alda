@@ -527,16 +527,12 @@ NULL
 #'
 #' \describe{
 #'   \item{`id`}{Participant ID.}
-#'   \item{`onset`}{Age of first depressive episode.}
+#'   \item{`age`}{Age each record corresponds to.}
+#'   \item{`event`}{Binary indicator for whether and when the adult experienced a depressive episode.}
 #'   \item{`censor`}{Censoring status.}
-#'   \item{`interview_age`}{Age at time of interview.}
+#'   \item{`parental_divorce`}{Binary indicator for whether the adult's parents divorced at this or any previous age.}
 #'   \item{`female`}{Binary indicator for whether the adult is a female.}
 #'   \item{`siblings`}{Number of siblings.}
-#'   \item{`bigfamily`}{Binary indicator for whether the adult has five or more siblings.}
-#'   \item{`period`}{Age each record corresponds to.}
-#'   \item{`depressive_episode`}{Binary indicator for whether the adult experienced a depressive episode.}
-#'   \item{`parental_divorce`}{Binary indicator for whether the adult's parents divorced at this or any previous age.}
-#'   \item{`parental_divorce_now`}{Binary indicator for whether the adult's parents divorced during the current period.}
 #' }
 #' @source
 #' Wheaton, B., Roszell, P., & Hall, K. (1997). The impact of twenty childhood
@@ -558,12 +554,11 @@ NULL
 #'
 #' \describe{
 #'   \item{`id`}{Participant ID.}
-#'   \item{`time`}{Age of first juvenile arrest.}
+#'   \item{`age`}{Age each record corresponds to.}
+#'   \item{`event`}{Binary indicator for whether and when the adolescent was arrested.}
 #'   \item{`censor`}{Censoring status.}
 #'   \item{`abused`}{Binary indicator for whether the adolescent was abused.}
 #'   \item{`black`}{Binary indicator for whether the adolescent is black.}
-#'   \item{`period`}{Age each record corresponds to.}
-#'   \item{`event`}{Binary indicator for whether the adolescent was arrested.}
 #' }
 #' @source
 #' Keiley, M. K., & Martin, N. C. (2002). Child abuse, neglect, and juvenile

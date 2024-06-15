@@ -6,16 +6,15 @@
 \title{Age of first juvenile arrest}
 \format{
 A person-period data frame with 15834 rows and
-7 columns:
+6 columns:
 
 \describe{
 \item{\code{id}}{Participant ID.}
-\item{\code{time}}{Age of first juvenile arrest.}
+\item{\code{age}}{Age each record corresponds to.}
+\item{\code{event}}{Binary indicator for whether and when the adolescent was arrested.}
 \item{\code{censor}}{Censoring status.}
 \item{\code{abused}}{Binary indicator for whether the adolescent was abused.}
 \item{\code{black}}{Binary indicator for whether the adolescent is black.}
-\item{\code{period}}{Age each record corresponds to.}
-\item{\code{event}}{Binary indicator for whether the adolescent was arrested.}
 }
 }
 \source{
