@@ -581,11 +581,10 @@ NULL
 #'
 #' \describe{
 #'   \item{`id`}{Participant ID.}
-#'   \item{`last_term`}{The term a student stopped enrolling in mathematics courses.}
-#'   \item{`woman`}{Binary indicators for whether the student identified as a woman.}
-#'   \item{`censor`}{Censoring status.}
-#'   \item{`term`}{Term each record corresponds to.}
+#'   \item{`term`}{Academic term each record corresponds to.}
 #'   \item{`event`}{Binary indicator for whether the student stopped enrolling in mathematics courses at a given term.}
+#'   \item{`censor`}{Censoring status.}
+#'   \item{`woman`}{Binary indicators for whether the student identified as a woman.}
 #' }
 #' @source
 #' Graham, S. E. (1997). The exodus from mathematics: When and why?

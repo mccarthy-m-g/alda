@@ -240,12 +240,13 @@ math_dropout <- tidy_data$mathdropout_pp |>
     last_term = lastpd
   ) |>
   select(
-    -c(one, ltime, fltime),
+    -c(last_term, one, ltime, fltime),
     -starts_with("hs"),
     -starts_with("coll"),
     -starts_with("fhs"),
     -starts_with("fcoll")
-  )
+  ) |>
+  relocate(id, term, event, censor, woman)
 
 # Chapter 13 ------------------------------------------------------------------
 
