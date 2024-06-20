@@ -2,14 +2,12 @@
 title: "Chapter 12: Extending the discrete-time hazard model"
 ---
 
-::: {.alert .alert-warning}
-This chapter is under construction.
-:::
-
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE
 )
 ggplot2::theme_set(ggplot2::theme_bw())
 ggplot2::theme_update(
@@ -23,187 +21,373 @@ library(alda)
 library(dplyr)
 library(tidyr)
 library(purrr)
+library(stringr)
+library(glmmTMB)
 library(broom)
+library(broom.mixed)
 library(ggplot2)
+library(scales)
+library(patchwork)
+library(modelsummary)
+library(gt)
 ```
 
-## 12.1 Alternative Specifications for the "Main Effect of TIME"
+## 12.1 Alternative specifications for the "main effect" of `time`
 
-Table 12.2, page 413:
+In Section 12.1 Singer and Willett (2003) discuss alternative functional forms for the shape of the discrete-time hazard function using data from Gamse and Conger (1997), who measured the number of years to receiving tenure in a sample of 260 semifinalists and fellowship recipients in the National Academy of Education--Spencer Foundation Post-Doctoral Fellowship Program who took an academic job after earning a doctorate. Academics were followed for up to nine years or until they received tenure.
+
+For this example we use the `tenure` data set, a person-level data frame with 260 rows and 3 columns:
+
+- `id`: Participant ID.
+- `years`: Number of years to receiving tenure.
+- `censor`: Censoring status.
 
 ```{r}
-# Convert to person-period format
+tenure
+```
+
+When introducing the basic discrete-time hazard model in Chapter 11, Singer and Willett (2003) suggested beginning with a model that placed no constraints on the shape of the hazard function over time (i.e., a completely general functional form). This resulted in a model that was easily interpretable, informative about the temporal shape of hazard, and consistent with life table estimates. However, use of a completely general functional form for `time` is not an integral feature of the model---any `time` predictor can be treated as a continuous variable, allowing any number of alternative functional forms for the shape of the discrete-time hazard function.
+
+As Singer and Willett (2003) discuss, specification for `time` in the discrete-time hazard model should be motivated by a combination of theory, previous research, and exploratory analysis, and serious consideration of alternative functional forms should be given when:
+
+- A study involves many discrete time periods.
+- Hazard is expected to be near zero in some time periods.
+- Some time periods have small risk sets.
+
+As in choosing the functional form of an individual growth model, the specification for `time` in the discrete-time hazard model can take on any number of functional forms, including (but not limited to):
+
+- Discontinuities (Section 6.1).
+- Transformations in the ladder of powers (Section 6.2).
+- Polynomial forms (Section 6.3).
+- Truly nonlinear trajectories (Section 6.4).
+
+Following Singer and Willett (2003), here we will explore the use of an ordered set of polynomials as the specification for `time` in the discrete-time hazard model---with a focus on choosing a "final" polynomial trajectory. Before fitting these models, we first need to convert the person-level `tenure` data set to a person-period data set.
+
+```{r}
 tenure_pp <- tenure |>
+  group_by(id) |>
   reframe(
     year = 1:max(years),
-    event = if_else(year == years & censor == 0, 1, 0),
-    .by = id
-  ) |>
-  mutate(
-    temp_year = year,
-    temp_dummy = 1
-  ) |>
-  pivot_wider(
-    names_from = temp_year,
-    names_prefix = "year_",
-    values_from = temp_dummy,
-    values_fill = 0
+    event = if_else(year == years & censor == 0, 1, 0)
   )
 
-# Fit models
-tenure_fit_general <- glm(
-  event ~ factor(year), family = "binomial", data = tenure_pp
-)
+tenure_pp
+```
 
-tenure_fit_constant <- glm(
-  event ~ 1, family = "binomial", data = tenure_pp
-)
+Here will fit seven discrete-time hazard models to the `tenure_pp` person-period data set: six models of increasing polynomial order (starting from a zero-order polynomial), and a model with a completely general functional form for the "main effect" of `time`.
 
+```{r}
+tenure_fit_constant  <- glm(event ~ 1, family = "binomial", data = tenure_pp)
 tenure_fit_linear    <- update(tenure_fit_constant, . ~ year)
 tenure_fit_quadratic <- update(tenure_fit_linear, . ~ . + I(year^2))
 tenure_fit_cubic     <- update(tenure_fit_quadratic, . ~ . + I(year^3))
 tenure_fit_order_4   <- update(tenure_fit_cubic, . ~ . + I(year^4))
 tenure_fit_order_5   <- update(tenure_fit_order_4, . ~ . + I(year^5))
+tenure_fit_general   <- update(tenure_fit_constant, . ~ 0 + factor(year))
 
-# Compare
-anova(
-  tenure_fit_constant,
-  tenure_fit_linear,
-  tenure_fit_quadratic,
-  tenure_fit_cubic,
-  tenure_fit_order_4,
-  tenure_fit_order_5
+tenure_fits <- list(
+  "Constant" = tenure_fit_constant,
+  "Linear" = tenure_fit_linear,
+  "Quadratic" = tenure_fit_quadratic,
+  "Cubic" = tenure_fit_cubic,
+  "Fourth order" = tenure_fit_order_4,
+  "Fifth order" = tenure_fit_order_5,
+  "General" = tenure_fit_general
 )
 ```
 
-Figure 12.1, page 414:
+### Comparing alternative specifications for the "main effect" of `time`
+
+To select a "final" model among these alternatives, Singer and Willett (2003) recommend comparing the fit of competing specifications with the following approach:
+
+- Compare the models graphically by plotting their fitted logit hazard functions together. Models based on alternative specifications for `time` should be compared against the completely general specification, identifying whether and which of these models can suitably reproduce the general functional form parsimoniously.
+- Compare deviance statistics across models of increasing temporal complexity, identifying the most parsimonious alternative specifications for `time`.
+- Compare deviance statistics for each alternative specification to the completely general specification, identifying which of the most parsimonious alternative specifications for `time` fit better than the completely general specification.
+- Examine AIC and BIC statistics to supplement the comparisons of deviance statistics.
+
+Working through this process, if you identify an alternative specification for `time` that fits nearly as well as the completely general one, appreciably better than all simpler ones, and no worse than all more complex ones, consider selecting it as your "final" model. However, if none of the alternative specifications for `time` meet these criteria, consider retaining the completely general specification as your "final" model.
+
+We begin by plotting the fitted logit hazard functions together. Following Singer and Willett (2003), we omit the fitted functions for the fourth order and fifth order polynomials because their deviance statistics suggest we cannot distinguish them from the cubic polynomial.
 
 ```{r}
-tenure_fit_trajectories <- map_df(
-  list(
-    constant = tenure_fit_constant,
-    linear = tenure_fit_linear,
-    quadratic = tenure_fit_quadratic,
-    cubic = tenure_fit_cubic,
-    general = tenure_fit_general
-  ),
-  \(.x) {
-    augment(.x, newdata = tibble(year = 1:9)) 
-  },
-  .id = "model"
-)
-
-tenure_fit_trajectories |>
+tenure_preds <- tenure_fits |>
+  discard_at(c("Fourth order", "Fifth order")) |>
+  map(\(.fit) augment(.fit, newdata = tibble(year = 1:9))) |>
+  list_rbind(names_to = "time") |>
   mutate(
-    model = factor(
-      model, levels = c("constant", "linear", "quadratic", "cubic", "general")
-    ),
-    hazard = if_else(
-      model %in% c("quadratic", "general"), 1 / (1 + exp(-.fitted)), NA
-    ),
-    survival = if_else(
-      model %in% c("quadratic", "general"), cumprod(1 - hazard), NA
-    ),
-    .by = model
-  ) |>
-  rename(logit_hazard = .fitted) |>
-  pivot_longer(cols = logit_hazard:survival, names_to = "estimate") |>
-  mutate(estimate = factor(
-    estimate, levels = c("logit_hazard", "hazard", "survival"))
-  ) |>
-  ggplot(aes(x = year, y = value, colour = model)) +
-    geom_line() +
-    scale_color_brewer(type = "qual", palette = "Dark2") +
-    scale_x_continuous(breaks = 1:9) +
-    facet_wrap(vars(estimate), scales = "free_y", labeller = label_both)
+    time = factor(
+      time,
+      levels = names(discard_at(tenure_fits, c("Fourth order", "Fifth order")))
+    )
+  )
+
+# Figure 12.1, page 414 (top):
+ggplot(tenure_preds, aes(x = year, y = .fitted, colour = time)) +
+  geom_line() +
+  scale_color_brewer(palette = "Dark2") +
+  scale_x_continuous(breaks = 1:9)
 ```
 
-## 12.2 Using the Complementary Log-Log Link to Specify a Discrete-Time Hazard Model
-
-Figure 12.2:
+Next we compare goodness-of-fit statistics of the alternative and completely general models.
 
 ```{r}
+# Compare models --------------------------------------------------------------
+tenure_anovas_poly <- with(
+  tenure_fits[1:6],
+  do.call(anova, c(map(names(tenure_fits[1:6]), as.name), test = "LRT"))
+)
 
+tenure_anovas_general <- map(
+  tenure_fits[1:6],
+  \(.fit) anova(.fit, tenure_fit_general, test = "LRT")
+)
+
+# Make table ------------------------------------------------------------------
+tenure_anovas_poly_tidy <- tenure_anovas_poly |>
+  tidy() |>
+  select(
+    deviance = residual.deviance,
+    previous_model = deviance,
+    p.previous = p.value
+  ) |>
+  mutate(time = names(tenure_fits[1:6]), .before = deviance)
+
+tenure_anovas_general_tidy <- tenure_anovas_general |>
+  map(tidy) |>
+  list_rbind(names_to = "time") |>
+  na.omit() |>
+  select(time, general_model = deviance, p.general = p.value)
+
+# Table 12.2, page 413:
+tenure_anovas_poly_tidy |>
+  left_join(tenure_anovas_general_tidy) |>
+  add_row(time = "General", deviance = deviance(tenure_fit_general)) |>
+  mutate(
+    AIC = map_dbl(tenure_fits, AIC),
+    BIC = map_dbl(tenure_fits, BIC),
+    across(where(is.numeric), \(.x) round(.x, digits = 2))
+  )
 ```
 
-Figure 12.3, page 423:
+Following the approach recommended by Singer and Willett (2003), we would select the quadratic polynomial model as our "final" model. We can see that this model has a similar but more parsimonious functional form by comparing the fitted hazard and survival functions of the quadratic polynomial model to the completely general model.
+
+First we will get the fitted hazard and survival functions for both models.
+
+```{r}
+tenure_preds_final <- tenure_preds |>
+  filter(time %in% c("Quadratic", "General")) |>
+  group_by(time) |>
+  mutate(
+    haz.fitted = 1 / (1 + exp(-.fitted)),
+    surv.fitted = cumprod(1 - haz.fitted)
+  ) |>
+  group_modify(
+    \(.group, ...) add_row(.group, year = 0, surv.fitted = 1, .before = 1)
+  )
+
+tenure_preds_final
+```
+
+Then we can plot them.
+
+```{r}
+tenure_fits_final_haz <- tenure_preds_final |>
+  ggplot(aes(x = year, y = haz.fitted, colour = time)) +
+    geom_line() +
+    scale_colour_manual(values = pal_brewer(palette = "Dark2")(5)[c(3, 5)]) +
+    scale_x_continuous(breaks = 0:9)
+
+tenure_fits_final_surv <- tenure_fits_final_haz + aes(y = surv.fitted)
+
+# Figure 12.1, page 414 (bottom):
+tenure_fits_final_haz + tenure_fits_final_surv +
+  plot_layout(guides = "collect")
+```
+
+## 12.2 Using the complementary log-log link to specify a discrete-time hazard model
+
+In Section 12.2 Singer and Willett (2003) discuss the **complementary log-log** (aka **clog-log**) transformation as an alternative link function for the discrete-time hazard model using a subset of data from Capaldi, Crosby, and Stoolmiller (1996), who measured the grade year of first sexual intercourse in a sample of 180 at-risk heterosexual adolescent males. Adolescent males were followed from Grade 7 up to Grade 12 or until they reported having had sexual intercourse for the first time.
+
+For this example we return to the `first_sex` data set introduced in Chapter 10, a person-level data frame with 180 rows and 5 columns:
+
+- `id`: Participant ID.
+- `grade`: Grade year of first sexual intercourse.
+- `censor`: Censoring status.
+- `parental_transition`: Binary indicator for whether the adolescent experienced a parental transition (where their parents separated or repartnered).
+- `parental_antisociality`: Composite score across four indicators measuring parents' level of antisocial behaviour during the child's formative years.
+
+```{r}
+first_sex
+```
+
+As usual, we begin by converting the person-level `first_sex` data set to a person-period data set to facilitate subsequent exploratory analysis and model fitting.
 
 ```{r}
 first_sex_pp <- first_sex |>
   rename(grades = grade) |>
+  group_by(id) |>
   reframe(
     grade = 7:max(grades),
     event = if_else(grade == grades & censor == 0, 1, 0),
     parental_transition,
-    parental_antisociality,
-    .by = id
+    parental_antisociality
   )
 
-# The nested map_() is used here so we can get an ID column for both the
-# link function and the subset.
-map_dfr(
-  list(logit = "logit", cloglog = "cloglog"),
-  \(.x) {
-    map_dfr(
-      list(`0` = 0, `1` = 1),
-      \(.y) {
-        first_sex_fit <- glm(
-          event ~ factor(grade),
-          family = binomial(link = .x),
-          data = first_sex_pp,
-          subset = c(parental_transition == .y)
-        )
-        
-        augment(first_sex_fit, newdata = tibble(grade = 7:12))
-      },
-      .id = "parental_transition"
-    )
-  },
-  .id = "link"
-) |>
-  ggplot(
-    aes(x = grade, y = .fitted, colour = parental_transition, linetype = link)
-  ) +
-    geom_line()
-
+first_sex_pp
 ```
 
-Table 12.3, page 424:
+Next, we will explore sample hazard functions for the `first_sex` data using life table methods on the *logit* and *complementary log-log* scales. Following from the Chapter 11 examples for the `first_sex` data, our research question again centres on modelling the relationship between hazard and the time-invariant `parental_transition` predictor---therefore, we will create a life table stratified by values of `parental_transition`.
 
 ```{r}
-map_dfr(
+first_sex_lifetable <- first_sex_pp |>
+  group_by(parental_transition, grade) |>
+  summarise(
+    n.risk = n(),
+    n.event = sum(event == 1),
+    n.censor = sum(event == 0),
+    haz.estimate = n.event / n.risk
+  )
+
+first_sex_lifetable
+```
+
+We can define functions for each of these transformations to transform the estimated hazard probabilities in the `first_sex` life table to different scales.
+
+```{r}
+odds <- function(x) x / (1 - x)
+log_odds <- function(x) log(odds(x))
+cloglog <- function(x) log(-log(1 - x))
+
+first_sex_lifetable <- first_sex_lifetable |>
+  mutate(
+    logit.estimate = log_odds(haz.estimate),
+    cloglog.estimate = cloglog(haz.estimate)
+  )
+
+first_sex_lifetable
+```
+
+As Singer and Willett (2003) discuss, like the logit transformation, the complementary log-log transformation maps probabilities onto a scale with no upper or lower bounds. However, they differ in that: 
+
+- The logit transformation yields the logarithm of the *odds of event occurrence*.
+- The complementary log-log transformation yields the logarithm of the negated logarithm of the *probability of event nonoccurrence*.
+- The logit transformation is *symmetric* on either side of the "median" hazard probability of 0.5, whereas the complementary log-log transformation is *asymmetric*.
+
+The practical consequence of these differences is that the two transformations provide similar estimates when hazard is small, but consistently diverge as hazard increases, which we can see by sample hazard functions for the `first_sex` data.
+
+```{r}
+# Figure 12.3, page 423:
+first_sex_lifetable |>
+  select(parental_transition, grade, logit.estimate, cloglog.estimate) |>
+  pivot_longer(
+    cols = c(logit.estimate, cloglog.estimate),
+    names_to = "transform",
+    names_pattern = "(.*)\\.estimate",
+    values_to = "haz.estimate"
+  ) |>
+  mutate(parental_transition = as.logical(parental_transition)) |>
+  ggplot(aes(x = grade, y = haz.estimate)) +
+    geom_line(aes(colour = parental_transition, linetype = transform)) +
+    scale_colour_brewer(palette = "Dark2")
+```
+
+Fitting the discrete-time hazard model using a complementary log-log link proceeds in the same way as when a logit link is used, invoking the same assumptions about the behaviour of complementary log-log hazard as we would about logit hazard. However, they differ in their **proportionality assumptions**:
+
+- The discrete-time hazard model with logit link is a **proportional odds model** whose antilogged slope parameter estimates are **odds ratios**, which we assume are proportional over time across all possible values of the predictor (or combinations of predictors).
+- The discrete-time hazard model with complementary log-log link is a **proportional hazards model** whose antilogged slope parameter estimates are **hazard ratios**, which we assume are proportional over time across all possible values of the predictor (or combinations of predictors).
+
+The significance of this difference is that the proportional hazards assumption invoked by the complementary log-log link yields a discrete-time hazard model that is directly analogous to the continuous-time hazard model. Given this, Singer and Willett (2003) recommend the following when choosing a link function for the discrete-time hazard model:
+
+- When data are collected in truly discrete time, the complementary log-log link has no particular advantage over the logit link. Parameter estimates and goodness-of-fit statistics tend to be similar when fitting identical models with alternate link functions, and the primary difference between these two specifications is the effect size metric for the antilogged slope parameter estimates (odds ratios or hazard ratios).
+- When underlying metric for time is truly continuous---but the data are collected in discrete time due to measurement difficulties---the complementary log-log link is preferable to the logit link. This is the case when analyzing **interval-censored data**, wherein events unfold in continuous time, but information about event occurrence is restricted to **discrete-time intervals**.
+
+Here we will fit two discrete-time hazard models to the `first_sex_pp` person-period data set: one with a complementary log-log link, and another with a logit link.
+
+```{r}
+# Define inverse transformation functions -------------------------------------
+log_odds_inv <- function(x) 1 / (1 + exp(-x))
+cloglog_inv <- function(x) 1 - exp(-exp(x))
+
+# Fit models ------------------------------------------------------------------
+first_sex_fits <- map(
   list(cloglog = "cloglog", logit = "logit"),
-  \(.x) {
-    first_sex_fit <- glm(
+  \(.link) {
+    glm(
       event ~ -1 + factor(grade) + parental_transition,
-      family = binomial(link = .x),
+      family = binomial(link = .link),
       data = first_sex_pp
     )
-    
-    first_sex_fit |>
-      tidy() |>
-      select(term, estimate) |>
-      mutate(
-        base_hazard = case_when(
-          .x == "logit" & term != "parental_transition" ~
-            1 / (1 + exp(-estimate)),
-          .x == "cloglog" & term != "parental_transition" ~
-            1 - exp(-exp(estimate))
-        )
-      )
-  },
-  .id = "link"
-) |>
-  pivot_wider(names_from = link, values_from = c(estimate, base_hazard))
+  }
+)
+
+# Make table ------------------------------------------------------------------
+
+# Table 12.3, page 424:
+first_sex_fits |>
+  map(tidy) |>
+  list_cbind() |>
+  unnest_wider(col = c(cloglog, logit), names_sep = ".") |>
+  select(term = cloglog.term, cloglog.estimate, logit.estimate) |>
+  mutate(
+    term = coef_rename(term, factor_name = FALSE),
+    cloglog.haz = if_else(
+      term != "parental_transition", cloglog_inv(cloglog.estimate), NA
+    ),
+    logit.haz = if_else(
+      term != "parental_transition", log_odds_inv(logit.estimate), NA
+    )
+  ) |>
+  add_row(
+    term = "Deviance",
+    cloglog.estimate = deviance(first_sex_fits$cloglog),
+    logit.estimate = deviance(first_sex_fits$logit)
+  )
 ```
 
-## 12.3 Time-Varying Predictors
+## 12.3 Time-varying predictors
 
-Figure 12.4, page 432:
+In Section 12.3 Singer and Willett (2003) demonstrate how to fit the discrete-time hazard model for data with **time-varying predictors** using a subset of data from Wheaton, Rozell, and Hall (1997), who measured the relation between age of first depressive episode and several childhood and adult traumatic stressors in a random sample of 1393 adults living in metropolitan Toronto, Ontario. Age of first depressive episode and traumatic stressors was determined through a structured interview.
+
+For this example we use the `first_depression_1` data set, a person-period data frame with 36997 rows and 7 columns:
+
+- `id`: Participant ID.
+- `age`: Age each record corresponds to.
+- `event`: Binary indicator for whether and when the adult experienced a depressive episode.
+- `censor`: Censoring status.
+- `parental_divorce`: Binary indicator for whether the adult's parents divorced at this or any previous age.
+- `female`: Binary indicator for whether the adult is a female.
+- `siblings`: Number of siblings.
 
 ```{r}
-first_depression_fit <- glm(
-  depressive_episode ~ poly(I(period - 18), 3, raw = TRUE) + parental_divorce,
+first_depression_1
+```
+
+No special strategies are needed to fit the discrete-time hazard model with time-varying predictors. However, as Singer and Willett (2003) discuss, the inclusion of time-varying predictors in a model requires restatements of the three assumptions inherent to basic discrete-time hazard models presented in Chapter 11. We now assume that:
+
+- There is a postulated value of logit hazard for each value of the time-varying predictor (or for each combination of predictor values for models with more than one predictor) *at each point in time*. Therefore, the effect of a time-varying predictor compares different groups of people at different times, rather than static groups of people at different times.
+- Joining consecutive postulated values of logit hazard will yield hazard functions that have an identical shape *for constant values of the time-varying predictor(s)*. Similar to time-varying predictors for the multilevel model for change (Section 5.3), the most extreme lower and upper constant values of the time-varying predictor(s) can be thought of as an envelope representing the complete set of population logit hazard functions for all possible temporal patterns of the time-varying predictor.
+- The distance between each of these logit hazard functions is identical in every time period. Therefore, the effect of a time-varying predictor is identical over time.
+
+To clarify these assumptions, here we will fit and plot a model with a cubic polynomial form for `age` and the time-varying predictor `parental_divorce` to the `first_depression_1` data, along with sample (logit) hazard functions from the life table.
+
+```{r}
+# Make life table -------------------------------------------------------------
+first_depression_lifetable <- first_depression_1 |>
+  mutate(parental_divorce = as.logical(parental_divorce)) |>
+  group_by(parental_divorce, age) |>
+  summarise(
+    n.risk = n(),
+    n.event = sum(event == 1),
+    n.censor = sum(event == 0),
+    haz.estimate = n.event / n.risk,
+    haz.estimate = if_else(haz.estimate == 0, NA, haz.estimate),
+    log_odds.estimate = log_odds(haz.estimate),
+    .groups = "drop_last"
+  )
+
+# Fit model -------------------------------------------------------------------
+first_depression_fit_1 <- glm(
+  event ~ poly(I(age - 18), 3, raw = TRUE) + parental_divorce,
   family = binomial(link = "logit"),
   data = first_depression_1
 )
@@ -212,126 +396,205 @@ first_depression_fit <- glm(
 # with stats::poly(), it is represented in augment() as a matrix column. A simple
 # workaround to get the predictor on its original scale as a vector is to pass
 # the original data to augment().
-first_depression_predictions <- first_depression_fit |>
-  augment(data = first_depression_1) |>
-  mutate(hazard = 1 / (1 + exp(-.fitted)))
-
-# Proportions of the risk set at each age who experienced an initial depressive
-# episode at that age, as function of their parental divorce status at that age.
-first_depression_proportions <- first_depression_1 |>
-  group_by(period, parental_divorce) |>
-  summarise(
-    total = n(),
-    event = sum(depressive_episode),
-    proportion = event / total,
-    proportion = if_else(proportion == 0, NA, proportion),
-    logit = log(proportion / (1 - proportion))
+first_depression_preds_1 <- first_depression_fit_1 |>
+  augment(data = first_depression_1, type.predict = "response") |>
+  rename(haz.estimate = .fitted) |>
+  mutate(
+    log_odds.estimate = log_odds(haz.estimate),
+    parental_divorce = as.logical(parental_divorce)
   )
 
-# Top plot
-ggplot(mapping = aes(x = period, colour = factor(parental_divorce))) +
-  geom_line(
-    aes(y = hazard), data = first_depression_predictions
-  ) +
-  geom_point(
-    aes(y = proportion), data = first_depression_proportions
-  ) +
-  scale_x_continuous(breaks = seq(0, 40, by = 5), limits = c(0, 40)) +
-  scale_y_continuous(limits = c(0, 0.06))
+# Plot ------------------------------------------------------------------------
+first_depression_fit_1_haz <- ggplot() +
+  aes(x = age, y = haz.estimate, colour = parental_divorce) +
+  geom_point(data = first_depression_lifetable) +
+  geom_line(data = first_depression_preds_1) +
+  scale_colour_brewer(palette = "Dark2") +
+  scale_x_continuous(breaks = seq(0, 40, by = 5)) +
+  coord_cartesian(xlim = c(0, 40), ylim = c(0, 0.06))
 
-# Bottom plot
-ggplot(mapping = aes(x = period, colour = factor(parental_divorce))) +
-  geom_line(
-    aes(y = .fitted), data = first_depression_predictions
-  ) +
-  geom_point(
-    aes(y = logit), data = first_depression_proportions
-  ) +
-  scale_x_continuous(breaks = seq(0, 40, by = 5), limits = c(0, 40)) +
-  scale_y_continuous(breaks = seq(-8, -2, by = 1), limits = c(-8, -2))
+first_depression_fit_1_logit <- first_depression_fit_1_haz +
+  aes(y = log_odds.estimate) + 
+  scale_y_continuous(breaks = seq(-8, -2, by = 1)) +
+  coord_cartesian(xlim = c(0, 40), ylim = c(-8, -2))
+
+# Figure 12.4, page 432:
+first_depression_fit_1_haz / first_depression_fit_1_logit +
+  plot_layout(guides = "collect", axes = "collect")
 ```
 
-Figure 12.5, page 437:
+### Plotting the effects of time-varying predictors
+
+When plotting fitted hazard and survivor functions for prototypical individuals, Singer and Willett (2003) suggest the following strategies for selecting prototypical values for time-varying predictors:
+
+- For time-varying predictors whose values can remain constant over time, choose time-invariant values that represent an envelope of all possible temporal patterns of the time-varying predictor.
+- For time-varying predictors whose values cannot remain constant over time, choose time-varying values that reflect substantively interesting temporal patterns.
+
+Here here we will demonstrate the first of these strategies using an updated version of the `first_depression_fit_1` model that includes a predictor for sex.
 
 ```{r}
-first_depression_fit_2 <- update(first_depression_fit, . ~ . + female)
+# Fit model -------------------------------------------------------------------
+first_depression_fit_2 <- update(first_depression_fit_1, . ~ . + female)
 
-first_depression_fit_2 |>
+# Make predictions ------------------------------------------------------------
+first_depression_preds_2 <- first_depression_fit_2 |>
   augment(
-    newdata = expand_grid(
-      period = 4:39, parental_divorce = c(0, 1), female = c(0, 1)
-    )
+    newdata = crossing(
+      age = 4:39, parental_divorce = c(0, 1), female = c(0, 1)
+    ),
+    type.predict = "response"
   ) |>
+  rename(haz.estimate = .fitted) |>
+  group_by(parental_divorce, female) |>
   mutate(
-    female = factor(female),
-    parental_divorce = factor(parental_divorce),
-    hazard = 1 / (1 + exp(-.fitted)),
-    survival = cumprod(1 - hazard),
-    .by = c(female, parental_divorce)
+    parental_divorce = as.logical(parental_divorce),
+    female = as.logical(female),
+    surv.estimate = cumprod(1 - haz.estimate)
   ) |>
-  pivot_longer(cols = c(hazard, survival), names_to = "estimate") |>
-  ggplot(aes(x = period, y = value, linetype = female, colour = parental_divorce)) +
-    geom_line() +
-    facet_wrap(vars(estimate), ncol = 1, scales = "free_y") +
-    scale_x_continuous(breaks = seq(0, 40, by = 5), limits = c(0, 40))  +
-    ggh4x::facetted_pos_scales(
-      y = list(
-        estimate == "hazard" ~ scale_y_continuous(limits = c(0, .04)),
-        estimate == "survival" ~ scale_y_continuous(limits = c(0, 1))
-      )
-    )
+  group_modify(
+    \(.group, ...) add_row(.group, age = 3, surv.estimate = 1, .before = 1)
+  )
+
+# Plot ------------------------------------------------------------------------
+first_depression_fit_2_haz <- first_depression_preds_2 |>
+  ggplot(aes(x = age, y = haz.estimate)) + 
+    geom_line(aes(linetype = parental_divorce, colour = female)) +
+    scale_colour_brewer(palette = "Dark2") +
+    scale_x_continuous(breaks = seq(0, 40, by = 5)) +
+    coord_cartesian(xlim = c(0, 40), ylim = c(0, 0.04))
+
+first_depression_fit_2_surv <- first_depression_fit_2_haz +
+  aes(y = surv.estimate) +
+  coord_cartesian(xlim = c(0, 40), ylim = c(0, 1))
+
+# Figure 12.5, page 437:
+first_depression_fit_2_haz / first_depression_fit_2_surv +
+  plot_layout(guides = "collect", axes = "collect")
 ```
 
-## 12.4 The Linear Additivity Assumption: Uncovering Violations and Simple Solutions
+## 12.4 The linear additivity assumption: Uncovering violations and simple solutions
 
-Figure 12.6, page 445:
+In Section 12.4 Singer and Willett (2003) introduce practical strategies for diagnosing and correcting violations of the discrete-time hazard model's **linear additivity assumption**, which stipulates that unit differences in the value of a (time-invariant or time-varying) predictor correspond to fixed differences in logit hazard. In other words, we postulate that a predictor's effect is:
+
+- **Additive**: It does not depend upon the values of other predictors in the model (i.e., there are no interactions between substantive predictors).
+- **Linear**: It does not depend upon the position of the unit difference along its scale (i.e., there are no nonlinear effects).
+
+### Interactions between substantive predictors
+
+Singer and Willett (2003) illustrate strategies for identifying possible interactions between substantive predictors using data from Keiley and Martin (2002), who measured the effect of child abuse on the risk of first juvenile arrest in a sample of 1553 adolescents aged 8 to 18. Adolescents were followed up to age 18 or until they were arrested.
+
+For this example we use the `first_arrest` data set, a person-period data frame with 15834 rows and 5 columns:
+
+- `id`: Participant ID.
+- `age`: Age each record corresponds to.
+- `event`: Binary indicator for whether the adolescent was arrested.- `censor`: Censoring status.
+- `abused`: Binary indicator for whether the adolescent was abused.
+- `black`: Binary indicator for whether the adolescent is black.
 
 ```{r}
-# Raw
-first_arrest |>
-  group_by(period, abused, black) |>
-  summarise(
-    total = n(),
-    event = sum(event),
-    proportion = event / total,
-    proportion = if_else(proportion == 0, NA, proportion),
-    logit = log(proportion / (1 - proportion))
-  ) |>
-  ungroup() |>
-  mutate(across(c(abused, black), factor)) |>
-  na.omit() |>
-  ggplot(aes(x = period, y = logit, colour = abused, group = abused)) +
-    geom_line() +
-    scale_x_continuous(breaks = 7:19, limits = c(7, 19)) +
-    scale_y_continuous(limits = c(-7, -2)) +
-    facet_wrap(vars(black), labeller = label_both)
+first_arrest
+```
 
-# Model
+Singer and Willett (2003) recommend using two strategies to identify possible interactions between substantive predictors:
+
+- Examine plots of sample (logit) hazard functions for evidence that the magnitude of the differential in hazard varies across groups.
+- Compare goodness-of-fit statistics of nested models that include and exclude an interaction term.
+
+To demonstrate the first strategy, we begin by constructing a life table for the `first_arrest`, which we will use to explore the possibility of an interaction between the `abused` and `black` predictors.
+
+```{r}
+first_arrest_lifetable <- first_arrest |>
+  mutate(across(c(abused, black), as.logical)) |>
+  group_by(abused, black, age) |>
+  summarise(
+    n.risk = n(),
+    n.event = sum(event == 1),
+    n.censor = sum(event == 0),
+    haz.estimate = n.event / n.risk,
+    haz.estimate = if_else(haz.estimate == 0, NA, haz.estimate),
+    log_odds.estimate = log_odds(haz.estimate),
+    .groups = "drop_last"
+  ) |>
+  na.omit()
+
+first_arrest_lifetable
+```
+
+Now we can plot the sample (logit) hazard functions. Notice that the magnitude of the differential in (logit) hazard associated with abuse is visibly larger for black adolescents compared to white adolescents.
+
+```{r}
+# Figure 12.6, page 445 (top):
+first_arrest_lifetable |>
+  ggplot(aes(x = age, y = log_odds.estimate, colour = black, linetype = abused)) +
+  geom_line() +
+  scale_colour_brewer(palette = "Dark2") +
+  scale_x_continuous(breaks = 7:19) +
+  coord_cartesian(xlim = c(7, 19), ylim = c(-7, -2)) +
+  facet_wrap(vars(black), labeller = label_both) +
+  ggtitle("Sample (logit) hazard functions") + 
+  theme(strip.background = element_blank(), strip.text.x = element_blank())
+```
+
+We can test for this interaction by comparing goodness-of-fit statistics of nested models that include and exclude an interaction term. Equivalently, as we demonstrate here, we can also examine a sequential analysis of deviance table for the model that includes an interaction term, rather than fitting two models (so long as the interaction is the final term in the model formula).
+
+```{r}
 first_arrest_fit <- glm(
-  event ~ factor(period) + abused + black + abused:black,
+  event ~ 0 + factor(age) + abused + black + abused:black,
   family = binomial(link = "logit"),
   data = first_arrest
 )
 
-first_arrest_fit |>
-  augment(
-    newdata = expand_grid(period = 8:18, abused = c(0, 1), black = c(0, 1))
-  ) |>
-  ggplot(
-    aes(
-      x = period, y = .fitted, colour = factor(abused), linetype = factor(black)
-    )
-  ) +
-  geom_line() +
-  scale_x_continuous(breaks = 7:19, limits = c(7, 19)) +
-  scale_y_continuous(limits = c(-8, -2))
+anova(first_arrest_fit, test = "LRT")
 ```
 
-Table 12.4, page 449:
+As usual, we can interpret interaction effects by examining combined parameter estimates or fitted hazard (and survivor) functions for prototypical individuals.
+
+First the combined parameter estimates. A simple way to obtain these estimates is to use the `type.predict = "terms"` argument in the `augment()` function, which returns a matrix giving the value of each coefficient multiplied by the prototypical values. Summing each row of the matrix and antilogging the totals results in an odds ratio for each prototypical individual.
 
 ```{r}
-model_A <- update(first_depression_fit_2, . ~ . + siblings)
-model_B <- update(
+first_arrest_fit |>
+  augment(
+    newdata = crossing(age = NA, abused = c(0, 1), black = c(0, 1)),
+    type.predict = "terms"
+  ) |>
+  mutate(.fitted = exp(rowSums(.fitted, na.rm = TRUE))) |>
+  select(abused, black, odds_ratio = .fitted)
+```
+
+Then plots of fitted hazard functions.
+
+```{r}
+first_arrest_preds <- first_arrest_fit |>
+  augment(
+    newdata = crossing(age = 8:18, abused = c(0, 1), black = c(0, 1)),
+    type.predict = "link"
+  ) |>
+  rename(log_odds.estimate = .fitted) |>
+  mutate(across(c(abused, black), as.logical))
+
+# Figure 12.6, page 445 (bottom):
+first_arrest_preds |>
+  ggplot(aes(x = age, y = log_odds.estimate, colour = black, linetype = abused)) +
+  geom_line() +
+  scale_colour_brewer(palette = "Dark2") +
+  scale_x_continuous(breaks = 7:19) +
+  coord_cartesian(xlim = c(7, 19), ylim = c(-7, -2)) +
+  ggtitle("Fitted (logit) hazard functions")
+```
+
+### Nonlinear effects
+
+Singer and Willett (2003) suggest two general strategies for exploring the linearity assumption and identifying an appropriate nonlinear functional form for any predictors:
+
+- Transform predictors so that relationships become linear on the transformed scale, but nonlinear on the raw scale (a la Section 6.2).
+- Categorize each continuous predictor into a small number of groups represented by dummy variables, then examine the pattern of parameter estimates for consecutive dummy variables to deduce the appropriate (nonlinear) functional form. Equally spaced parameter estimates suggest a linear effect, and unequally spaced parameter estimates suggest a nonlinear effect.
+
+We return to the `first_depression_fit_2` model from Section 12.3 to demonstrate the second strategy, examining the effect of a third predictor, `siblings`. Here we will fit three discrete-time hazard models to the `first_depression_1` data: A model that adds `siblings` in its raw form (Model A), a model that categorizes `siblings` into a system of dummy variables (Model B), a model that splits `siblings` into two groups based on the pattern of parameter estimates in Model B (Model C), and a model that gives a cubic `siblings` specification (Model D).
+
+```{r}
+# Fit models ------------------------------------------------------------------
+first_depression_fit_A <- update(first_depression_fit_2, . ~ . + siblings)
+first_depression_fit_B <- update(
   first_depression_fit_2, 
   . ~ . +
     between(siblings, 1, 2) +
@@ -340,107 +603,378 @@ model_B <- update(
     between(siblings, 7, 8) +
     between(siblings, 9, Inf)
 )
-model_C <- update(first_depression_fit_2, . ~ . + bigfamily)
+first_depression_fit_C <- update(first_depression_fit_2, . ~ . + I(siblings >= 5))
+first_depression_fit_D <- update(
+  first_depression_fit_2, . ~ . + poly(siblings, 3, raw = TRUE)
+)
 
-tidy(model_A)
-tidy(model_B)
-tidy(model_C)
+first_depression_fits <- list(
+  "Model A" = first_depression_fit_A,
+  "Model B" = first_depression_fit_B,
+  "Model C" = first_depression_fit_C,
+  "Model D" = first_depression_fit_D
+)
+
+# Make table ------------------------------------------------------------------
+options(modelsummary_get = "all")
+
+# Table 12.4, page 449:
+first_depression_fits |>
+  modelsummary(
+    fmt = 4,
+    coef_rename = coef_rename,
+    gof_map = c("deviance", "AIC"),
+    output = "gt"
+  )
 ```
+
+Notice that the parameter estimates for the five `siblings` dummy variables in Model B are not equidistant, suggesting that Model A may be misleading due to the number of `siblings` having a nonlinear effect on risk of depression. Model C attempts to capture this nonlinear effect by splitting `siblings` into two broad groups, based on the observation that small- to mid-size families appear to have negligible influence on risk of depression, whereas large families have much lower risk; and Model D attempts to capture this nonlinear effect using a cubic polynomial.
+
+As Singer and Willett (2003) conclude, for the `first_depression_1` data, the nonlinear effect of `siblings` was jagged and disjunctive rather than smooth and continuous; therefore, the categorical specification in Model C fit much better than the continuous specification in Model D. However, they caution against routinely categorizing continuous variables to capture nonlinear effects. As usual, it is preferable to keep continuous predictors continuous whenever possible, categorizing continuous variables only as a last resort.
 
 ## 12.5 The proportionality assumption: Uncovering violations and simple solutions
 
-Figure 12.8, page 458:
+In Section 12.5 Singer and Willett (2003) discuss strategies for investigating and relaxing the the discrete-time hazard model's **proportionality assumption** using data from Graham (1997), who measured the relation between mathematics course-taking and gender identity in a sample of 3790 tenth grade high school students. Students were followed for up to 5 terms (eleventh grade, twelfth grade, and the first three semesters of college) or until they stopped enrolling in mathematics courses.
+
+For this example we use the `math_dropout` data set, a person-period data frame with 9558 rows and 5 columns:
+
+- `id`: Participant ID.
+- `term`: Academic term each record corresponds to.
+- `event`: Binary indicator for whether the student stopped enrolling in mathematics courses at a given term.
+- `censor`: Censoring status.
+- `woman`: Binary indicators for whether the student identified as a woman.
 
 ```{r}
-# Raw
-math_dropout |>
-  group_by(term, woman) |>
-  summarise(
-    total = n(),
-    event = sum(event),
-    proportion = event / total,
-    proportion = if_else(proportion == 0, NA, proportion),
-    logit = log(proportion / (1 - proportion))
+math_dropout
+```
+
+When introducing the basic discrete-time hazard model in Chapter 11, and extending it in Section 12.2, Singer and Willett (2003) stipulated discrete-time hazard models that assumed the effect of each predictor was constant over time, resulting in logit or complementary log-log hazard functions that have an identical distance between them in every time period, and proportional odds or hazard ratios. However, there are at least three ways in which a predictor's *effect* may vary over time:
+
+- It may *increase* over time.
+- It may *decrease* over time.
+- It may be *particularly pronounced* in some time periods, differing *erratically* over time.
+
+As Singer and Willett (2003) discuss, the existence of **time-dependent effects** suggests the need for a **nonproportional odds model** (or **nonproportional hazards model**), that includes interactions between predictors and `time`.
+
+Here we will fit three models to the `math_dropout` data: a proportional odds model that adds `woman` as a predictor (Model A); a nonproportional odds model that adds a completely general interaction between `woman` and `term`, allowing the gender differential to differ in each term (Model B); and a nonproportional odds model that adds a linear interaction between `woman` and `term - 1`, allowing the gender differential to smoothly increase or decrease over time (Model C).
+
+```{r}
+# Fit models ------------------------------------------------------------------
+math_dropout_fit_A <- glm(
+  event ~ 0 + factor(term) + woman,
+  family = binomial(link = "logit"),
+  data = math_dropout
+)
+math_dropout_fit_B <- glm(
+  event ~ 0 + factor(term) + factor(term):woman,
+  family = binomial(link = "logit"),
+  data = math_dropout
+)
+math_dropout_fit_C <- update(math_dropout_fit_A, . ~ . + woman:I(term - 1))
+
+math_dropout_fits <- list(
+  "Model A" = math_dropout_fit_A,
+  "Model B" = math_dropout_fit_B,
+  "Model C" = math_dropout_fit_C
+)
+
+# Make table ------------------------------------------------------------------
+
+# Table 12.5, page 459:
+math_dropout_fits |>
+  modelsummary(
+    fmt = 4,
+    coef_rename = \(.x) coef_rename(.x, factor_name = FALSE),
+    gof_map = c("deviance", "AIC"),
+    output = "gt"
+  )
+```
+
+We can test the proportionality assumption by using likelihood ratio tests to compare the deviance statistics between proportional odds models and nonproportional odds models.
+
+As Singer and Willett (2003) discuss, although Model B fits slightly better than Model A, the likelihood ratio test suggests this improvement is insufficient to justify four extra parameters. However, the systematic increase in the `factor(term):woman` coefficients of Model B suggests a more parsimonious that adds a linear interaction between `woman` and `term `, Model C, which does fit better than Model A (and no worse than Model B). We therefore choose Model C as our "final" model, in lieu of Model A with its untenable proportionality assumption.
+
+```{r}
+math_dropout_anovas <- list(
+  "Model A vs Model B" = anova(
+    math_dropout_fit_A, math_dropout_fit_B, test = "LRT"
+  ),
+  "Model A vs Model C" = anova(
+    math_dropout_fit_A, math_dropout_fit_C, test = "LRT"
+  ),
+  "Model C vs Model B" = anova(
+    math_dropout_fit_C, math_dropout_fit_B, test = "LRT"
+  )
+)
+
+math_dropout_anovas |>
+  map(tidy) |>
+  list_rbind(names_to = "test") |>
+  mutate(
+    term = str_remove(term, "0 \\+|- 1$"),
+    across(c(df.residual, df), as.integer)
   ) |>
-  ungroup() |>
-  mutate(across(c(woman), factor)) |>
-  na.omit() |>
-  ggplot(aes(x = term, y = logit, colour = woman)) +
-    geom_line()
-
-# Models
-model_A <- glm(
-  event ~ -1 + factor(term) + woman,
-  family = binomial(link = "logit"),
-  data = math_dropout
-)
-model_B <- glm(
-  event ~ -1 + factor(term) + factor(term):woman,
-  family = binomial(link = "logit"),
-  data = math_dropout
-)
-model_C <- update(model_A, . ~ . + woman:I(term - 1))
-
-map_df(
-  list(model_A = model_A, model_B = model_B, model_C = model_C),
-  \(.x) {
-    .x |>
-      augment(newdata = expand_grid(term = 1:5, woman = c(0, 1))) |>
-      mutate(hazard = 1 / (1 + exp(-.fitted)))
-  },
-  .id = "model"
-) |>
-  ggplot(aes(x = term, y = hazard, colour = factor(woman))) +
-    geom_line() +
-    facet_wrap(vars(model))
+  group_by(test) |>
+  gt() |>
+  cols_label(term = "comparison") |>
+  fmt_number(columns = where(is.double), decimals = 2) |>
+  sub_missing(missing_text = "")
 ```
 
-Table 12.5, page 459:
+Finally, we can plot fitted (logit) hazard functions, along with sample (logit) hazard functions from the life table, from each of these models to visualize their behaviour. Notice that the fitted (logit) hazard functions of Model B are identical to the sample (logit) hazard functions from the life table; as Singer and Willett (2003) explain, for categorical predictors, fitted hazard functions from a general interaction with time model reproduce within-group sample hazard functions (just as fitted hazard functions from a model with no substantive predictors reproduce sample hazard functions).
 
 ```{r}
-tidy(model_A)
-tidy(model_B)
-tidy(model_C)
+# Make life table -------------------------------------------------------------
+math_dropout_lifetable <- math_dropout |>
+  mutate(woman = as.logical(woman)) |>
+  group_by(woman, term) |>
+  summarise(
+    model = "Sample",
+    n.risk = n(),
+    n.event = sum(event == 1),
+    n.censor = sum(event == 0),
+    haz.estimate = n.event / n.risk,
+    haz.estimate = if_else(haz.estimate == 0, NA, haz.estimate),
+    log_odds.estimate = log_odds(haz.estimate),
+    .groups = "drop_last"
+  )
+
+# Make predictions ------------------------------------------------------------
+math_dropout_preds <- math_dropout_fits |>
+  map(
+    \(.fit) {
+      .fit |>
+        augment(
+          newdata = crossing(term = 1:5, woman = c(0, 1)),
+          type.predict = "link"
+        )
+    }
+  ) |>
+  list_rbind(names_to = "model") |>
+  mutate(woman = as.logical(woman)) |>
+  rename(log_odds.estimate = .fitted)
+
+# Plot ------------------------------------------------------------------------
+
+# Figure 12.8, page 458:
+math_dropout_lifetable |>
+  bind_rows(math_dropout_preds) |>
+  mutate(model = factor(model, levels = unique(model))) |>
+  ggplot(aes(x = term, y = log_odds.estimate, colour = woman)) +
+    geom_line() +
+    scale_color_brewer(palette = "Dark2") +
+    facet_wrap(vars(model)) +
+    coord_cartesian(ylim = c(-2, 0))
 ```
 
-## 12.6 The No Unobserved Heterogeneity Assumption: No Simple Solution
+## 12.6 The no unobserved heterogeneity assumption: No simple solution
 
-## 12.7 Residual Analysis
+In Section 12.6 Singer and Willett (2003) briefly discuss an additional assumption common to all the discrete-time and continuous-time hazard models presented throughout the book: That all variation in hazard profiles across individuals is assumed to depend on observed variation in the predictors, such that individuals who share identical predictor profiles will have identical population hazard functions. In other words, these models are assumed to have **no unobserved heterogeneity**, and are conceptually similar to the complete pooling model discussed in Section 3.2.
 
-Table 12.6, page 465:
+As Singer and Willett (2003) discuss, ignoring unobserved heterogeneity can have the following consequences:
+
+- It always leads to hazard functions that appear to decline over time, due to the composition of the risk set changing over time as high-risk populations experience the target event at high rates, medium-risk populations at moderate rates, and low-risk at low rates. Therefore, the shape of the population hazard function may fail to describe the pattern of risk for the intended population under study, due it being a blended average of the risk profiles of several heterogeneous populations (whose shapes may be entirely different from the blended average).
+- Parameter estimates can only be interpreted as **population averaged coefficients**, and not as person-specific coefficients.
+
+As with the multilevel model for change, a **multilevel discrete-time hazard model** (or a multilevel continuous-time hazard model) can be used to explicitly model heterogeneity by adding a random effects term, such that each group has its own hazard function. Note that the survival analysis literature often refers to multilevel hazard models with only a person-specific random intercept as **frailty models**, and with only a cluster-specific random intercept as **shared frailty models**. For further discussion of these models, see Tutz and Schmid (2016) and Austin (2017).
+
+For this example we return to the `teachers` data set introduced in Chapter 9, a person-level data frame with 3941 rows and 3 columns:
+
+- `id`: Teacher ID.
+- `years`: The number of years between a teacher's dates of hire and departure from the Michigan public schools.
+- `censor`: Censoring status.
+
+```{r}
+teachers
+```
+
+We first need to convert the person-level `teachers` data set to a person-period data set.
+
+```{r}
+teachers_pp <- teachers |>
+  group_by(id) |>
+  reframe(
+    year = 1:years,
+    event = if_else(year == years & censor == 0, true = 1, false = 0)
+  )
+
+teachers_pp
+```
+
+We can fit a multilevel discrete-time hazard model using either the `glmer()` function from the **lme4** package or the `glmmTMB()` function from the **glmmTMB** package, which are both functions for fitting **generalized linear mixed models**. Here we will fit two models to the `teachers_pp` person-period data set: a basic discrete-time hazard model (Model A), and a frailty model (Model B). 
+
+```{r}
+# Fit models ------------------------------------------------------------------
+
+# We are fitting this model with the glmmTMB() function instead of glm() so we
+# can compare its fit with the frailty model using the anova() function.
+teachers_fit_A <- glmmTMB(
+  event ~ 0 + factor(year),
+  data = teachers_pp,
+  family = binomial(link = "cloglog"),
+)
+
+teachers_fit_B <- glmmTMB(
+  event ~ 0 + factor(year) + (1 | id),
+  data = teachers_pp,
+  family = binomial(link = "cloglog"),
+)
+
+teachers_fits <- list(
+  "Model A" = teachers_fit_A,
+  "Model B" = teachers_fit_B
+)
+
+# Make table ------------------------------------------------------------------
+teachers_fits |>
+  modelsummary(
+    fmt = 4,
+    scales = c("vcov", NA),
+    coef_rename = \(.x) coef_rename(.x, factor_name = FALSE),
+    gof_map = c("logLik", "deviance", "AIC", "BIC"),
+    output = "gt"
+  ) |>
+  tab_row_group(label = "Goodness-of-Fit", rows = 26:29) |>
+  tab_row_group(label = "Variance Components", rows = 25) |>
+  tab_row_group(label = "Fixed Effects", rows = 1:24)
+```
+
+Comparing goodness-of-fit statistics between the nested models suggests that the frailty model may be closer to the underlying data-generating process, and that the monotonically decreasing sample hazard function for the `teachers` data observed in Chapter 10 (Figure 10.1) may have been an artifact of unobserved heterogeneity.
+
+```{r}
+anova(teachers_fit_A, teachers_fit_B)
+```
+
+Plotting **coincident hazard functions**---which are simply individual hazard functions summarized by the number of individuals with the hazard profile---from the frailty model seems to support this assertion. Notice that (1) the individual hazard functions do not follow a monotonically decreasing pattern, and (2) the composition of the risk set changes over time, with high risk teachers leaving early and low risk teachers either leaving much later (or not at all).
+
+```{r}
+# Make predictions
+teachers_preds <- teachers_fit_B |>
+  augment(data = teachers_pp, type.predict = "response") |>
+  rename(haz.estimate = .fitted)
+
+# Wrangle
+teachers_cotraj <- teachers_preds |>
+  select(id, year, haz.estimate) |>
+  pivot_wider(
+    names_from = year,
+    names_prefix = "year_",
+    values_from = haz.estimate
+  ) |>
+  group_by(pick(starts_with("year"))) |>
+  summarise(coincident_trajectories = n(), .groups = "drop") |>
+  mutate(trajectory_id = 1:n(), .before = everything()) |>
+  pivot_longer(
+    cols = starts_with("year"),
+    names_to = "year",
+    names_prefix = "year_",
+    names_transform = as.integer,
+    values_to = "haz.estimate"
+  )
+
+# Plot
+ggplot(teachers_cotraj, aes(x = year, y = haz.estimate)) +
+  geom_line(aes(group = trajectory_id, linewidth = coincident_trajectories))  +
+  scale_linewidth_continuous(range = c(.25, 2)) +
+  scale_x_continuous(breaks = 0:13) +
+  coord_cartesian(xlim = c(0, 13), ylim = c(0, .21))
+```
+
+Although this does not wholly rebuke Singer and Willett's (2003) original conclusion that novice teachers (or those with only a few years of experience) are at greatest risk of leaving teaching, but that risk of leaving declines once they gain experience; it adds an additional layer of nuance not captured by the basic discrete-time hazard model, which we can see by plotting the population hazard functions from both models.
+
+```{r}
+# Make predictions
+teachers_haz <- teachers_fits |>
+  map(
+    \(.fit) {
+      augment(
+        .fit,
+        newdata = tibble(year = 1:12),
+        type.predict = "response",
+        re.form = NA
+      )
+    }
+  ) |>
+  list_rbind(names_to = "model") |>
+  rename(haz.estimate = .fitted)
+
+# Plot
+ggplot(teachers_haz, aes(x = year, y = haz.estimate)) +
+  geom_line() +
+  scale_x_continuous(breaks = 0:13) +
+  coord_cartesian(xlim = c(0, 13), ylim = c(0, .15)) +
+  facet_wrap(vars(model))
+```
+
+## 12.7 Residual analysis
+
+In Section 12.7 Singer and Willett (2003) return to the `first_sex` data to discuss two strategies for examining **deviance residuals** of the discrete-time hazard model:
+
+- Using **index plots** (sequential plots by ID) to examine deviance residuals on a case-by-case basis.
+- Summarizing each individual's deviance residuals into a **sum of squared deviance residuals** to examine their contribution to the model's deviance statistic.
+
+When examining index plots like these, Singer and Willett (2003) note that most of the deviance residuals will be negative---except for those records where the target event occurred---and suggest looking for observations with extreme residuals, which suggest poor model fit. Index plots of the sum of squared deviance individuals can be used to identify individuals whose outcomes are poorly predicted, again by looking for individuals with extreme aggregated residuals.
+
+Here we will fit a basic discrete-time hazard model to the `first_sex_pp` person-period data, which follows the same specification as Model D of Table 11.3.
 
 ```{r}
 first_sex_fit <- glm(
-  event ~ -1 + factor(grade) + parental_transition + parental_antisociality,
+  event ~ 0 + factor(grade) + parental_transition + parental_antisociality,
   family = binomial(link = "logit"),
   data = first_sex_pp
 )
 
-first_sex_fit |>
-  augment(data = first_sex_pp, type.residuals = "deviance") |>
-  select(id:parental_antisociality, .resid) |>
-  filter(id %in% c(22, 112, 166, 89, 102, 87, 67, 212)) |>
-  pivot_wider(
-    id_cols = id,
-    names_from = grade,
-    names_prefix = "grade_",
-    values_from = .resid
-  )
+summary(first_sex_fit)
 ```
 
-Figure 12.8, page 467:
+We can use the `augment()` function from the **broom** package to get deviance residuals for each person-period observation by setting the `type.residuals` argument to `"deviance"`.
 
 ```{r}
-first_sex_fit |>
+first_sex_fit_residuals <- first_sex_fit |>
   augment(data = first_sex_pp, type.residuals = "deviance") |>
-  ggplot(aes(x = id, y = .resid)) +
-    geom_point() +
-    geom_hline(yintercept = 0)
+  mutate(
+    ss.deviance = sum(.resid^2),
+    censor = if_else(any(event == 1), 0, 1),
+    .by = id
+  ) |>
+  select(id:parental_antisociality, censor, deviance = .resid, ss.deviance, -event)
 
-first_sex_fit |>
-  augment(data = first_sex_pp, type.residuals = "deviance") |>
-  group_by(id) |>
-  summarise(ss.deviance = sum(.resid^2)) |>
+first_sex_fit_residuals
+```
+
+Following Singer and Willett (2003), we begin by presenting deviance residuals for eight adolescents from the `first_sex_fit` model.
+
+```{r}
+# Table 12.6, page 465:
+c(22, 112, 166, 89, 102, 87, 67, 212) |>
+  map(\(.id) filter(first_sex_fit_residuals, id == .id)) |>
+  list_rbind() |>
+  pivot_wider(
+    names_from = grade,
+    names_prefix = "grade_",
+    values_from = deviance
+  ) |>
+  relocate(ss.deviance, .after = everything()) |>
+  gt() |>
+  sub_missing(missing_text = "")
+```
+
+Finally, we can examine (sum of squared) deviance residuals using index plots. Note that we only convert `id` from a factor to numeric for a cleaner looking x-axis.
+
+```{r}
+first_sex_fit_ss.deviance <- first_sex_fit_residuals |>
+  mutate(id = as.numeric(as.character(id))) |>
   ggplot(aes(x = id, y = ss.deviance)) +
-    geom_point()
+    geom_point() +
+    scale_x_continuous(breaks = seq(0, 220, by = 20)) +
+    coord_cartesian(xlim = c(0, 220), ylim = c(1, 8))
+
+first_sex_fit_deviance <- first_sex_fit_ss.deviance +
+  aes(y = deviance) +
+  geom_hline(yintercept = 0, alpha = .25) +
+  coord_cartesian(xlim = c(0, 220), ylim = c(-2, 3))
+
+# Figure 12.8, page 467:
+first_sex_fit_deviance / first_sex_fit_ss.deviance +
+  plot_layout(axes = "collect")
 ```
