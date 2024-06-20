@@ -213,17 +213,25 @@ tenure <- tidy_data$tenure_orig |>
 
 first_depression_1 <- tidy_data$depression_pp |>
   rename(
-    depressive_episode = event,
     interview_age = age,
     censor_age = censage,
     siblings = nsibs,
     parental_divorce = pd,
-    parental_divorce_now = pdnow
+    parental_divorce_now = pdnow,
+    age = period
   ) |>
-  select(-(censor_age:aged), -(sibs12:sibs9plus), -(one:age_18cub))
+  select(
+    -c(onset, interview_age),
+    -(censor_age:aged),
+    -(sibs12:bigfamily),
+    -(parental_divorce_now:age_18cub)
+  ) |>
+  relocate(id, age, event, censor, parental_divorce, female, siblings)
 
 first_arrest <- tidy_data$firstarrest_pp |>
-  select(-starts_with("d"), -ablack)
+  select(-time, -starts_with("d"), -ablack) |>
+  rename(age = period) |>
+  relocate(id, age, event, censor, abused, black)
 
 math_dropout <- tidy_data$mathdropout_pp |>
   rename(
@@ -232,12 +240,13 @@ math_dropout <- tidy_data$mathdropout_pp |>
     last_term = lastpd
   ) |>
   select(
-    -c(one, ltime, fltime),
+    -c(last_term, one, ltime, fltime),
     -starts_with("hs"),
     -starts_with("coll"),
     -starts_with("fhs"),
     -starts_with("fcoll")
-  )
+  ) |>
+  relocate(id, term, event, censor, woman)
 
 # Chapter 13 ------------------------------------------------------------------
 

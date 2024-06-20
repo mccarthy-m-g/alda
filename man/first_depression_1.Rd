@@ -6,20 +6,16 @@
 \title{Age of first depression}
 \format{
 A person-period data frame with 36997 rows and
-11 columns:
+7 columns:
 
 \describe{
 \item{\code{id}}{Participant ID.}
-\item{\code{onset}}{Age of first depressive episode.}
+\item{\code{age}}{Age each record corresponds to.}
+\item{\code{event}}{Binary indicator for whether and when the adult experienced a depressive episode.}
 \item{\code{censor}}{Censoring status.}
-\item{\code{interview_age}}{Age at time of interview.}
+\item{\code{parental_divorce}}{Binary indicator for whether the adult's parents divorced at this or any previous age.}
 \item{\code{female}}{Binary indicator for whether the adult is a female.}
 \item{\code{siblings}}{Number of siblings.}
-\item{\code{bigfamily}}{Binary indicator for whether the adult has five or more siblings.}
-\item{\code{period}}{Age each record corresponds to.}
-\item{\code{depressive_episode}}{Binary indicator for whether the adult experienced a depressive episode.}
-\item{\code{parental_divorce}}{Binary indicator for whether the adult's parents divorced at this or any previous age.}
-\item{\code{parental_divorce_now}}{Binary indicator for whether the adult's parents divorced during the current period.}
 }
 }
 \source{

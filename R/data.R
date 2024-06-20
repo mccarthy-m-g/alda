@@ -495,7 +495,7 @@ NULL
 #'
 #' Data from Gamse and Conger (1997) measuring the number of years to receiving
 #' tenure in a sample of 260 semifinalists and fellowship recipients in the
-#' National Academy of Education–Spencer Foundation PostDoctoral Fellowship
+#' National Academy of Education--Spencer Foundation Post-Doctoral Fellowship
 #' Program who took an academic job after earning a doctorate. Academics were
 #' followed for up to nine years or until they received tenure.
 #'
@@ -527,16 +527,12 @@ NULL
 #'
 #' \describe{
 #'   \item{`id`}{Participant ID.}
-#'   \item{`onset`}{Age of first depressive episode.}
+#'   \item{`age`}{Age each record corresponds to.}
+#'   \item{`event`}{Binary indicator for whether and when the adult experienced a depressive episode.}
 #'   \item{`censor`}{Censoring status.}
-#'   \item{`interview_age`}{Age at time of interview.}
+#'   \item{`parental_divorce`}{Binary indicator for whether the adult's parents divorced at this or any previous age.}
 #'   \item{`female`}{Binary indicator for whether the adult is a female.}
 #'   \item{`siblings`}{Number of siblings.}
-#'   \item{`bigfamily`}{Binary indicator for whether the adult has five or more siblings.}
-#'   \item{`period`}{Age each record corresponds to.}
-#'   \item{`depressive_episode`}{Binary indicator for whether the adult experienced a depressive episode.}
-#'   \item{`parental_divorce`}{Binary indicator for whether the adult's parents divorced at this or any previous age.}
-#'   \item{`parental_divorce_now`}{Binary indicator for whether the adult's parents divorced during the current period.}
 #' }
 #' @source
 #' Wheaton, B., Roszell, P., & Hall, K. (1997). The impact of twenty childhood
@@ -558,12 +554,11 @@ NULL
 #'
 #' \describe{
 #'   \item{`id`}{Participant ID.}
-#'   \item{`time`}{Age of first juvenile arrest.}
+#'   \item{`age`}{Age each record corresponds to.}
+#'   \item{`event`}{Binary indicator for whether and when the adolescent was arrested.}
 #'   \item{`censor`}{Censoring status.}
 #'   \item{`abused`}{Binary indicator for whether the adolescent was abused.}
 #'   \item{`black`}{Binary indicator for whether the adolescent is black.}
-#'   \item{`period`}{Age each record corresponds to.}
-#'   \item{`event`}{Binary indicator for whether the adolescent was arrested.}
 #' }
 #' @source
 #' Keiley, M. K., & Martin, N. C. (2002). Child abuse, neglect, and juvenile
@@ -586,11 +581,10 @@ NULL
 #'
 #' \describe{
 #'   \item{`id`}{Participant ID.}
-#'   \item{`last_term`}{The term a student stopped enrolling in mathematics courses.}
-#'   \item{`woman`}{Binary indicators for whether the student identified as a woman.}
-#'   \item{`censor`}{Censoring status.}
-#'   \item{`term`}{Term each record corresponds to.}
+#'   \item{`term`}{Academic term each record corresponds to.}
 #'   \item{`event`}{Binary indicator for whether the student stopped enrolling in mathematics courses at a given term.}
+#'   \item{`censor`}{Censoring status.}
+#'   \item{`woman`}{Binary indicators for whether the student identified as a woman.}
 #' }
 #' @source
 #' Graham, S. E. (1997). The exodus from mathematics: When and why?
