@@ -728,8 +728,8 @@ NULL
 #'   \item{`days`}{Number of days to rearrest.}
 #'   \item{`months`}{Number of months to rearrest, on the scale of an "average" month (with 30.4375 days).}
 #'   \item{`censor`}{Censoring status.}
-#'   \item{`personal`}{Committed a person-related crime}
-#'   \item{`property`}{Binary indicator for whether the inmate committed a property crime.}
+#'   \item{`person_crime`}{Committed a person-related crime}
+#'   \item{`property_crime`}{Binary indicator for whether the inmate committed a property crime.}
 #'   \item{`age`}{Centred age at time or release.}
 #' }
 #' @source
