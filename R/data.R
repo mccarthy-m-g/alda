@@ -644,8 +644,9 @@ NULL
 
 #' Supreme Court justice tenure
 #'
-#' Data from Zorn and Van Winkle (2000) how long all 107 justices appointed to
-#' the U.S. Supreme Court between 1789 and 1980 remained in their position.
+#' Data from Zorn and Van Winkle (2000) measuring how long all 107 justices
+#' appointed to the U.S. Supreme Court between 1789 and 1980 remained in their
+#' position.
 #'
 #' @format
 #' A person-level data frame with `r nrow(judges)` rows and

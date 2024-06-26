@@ -26,7 +26,8 @@ Court vacancies, 1780–1992. Political Behavior, 22, 145–166.
 judges
 }
 \description{
-Data from Zorn and Van Winkle (2000) how long all 107 justices appointed to
-the U.S. Supreme Court between 1789 and 1980 remained in their position.
+Data from Zorn and Van Winkle (2000) measuring how long all 107 justices
+appointed to the U.S. Supreme Court between 1789 and 1980 remained in their
+position.
 }
 \keyword{datasets}

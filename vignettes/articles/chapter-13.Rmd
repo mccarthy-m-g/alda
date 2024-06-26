@@ -2,14 +2,12 @@
 title: "Chapter 13: Describing continuous-time event occurrence data"
 ---
 
-::: {.alert .alert-warning}
-This chapter is under construction.
-:::
-
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE
 )
 ggplot2::theme_set(ggplot2::theme_bw())
 ggplot2::theme_update(
@@ -29,194 +27,335 @@ library(patchwork)
 library(survival)
 library(muhaz)
 library(broom)
+library(gt)
 ```
 
-## 13.1 A Framework for Characterizing the Distribution of Continuous-Time Event Data
+## 13.1 A framework for characterizing the distribution of continuous-time event data
 
-## 13.2 Grouped Methods for Estimating Continuous-Time Survivor and Hazard Functions
+In Section 13.1 Singer and Willett (2003) discuss the salient features of **continuous-time event data** using a subset of data from Diekmann and colleagues (1996), who measured time to horn honking in a sample of 57 motorists who were purposefully blocked at a green light by a Volkswagen Jetta at a busy intersection near the centre of Munich, West Germany on two busy afternoons (Sunday and Monday) in 1998. Motorists were followed until they honked their horns or took an alternative action (beaming or changing lanes).
 
-Table 13.2, page 477:
+For this example we use the `honking` data set, a person-level data frame with 57 rows and 3 columns:
+
+- `id`: Participant ID.
+- `seconds`: Number of seconds to horn honking or an alternative action.
+- `censor`: Censoring status.
 
 ```{r}
-# Adding discrete-time intervals
-honking_discrete <- honking |>
-  mutate(
-    event = if_else(censor == 0, 1, 0),
-    time_interval = cut(seconds, breaks = c(1:8, 18), right = FALSE),
-    time_start = str_extract(time_interval, "[[:digit:]]+(?=,)"),
-    time_end = str_extract(time_interval, "(?<=,)[[:digit:]]+"),
-    across(c(time_start, time_end), as.numeric)
-  )
+honking
+```
 
-# Grouped life table
-honking_grouped <- honking_discrete |>
-  group_by(time_interval, time_start, time_end) |>
+The defining feature of continuous time is that it is infinitely divisible---there exist an infinite number of possible instants when the target event can occur, which can be measured with ever-increasing precision by using finer metrics for clocking time. As Singer and Willett (2003) discuss, because continuous time is infinitely divisible, the 
+(theoretical) distribution of event times has two salient features:
+
+- The probability of observing any particular event time is infinitesimally small.
+- The probability that two or more individuals will share the same event time is infinitesimally small.
+
+Although we do not expect to observe these properties exactly in real data due to measurement limitations, such as rounding, we can observe that both of these properties are almost manifested in the event times of the `honking` data, which has only one tie at 1.41 seconds.
+
+```{r}
+# Similar to Table 13.1:
+honking |>
+  arrange(seconds) |>
+  mutate(
+    seconds = ifelse(censor == 0, seconds, paste0(seconds, "*")),
+    .keep = "none"
+  ) |>
+  pull(seconds)
+```
+
+These features are a significant departure from the distributional features of discrete event times, where the probability of event occurrence in at least some periods is non-zero and ties are pervasive. Because of this departure, we must introduce new continuous time definitions of the survivor and hazard functions:
+
+- The **continuous-time survival function** is the *cumulative probability* that the event time, $T_i$, of the $i$th individual will exceed $t_j$, the infinite number of possible instants when the target event could occur:
+
+  $$
+  S(t_{ij}) = \Pr[T_i > t_j],
+  $$
+  
+  which is essentially identical to the discrete-time survival function in definition and meaning, aside from the different metric for clocking time.
+  
+- The **continuous-time hazard function** is an instantaneous *rate* assessing the conditional probability that the $i$th individual will experience the target event in the next small interval of time, $\Delta t$, given that they did not experience it in any prior interval, divided by the length of that interval:
+
+  $$
+  h(t_{ij}) = \lim_{\Delta t \to 0} \left\{
+    \frac{\Pr[T_i \in (t_j, t_j + \Delta t) | T_i \geq t_j]}
+    {\Delta t}
+  \right\},
+  $$
+  
+  which means that unlike discrete-time hazard probabilities, continuous-time hazard rates do not have an upper bound and can exceed values of 1.0.
+
+## 13.2 Grouped methods for estimating continuous-time survivor and hazard functions
+
+In Section 13.2 Singer and Willett (2003) discuss two strategies for estimating continuous-time survival and hazard functions from the **grouped life table**, which partitions continuous time into a manageable number of contiguous (possibly unequal width) intervals:
+
+- The **discrete-time method** estimates continuous-time survival and hazard functions by applying the discrete-time principles of Section 10.2 to the grouped life table.
+- The **actuarial method** (aka the life table method) estimates continuous-time survival and hazard functions based on data assumed to be available at each interval's midpoint, using a similar strategy to the discrete-time method.
+
+We begin by creating a grouped life table for the `honking` data, which we divide into eight contiguous intervals: seven 1-second intervals, and one 10-second interval.
+
+```{r}
+honking_lifetable <- honking |>
+  group_by(time_interval = cut(seconds, breaks = c(1:8, 18), right = FALSE)) |>
+  # All grouping needs to be dropped after summarizing in order to calculate the
+  # number at risk correctly in the next step.
   summarise(
-    total = n(),
-    n_event = sum(event),
-    n_censor = sum(censor),
-    # All grouping needs to be dropped in order to calculate the number at risk
-    # correctly.
+    n = n(),
+    n.event = sum(censor == 0),
+    n.censor = sum(censor == 1),
     .groups = "drop"
   ) |>
-  mutate(n_risk = sum(total) - lag(cumsum(total), default = 0))
-
-# The conditional probability can be estimated using the same discrete-time methods
-# from the previous chapter, using the grouped data.
-honking_grouped_fit <- glm(
-  cbind(n_event, n_risk - n_event) ~ 0 + time_interval,
-  family = binomial(link = "logit"),
-  data = honking_grouped
-)
-
-honking_grouped_fit |>
-  # .fitted is the conditional probability
-  broom::augment(newdata = honking_grouped, type.predict = "response") |>
   mutate(
-    survival = cumprod(1 - .fitted),
-    hazard = .fitted / (time_end - time_start)
-  )
-
-# Estimates by hand
-honking_discrete_fit <- honking_grouped |>
-  mutate(
-    conditional_probability = n_event / n_risk,
-    discrete.s = cumprod(1 - conditional_probability),
-    discrete.h = conditional_probability / (time_end - time_start),
-    # The actuarial method redefines the number of individuals to be at risk of
-    # event occurrence for both the survival and hazard functions, and thus has
-    # different conditional probabilities from the discrete method.
-    n_risk.s = n_risk - (n_censor / 2),
-    conditional_probability.s = n_event / n_risk.s,
-    actuarial.s = cumprod(1 - conditional_probability.s),
-    n_risk.h = n_risk.s - (n_event / 2),
-    conditional_probability.h = n_event / n_risk.h,
-    actuarial.h = conditional_probability.h / (time_end - time_start)
+    n.risk = sum(n) - lag(cumsum(n), default = 0),
+    prob.estimate = n.event / n.risk
   ) |>
-  select(
-    -c(conditional_probability.s, conditional_probability.h, n_risk.s, n_risk.h)
-  ) |>
-  add_row(time_end = 0:1, discrete.s = 1, actuarial.s = 1)
+  select(time_interval, n.risk, n.event:prob.estimate)
 
-honking_discrete_fit
+honking_lifetable
 ```
 
-Figure 13.1, page 479:
+Then we can estimate the continuous-time survival and hazard functions "by hand" using the discrete-time and actuarial methods.
 
 ```{r}
-honking_discrete_fit |>
-  pivot_longer(
-    cols = c(discrete.h, discrete.s, actuarial.h, actuarial.s),
-    names_to = "estimate"
-  ) |>
+honking_lifetable <- honking_lifetable |>
   mutate(
-    estimate = factor(
-      estimate,
-      levels = c("discrete.s", "actuarial.s", "discrete.h", "actuarial.h")
+    # Temporary variables
+    time_start = as.numeric(str_extract(time_interval, "[[:digit:]]+(?=,)")),
+    time_end = as.numeric(str_extract(time_interval, "(?<=,)[[:digit:]]+")),
+    time_width = time_end - time_start,
+    prob.estimate.actuarial = n.event / (n.risk - (n.censor / 2)),
+    # Discrete-time method estimates
+    surv.discrete = cumprod(1 - prob.estimate),
+    haz.discrete = prob.estimate / time_width,
+    # Actuarial method estimates
+    surv.actuarial = cumprod(1 - prob.estimate.actuarial),
+    haz.actuarial = (
+      n.event / (n.risk - (n.censor / 2) - (n.event / 2)) / time_width
     )
   ) |>
-  ggplot(aes(x = time_end, y = value)) +
-    geom_line(data = \(x) filter(x, str_detect(estimate, "discrete"))) +
-    geom_step(
-      data = \(x) filter(x, str_detect(estimate, "actuarial")),
-      direction = "vh"
-    ) +
-    scale_x_continuous(limits = c(0, 20)) +
-    facet_wrap(vars(estimate), scales = "free_y") +
-    ggh4x::facetted_pos_scales(
-      y = list(
-        str_detect(estimate, "s$") ~ scale_y_continuous(limits = c(0, 1)),
-        str_detect(estimate, "h$") ~
-          scale_y_continuous(limits = c(0, .35), breaks = seq(0, .35, by = .05))
-      )
-    )
+  select(-c(time_start:prob.estimate.actuarial))
+
+# Table 13.2, page 477:
+honking_lifetable  |>
+  gt() |>
+  fmt_number(columns = prob.estimate:haz.actuarial, decimals = 4)
 ```
 
-## 13.3 The Kaplan-Meier Method of Estimating the Continuous-Time Survivor Function
-
-Table 13.3, page 484:
+Finally we can plot the estimates of both methods. Following Singer and Willett (2003), we plot the actuarial estimates as a step function associating each survival probability and hazard rate with its entire time interval.
 
 ```{r}
-honking_continuous_fit <- survfit(Surv(seconds, 1 - censor) ~ 1, data = honking)
+# Baseline plot
+honking_plot <- honking_lifetable |>
+  mutate(
+    seconds = as.numeric(str_extract(time_interval, "(?<=,)[[:digit:]]+"))
+  ) |>
+  add_row(seconds = 0:1, surv.discrete = 1, surv.actuarial = 1) |>
+  ggplot(aes(x = seconds))
 
-honking_continuous_fit_tidy <- honking_continuous_fit |>
+# Survival functions
+honking_surv.discrete <- honking_plot + geom_line(aes(y = surv.discrete))
+honking_surv.actuarial <- honking_plot +
+  geom_step(aes(y = surv.actuarial), direction = "vh")
+
+# Hazard functions
+honking_haz.discrete <- honking_plot +
+  geom_line(aes(y = haz.discrete)) +
+  coord_cartesian(ylim = c(0, .35))
+honking_haz.actuarial <- honking_plot +
+  geom_step(aes(y = haz.actuarial), direction = "vh") +
+  coord_cartesian(ylim = c(0, .35))
+
+# Figure 13.1, page 479:
+honking_surv.discrete + honking_surv.actuarial +
+  honking_haz.discrete + honking_haz.actuarial +
+  plot_layout(nrow = 2, axes = "collect_x")
+```
+
+## 13.3 The Kaplan-Meier method of estimating the continuous-time survivor function
+
+In Section 13.3 Singer and Willett (2003) introduce the **Kaplan-Meier method** (aka the **product-limit method**) of estimating the continuous-time survival function, which is a simple extension of the discrete-time method that constructs time intervals using the raw event times such that each interval contains just one observed event time.
+
+We can fit a survival function with the the Kaplan-Meier method using the `survfit()` function from the **survival** package (which we briefly discussed in Section 10.1). The model formula for the `survfit()` function takes the form `response ~ terms`, where the response must be a "survival object" created by the `Surv()` function. For right-censored data, the survival object can be created by supplying two unnamed arguments to the `Surv()` function corresponding to `time` and `event` variables, in that order. Note that we can recode a `censor` variable into an `event` variable by reversing its values. For 0-1 coded data, we can write the event status as `event = censor - 1`.
+
+```{r}
+honking_survfit <- survfit(Surv(seconds, 1 - censor) ~ 1, data = honking)
+honking_survfit
+```
+
+We can view the grouped life table from the `survfit` object using either the `summary()` function, or the `tidy()` function from the **broom** package.
+
+```{r}
+summary(honking_survfit)
+```
+
+Note that these two methods return different standard errors: The `summary()` function returns the standard error for the survival function; however, the `tidy()` function [returns the standard error for the cumulative hazard](https://github.com/tidymodels/broom/pull/1162) (see Section 13.4), so we need to transform it to get the standard error for the survival function.
+
+```{r}
+tidy(honking_survfit)
+```
+
+They also return differing numbers of rows: By default, the `summary()` function returns rows only for intervals where an event occurred (this can be changed with the `censored` argument); whereas the the `tidy()` function always returns rows for both uncensored and censored intervals. However, because survival estimates do not change during censored intervals, an easy way to match the result of `tidy()` with `summary()` is to group the data by estimate values, then summarize.
+
+```{r}
+honking_lifetable_km <- honking_survfit |>
   survfit0() |>
   tidy() |>
-  select(-starts_with("conf")) |>
-  mutate(
-    # tidy() returns the standard error for the cumulative hazard, so we need to
-    # transform it into the standard error for the survival. 
-    std.error = estimate * std.error,
-    conditional_probability = n.event / n.risk,
-    time_interval = 1:n(),
-    time_end = lead(time, default = Inf),
-    width = time_end - time,
-    hazard = conditional_probability / width
+  group_by(pick(estimate:conf.low)) |>
+  summarise(
+    time_start = first(time),
+    n.risk = first(n.risk),
+    across(c(n.event, n.censor), sum),
+    .groups = "drop"
   ) |>
-  relocate(
-    time_interval,
-    time_start = time,
+  arrange(time_start) |>
+  mutate(
+    std.error = estimate * std.error,
+    interval = 1:n() - 1,
+    time_end = lead(time_start, default = Inf),
+    time_width = time_end - time_start,
+    prob.estimate = n.event / n.risk,
+    # Note that although there is no Kaplan-Meier-type hazard estimate, this
+    # statistic forms the basis of other descriptive methods discussed below.
+    # The values depicted here differ slightly from the text because Singer and
+    # Willett (2003) rounded the probability estimates before estimating the
+    # hazard.
+    haz.estimate = prob.estimate / time_width
+  ) |>
+  select(
+    interval,
+    time_start,
     time_end,
     n.risk:n.censor,
-    conditional_probability,
-    survival = estimate
+    prob.estimate,
+    surv.estimate = estimate,
+    std.error,
+    time_width,
+    haz.estimate
   )
 
-honking_continuous_fit_tidy
+# Table 13.3, page 484:
+honking_lifetable_km |>
+  gt() |>
+  fmt_number(
+    columns = c(prob.estimate, surv.estimate, std.error, haz.estimate),
+    decimals = 4
+  )
 ```
 
-Figure  13.2, page 485:
+Finally, we can plot the Kaplan-Meier estimates of the continuous time survival function, and compare them with the discrete-time and actuarial estimates. Note that for plotting, we prefer the grouped life table with uncensored and censored intervals. This is because, if the largest event time is censored (as it is here), it allows us to extend the last interval of the step function out to that largest censored value rather than going to infinity. Therefore, here we re-tidy the `honking_survfit` object rather than using the `honking_lifetable_km` grouped life table.
 
 ```{r}
-honking_continuous_fit_tidy |>
-  add_row(time_end = 0:1, survival = 1) |>
-  # The largest event time was censored, so we extend the last step out to that
-  # largest censored value rather than going to infinity.
-  mutate(time_end = if_else(time_end == Inf, time_start, time_end)) |> 
-  ggplot() +
-    geom_step(
-      aes(x = time_end, y = survival, linetype = "1: Kaplan Meier"),
-      direction = "vh"
-    ) +
-    geom_line(
-      aes(x = time_end, y = discrete.s, linetype = "2: Discrete-time"),
-      data = honking_discrete_fit
-    ) +
-    geom_step(
-      aes(x = time_end, y = actuarial.s, linetype = "3: Actuarial"),
-      data = honking_discrete_fit,
-      direction = "vh"
-    ) +
-    scale_x_continuous(limits = c(0, 20)) +
-    labs(x = "time")
-```
-
-## 13.4 The Cumulative Hazard Function
-
-Figure 13.4, page 493:
-
-```{r}
-honking_continuous_fit_tidy |>
-  mutate(time_end = if_else(time_end == Inf, time_start, time_end)) |> 
-  ggplot(aes(x = time_end)) +
-    geom_step(
-      aes(y = -log(survival), linetype = "Negative log"),
-      direction = "vh"
-    ) +
-    geom_step(
-      aes(y = cumsum(hazard * width), linetype = "Nelson-Aalen"),
-      direction = "vh"
+honking_surv.km <- honking_survfit |>
+  survfit0() |>
+  tidy() |>
+  rename(seconds = time, surv.estimate = estimate) |>
+  mutate(
+    method = factor(
+      "Kaplan-Meier", levels = c("Kaplan-Meier", "discrete-time", "actuarial")
     )
+  ) |>
+  ggplot(aes(x = seconds)) +
+    geom_step(
+      aes(y = surv.estimate, linetype = method), direction = "hv"
+    ) +
+    guides(linetype = "none") +
+    coord_cartesian(xlim = c(0, 20))
+
+honking_survs <- honking_surv.km +
+  geom_line(
+    aes(y = surv.discrete, linetype = "discrete-time"),
+    data = honking_plot$data,
+    alpha = .33
+  ) +
+  geom_step(
+    aes(y = surv.actuarial, linetype = "actuarial"),
+    data = honking_plot$data,
+    direction = "vh",
+    alpha = .33
+  ) +
+  scale_linetype_manual(values = 1:3) +
+  guides(linetype = guide_legend())
+
+# Figure 13.2, page 485:
+honking_surv.km + honking_survs +
+  plot_layout(ncol = 1, guides = "collect", axes = "collect")
 ```
 
-## 13.5 Kernel-Smoothed Estimates of the Hazard Function
+## 13.4 The cumulative hazard function
 
-Figure 13.5, page 496:
+In Section 13.4 Singer and Willett (2003) introduce the **cumulative hazard function**, which is the *integral of the hazard function* between the integration limits of time 0 and time $t$ (i.e., the "accumulation" of the hazard over time), given by:
+
+$$
+H(t_{ij}) = \int_0^t h(t_{ij}) d t.
+$$
+
+There are two simple ways to estimate the cumulative hazard function:
+
+- The **Nelson-Aalen method** accumulates the estimated total amount of hazard during all instants in each interval, given by the product of the $j$th Kaplan-Meier–type hazard estimate and its interval's width:
+
+  $$
+  \hat H_\text{NA}(t_j) = \hat h_\text{KM}(t_1) \text{width}_1
+    + \hat h_\text{KM}(t_2) \text{width}_2
+    + \dots
+    + \hat h_\text{KM}(t_j) \text{width}_j.
+  $$
+  
+- The **negative log survivor function method** exploits a well-known mathematical relationship between the cumulative hazard and survivor functions, which is that the population cumulative hazard function is identical to the negative log of the population survivor function:
+
+  $$
+  \hat H_{-\text{LS}}(t_j) = -\log \hat S_\text{KM}(t_{ij}).
+  $$
+
+Here we will use both of these methods to plot cumulative hazard functions from the `honking_survfit` object. Notice that the the estimates are most similar during early event times, when the risk set is large, diverging as the size of the risk set decreases.
 
 ```{r}
-kernel_smoothed_hazards <- map_df(
+honking_lifetable_km_2 <- honking_survfit |>
+  survfit0() |>
+  tidy() |>
+  mutate(
+    time_end = lead(time, default = Inf),
+    width = time_end - time,
+    prob.estimate = n.event / n.risk,
+    haz.estimate = prob.estimate / width,
+    cumhaz.nelson_aalen = survfit0(honking_survfit)[["cumhaz"]],
+    cumhaz.neglogsurv = -log(estimate)
+  ) |>
+  rename(seconds = time, surv.estimate = estimate)
+
+# Figure 13.4, page 493:
+ggplot(honking_lifetable_km_2, aes(x = seconds)) +
+  geom_step(
+    aes(y = cumhaz.neglogsurv, linetype = "Negative log"),
+    direction = "vh"
+  ) +
+  geom_step(
+    aes(y = cumhaz.nelson_aalen, linetype = "Nelson-Aalen"),
+    direction = "vh"
+  ) +
+  labs(
+    y = "cumhaz.estimate",
+    linetype = "method"
+  )
+```
+
+When examining plots of the cumulative hazard function, Singer and Willett (2003) suggest studying how the *rate of increase* in the cumulative hazard function *changes over time* to deduce the shape of the underlying hazard function:
+
+- A *linear* rate of increase suggests a constant hazard.
+- An *accelerating* rate of increase suggests an increasing hazard.
+- A *decelerating* rate of increase suggests a decreasing hazard.
+- A *changing* rate of increase suggests that the hazard function has reached either a peak or a trough.
+
+## 13.5 Kernel-smoothed estimates of the hazard function
+
+In Section 13.5 Singer and Willett (2003) discuss how to visualize the underlying shape of the continuous-time hazard function using **kernel-smoothed estimates**, which estimate the "average" population value of hazard at many focal points in time by aggregating together all the point estimates in their temporal vicinity.
+
+The `muhaz()` function from the **muhaz** package can be used to estimate the kernel-smoothed hazard function from right-censored data. For details on how the `muhaz()` function works, consult the function documentation.
+
+Here we will estimate and plot kernel-smooth hazard functions for the `honking` data with bandwidths of 1, 2, and 3. Notice that as the bandwidth increases, the shape of the function becomes smoother. As Singer and Willett (2003) discuss, this suggests a need to explore a range of bandwidths to strike a balance between smooth and precise realizations of the underlying shape of the hazard function.
+
+```{r}
+honking_smoothhaz <- map_df(
   set_names(1:3),
-  \(bandwidth) {
+  \(.bandwidth) {
     # muhaz() estimates the hazard function from right-censored data using
     # kernel-based methods, using the vector of survival and event times.
     kernel_smoothed_hazard <- muhaz(
@@ -224,75 +363,97 @@ kernel_smoothed_hazards <- map_df(
       1 - honking$censor,
       # Narrow the temporal region the smoothed function describes, given the
       # bandwidth and the minimum and maximum observed event times.
-      min.time = min(honking$seconds[honking$censor == 0]) + bandwidth,
-      max.time = max(honking$seconds[honking$censor == 0]) - bandwidth,
-      bw.grid = bandwidth,
+      min.time = min(honking$seconds[honking$censor == 0]) + .bandwidth,
+      max.time = max(honking$seconds[honking$censor == 0]) - .bandwidth,
+      bw.grid = .bandwidth,
       bw.method = "global",
       b.cor = "none",
       kern = "epanechnikov"
     )
     
-    tidy(kernel_smoothed_hazard)
+    kernel_smoothed_hazard |>
+      tidy() |>
+      rename(smoothhaz.estimate = estimate)
   },
   .id = "bandwidth"
 )
 
-ggplot(kernel_smoothed_hazards, aes(x = time, y = estimate)) +
+# Figure 13.5, page 496:
+ggplot(honking_smoothhaz, aes(x = time, y = smoothhaz.estimate)) +
   geom_line() +
   scale_x_continuous(limits = c(0, 20)) +
   facet_wrap(vars(bandwidth), ncol = 1, labeller = label_both)
 ```
 
-## 13.6 Developing an Intuition about Continuous-Time Survivor, Cumulative Hazard, and Kernel-Smoothed Hazard Functions
+## 13.6 Developing an intuition about continuous-time survivor, cumulative hazard, and kernel-smoothed hazard functions
 
-Figure 13.6, page 499:
+In Section 13.6 Singer and Willett (2003) examine and describe the survival functions, cumulative hazard functions, and kernel-smoothed hazard functions from four studies that differ by their type of target event, metric for clocking time, and underlying profile of risk:
+
+  - `alcohol_relapse`: A person-level data frame with 89 rows and 3 columns containing a subset of data from Cooney and colleagues (1991), who measured weeks to first "heavy drinking" day in a sample of 89 recently treated alcoholics. Individuals were followed for up to two years (around 104.286 weeks) or until they relapsed.
+
+    ```{r}
+    alcohol_relapse
+    ```
+
+  - `judges`: A person-level data frame with 109 rows and 7 columns containing data from Zorn and Van Winkle (2000) measuring how long all 107 justices appointed to the U.S. Supreme Court between 1789 and 1980 remained in their position.
+
+    ```{r}
+    judges
+    ```
+
+  - `first_depression_2`: A person-level data frame with 2974 rows and 3 columns containing data from Sorenson, Rutter, and Aneshensel (1991), who measured age of first depressive episode in a sample of 2974 adults. Age of first depressive episode was measured by asking respondents whether and, if so, at what age they first experienced a depressive episode.
+
+    ```{r}
+    first_depression_2
+    ```
+
+  - `health_workers`: A person-level data frame with 2074 rows and 3 columns containing a subset of data from Singer and colleagues (1998), who measured length of employment in a sample of 2074 health care workers hired by community and migrant health centres. Health care workers were followed for up to 33 months or until termination of employment.
+
+    ```{r}
+    health_workers
+    ```
+    
+First we will estimate survival and cumulative hazard functions for each of the studies.
 
 ```{r}
-# TODO: Check that models are correct, then tidy up code.
-
-# Fit survival models
-alcohol_relapse_fit <- survfit(
+alcohol_relapse_survfit <- survfit(
   Surv(weeks, 1 - censor) ~ 1, data = alcohol_relapse
 )
-
-judges_fit <- survfit(
+judges_survfit <- survfit(
   Surv(tenure, dead) ~ 1, data = judges
 )
-
-first_depression_fit <- survfit(
+first_depression_survfit <- survfit(
   Surv(age, 1 - censor) ~ 1, data = first_depression_2
 )
-
-health_workers_fit <- survfit(
+health_workers_survfit <- survfit(
   Surv(weeks, 1 - censor) ~ 1, data = health_workers
 )
 
-# Tidy survival models
-survival_models <- list(
-  alcohol_relapse = alcohol_relapse_fit,
-  judges = judges_fit,
-  first_depression = first_depression_fit,
-  health_workers = health_workers_fit
+study_survfit <- list(
+  alcohol_relapse = alcohol_relapse_survfit,
+  judges = judges_survfit,
+  first_depression = first_depression_survfit,
+  health_workers = health_workers_survfit
 )
 
-survival_models_tidy <- map(
-  survival_models,
-  \(.x) {
-    .x |>
-      survfit0() |>
-      tidy() |>
-      mutate(cumulative_hazard = -log(estimate)) |>
-      select(time, survival = estimate, cumulative_hazard) |>
-      pivot_longer(
-        cols = c(survival, cumulative_hazard),
-        names_to = "statistic",
-        values_to = "estimate"
-      )
-  }
-)
+study_lifetables <- study_survfit |>
+  map(
+    \(.survfit) {
+      .survfit |>
+        survfit0() |>
+        tidy() |>
+        mutate(cumhaz.estimate = -log(estimate)) |>
+        select(time, surv.estimate = estimate, cumhaz.estimate)
+    }
+  )
 
-# Estimate and tidy smoothed hazards
-kernel_smoothed_hazards_tidy <- pmap(
+study_lifetables
+```
+
+Second, we will estimate the kernel-smoothed hazard functions.
+
+```{r}
+study_smoothhaz <- pmap(
   list(
     list(
       alcohol_relapse = alcohol_relapse$weeks,
@@ -322,31 +483,93 @@ kernel_smoothed_hazards_tidy <- pmap(
     
     kernel_smoothed_hazard |>
       tidy() |>
-      mutate(statistic = "hazard")
+      rename(smoothhaz.estimate = estimate)
   }
 )
 
-# Combine estimates
-estimates_tidy <- map2(
-  survival_models_tidy, kernel_smoothed_hazards_tidy,
+study_smoothhaz
+```
+
+Third, we will join the survival and cumulative hazard function data frames with the kernel-smoothed hazard function data frames.
+
+```{r}
+study_functions <- map2(
+  study_lifetables, study_smoothhaz,
   \(.x, .y) {
-    bind_rows(.x, .y) |>
-      mutate(statistic = factor(
-        statistic, levels = c("survival", "cumulative_hazard", "hazard"))
-      )
+    .x |>
+      full_join(.y) |>
+      arrange(time)
   }
 )
 
-plots <- map2(
-  estimates_tidy, names(estimates_tidy),
-  \(.x, .y) {
-    ggplot(.x, aes(x = time, y = estimate)) +
-      geom_step(data = \(.x) filter(.x, statistic != "hazard")) +
-      geom_line(data = \(.x) filter(.x, statistic == "hazard")) +
-      facet_wrap(vars(statistic), ncol = 1, scales = "free_y") +
-      labs(title = .y)
+study_functions
+```
+
+Finally, we can plot the functions for each of the studies.
+
+```{r}
+study_plots <- pmap(
+  list(
+    study_functions,
+    list(c(0, 100), c(0, 35), c(0, 100), c(0, 130)),
+    list("weeks", "years", "age", "weeks")
+  ),
+  \(.study, .xlim, .time) {
+    
+    study_surv <- .study |>
+      select(time, surv.estimate) |>
+      na.omit() |>
+      ggplot(aes(x = time, y = surv.estimate)) +
+        geom_step() +
+        coord_cartesian(xlim = .xlim, ylim = c(0, 1)) +
+        labs(x = .time)
+    
+    study_cumhaz <- .study |>
+      select(time, cumhaz.estimate) |>
+      na.omit() |>
+      ggplot(aes(x = time, y = cumhaz.estimate)) +
+        geom_step() +
+        coord_cartesian(xlim = .xlim) +
+        labs(x = .time)
+    
+    study_smoothhaz <- .study |>
+      select(time, smoothhaz.estimate) |>
+      na.omit() |>
+      ggplot(aes(x = time, y = smoothhaz.estimate)) +
+        geom_line() +
+        coord_cartesian(xlim = .xlim) +
+        labs(x = .time)
+    
+    study_surv / study_cumhaz / study_smoothhaz +
+      plot_layout(axes = "collect")
   }
 )
+```
 
-patchwork::wrap_plots(plots, ncol = 4)
+First, the `alcohol_relapse` data.
+
+```{r}
+# Figure 13.6, page 499:
+study_plots$alcohol_relapse
+```
+
+Second, the `judges` data.
+
+```{r}
+# Figure 13.6, page 499:
+study_plots$judges
+```
+
+Third, the `first_depression` data.
+
+```{r}
+# Figure 13.6, page 499:
+study_plots$first_depression
+```
+
+Finally, the `health_workers` data.
+
+```{r}
+# Figure 13.6, page 499:
+study_plots$health_workers
 ```
