@@ -28,7 +28,7 @@ Corrections' cognitive self-change program. Criminal Justice and Behavior,
 rearrest
 }
 \description{
-Data from Henning and Frueh (1996) measuring measuring days to rearrest in
+Data from Henning and Frueh (1996) measuring days to rearrest in
 a sample of 194 inmates recently released from a medium security prison. Inmates
 were followed for up to three years or until they were rearrested.
 }
