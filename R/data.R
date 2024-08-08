@@ -715,7 +715,7 @@ NULL
 
 #' Days to inmate recidivism
 #'
-#' Data from Henning and Frueh (1996) measuring measuring days to rearrest in
+#' Data from Henning and Frueh (1996) measuring days to rearrest in
 #' a sample of 194 inmates recently released from a medium security prison. Inmates
 #' were followed for up to three years or until they were rearrested.
 #'
@@ -728,8 +728,8 @@ NULL
 #'   \item{`days`}{Number of days to rearrest.}
 #'   \item{`months`}{Number of months to rearrest, on the scale of an "average" month (with 30.4375 days).}
 #'   \item{`censor`}{Censoring status.}
-#'   \item{`personal`}{Committed a person-related crime}
-#'   \item{`property`}{Binary indicator for whether the inmate committed a property crime.}
+#'   \item{`person_crime`}{Committed a person-related crime}
+#'   \item{`property_crime`}{Binary indicator for whether the inmate committed a property crime.}
 #'   \item{`age`}{Centred age at time or release.}
 #' }
 #' @source
