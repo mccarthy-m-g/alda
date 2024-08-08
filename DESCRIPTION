@@ -25,13 +25,14 @@ Suggests:
 Config/Needs/website:
     broom,
     broom.mixed,
+    car,
     corrr,
     dplyr,
     easystats,
     ggh4x,
     ggplot2,
     glmmTMB,
-    gt,
+    gt (>= 0.11.0),
     katex (>= 1.4.1),
     lavaan,
     lme4,
@@ -48,8 +49,6 @@ Config/Needs/website:
     tidyr,
     tidySEM,
     vctrs
-Remotes:  
-    rstudio/gt
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
