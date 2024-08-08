@@ -5,88 +5,72 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="alda">
 <title>Chapter 13: Describing continuous-time event occurrence data • alda</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js" integrity="sha512-7O5pXpc0oCRrxk8RUfDYFgn0nO1t+jLuIOQdOMRp4APB7uZ4vSjspzp5y6YDtDs4VzUSTbWzBFZ/LKJhnyFOKw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Chapter 13: Describing continuous-time event occurrence data">
-<meta property="og:description" content="alda">
-<!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
-<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]-->
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Chapter 13: Describing continuous-time event occurrence data">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
-    
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light" data-bs-theme="light"><div class="container">
-    
+
+    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+
     <a class="navbar-brand me-2" href="../index.html">alda</a>
 
     <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.9000</small>
 
-    
+
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item">
-  <a class="nav-link" href="../reference/index.html">Reference</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-tips-amp-tricks">Tips &amp; Tricks</a>
-  <div class="dropdown-menu" aria-labelledby="dropdown-tips-amp-tricks">
-    <a class="dropdown-item" href="../articles/longitudinal-data-organization.html">Longitudinal data organization</a>
-  </div>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-tips-tricks" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Tips &amp; Tricks</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-tips-tricks">
+<li><a class="dropdown-item" href="../articles/longitudinal-data-organization.html">Longitudinal data organization</a></li>
+  </ul>
 </li>
 <li class="active nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-textbook-examples">Textbook examples</a>
-  <div class="dropdown-menu" aria-labelledby="dropdown-textbook-examples">
-    <h6 class="dropdown-header" data-toc-skip>Longitudinal mixed effects modelling</h6>
-    <a class="dropdown-item" href="../articles/chapter-2.html">Chapter 2</a>
-    <a class="dropdown-item" href="../articles/chapter-3.html">Chapter 3</a>
-    <a class="dropdown-item" href="../articles/chapter-4.html">Chapter 4</a>
-    <a class="dropdown-item" href="../articles/chapter-5.html">Chapter 5</a>
-    <a class="dropdown-item" href="../articles/chapter-6.html">Chapter 6</a>
-    <a class="dropdown-item" href="../articles/chapter-7.html">Chapter 7</a>
-    <div class="dropdown-divider"></div>
-    <h6 class="dropdown-header" data-toc-skip>Longitudinal structural equation modelling</h6>
-    <a class="dropdown-item" href="../articles/chapter-8.html">Chapter 8</a>
-    <div class="dropdown-divider"></div>
-    <h6 class="dropdown-header" data-toc-skip>Survival analysis</h6>
-    <a class="dropdown-item" href="../articles/chapter-9.html">Chapter 9</a>
-    <a class="dropdown-item" href="../articles/chapter-10.html">Chapter 10</a>
-    <a class="dropdown-item" href="../articles/chapter-11.html">Chapter 11</a>
-    <a class="dropdown-item" href="../articles/chapter-12.html">Chapter 12</a>
-    <a class="dropdown-item" href="../articles/chapter-13.html">Chapter 13</a>
-    <a class="dropdown-item" href="../articles/chapter-14.html">Chapter 14</a>
-    <a class="dropdown-item" href="../articles/chapter-15.html">Chapter 15</a>
-  </div>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-textbook-examples" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Textbook examples</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-textbook-examples">
+<li><h6 class="dropdown-header" data-toc-skip>Longitudinal mixed effects modelling</h6></li>
+    <li><a class="dropdown-item" href="../articles/chapter-2.html">Chapter 2</a></li>
+    <li><a class="dropdown-item" href="../articles/chapter-3.html">Chapter 3</a></li>
+    <li><a class="dropdown-item" href="../articles/chapter-4.html">Chapter 4</a></li>
+    <li><a class="dropdown-item" href="../articles/chapter-5.html">Chapter 5</a></li>
+    <li><a class="dropdown-item" href="../articles/chapter-6.html">Chapter 6</a></li>
+    <li><a class="dropdown-item" href="../articles/chapter-7.html">Chapter 7</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Longitudinal structural equation modelling</h6></li>
+    <li><a class="dropdown-item" href="../articles/chapter-8.html">Chapter 8</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Survival analysis</h6></li>
+    <li><a class="dropdown-item" href="../articles/chapter-9.html">Chapter 9</a></li>
+    <li><a class="dropdown-item" href="../articles/chapter-10.html">Chapter 10</a></li>
+    <li><a class="dropdown-item" href="../articles/chapter-11.html">Chapter 11</a></li>
+    <li><a class="dropdown-item" href="../articles/chapter-12.html">Chapter 12</a></li>
+    <li><a class="dropdown-item" href="../articles/chapter-13.html">Chapter 13</a></li>
+    <li><a class="dropdown-item" href="../articles/chapter-14.html">Chapter 14</a></li>
+    <li><a class="dropdown-item" href="../articles/chapter-15.html">Chapter 15</a></li>
+  </ul>
 </li>
-<li class="nav-item">
-  <a class="nav-link" href="../news/index.html">Changelog</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
-<form class="form-inline my-2 my-lg-0" role="search">
-        <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
-</form>
-
-      <ul class="navbar-nav">
-<li class="nav-item">
-  <a class="external-link nav-link" href="https://github.com/mccarthy-m-g/alda/" aria-label="github">
-    <span class="fab fa fab fa-github fa-lg"></span>
-     
-  </a>
-</li>
+<ul class="navbar-nav">
+<li class="nav-item"><form class="form-inline" role="search">
+ <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
+</form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/mccarthy-m-g/alda/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
-    
+
   </div>
 </nav><div class="container template-article">
 
@@ -95,10 +79,11 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="" class="logo" alt=""><h1>Chapter 13: Describing continuous-time event occurrence data</h1>
+
+      <h1>Chapter 13: Describing continuous-time event occurrence data</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/mccarthy-m-g/alda/blob/HEAD/vignettes/articles/chapter-13.Rmd" class="external-link"><code>vignettes/articles/chapter-13.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/mccarthy-m-g/alda/blob/main/vignettes/articles/chapter-13.Rmd" class="external-link"><code>vignettes/articles/chapter-13.Rmd</code></a></small>
       <div class="d-none name"><code>chapter-13.Rmd</code></div>
     </div>
 
@@ -198,11 +183,17 @@ definitions of the survivor and hazard functions:</p>
 <ul>
 <li>
 <p>The <strong>continuous-time survival function</strong> is the
-<em>cumulative probability</em> that the event time, <span class="math inline">\(T_i\)</span>, of the <span class="math inline">\(i\)</span>th individual will exceed <span class="math inline">\(t_j\)</span>, the infinite number of possible
-instants when the target event could occur:</p>
-<p><span class="math display">\[
+<em>cumulative probability</em> that the event time,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>T</mi><mi>i</mi></msub><annotation encoding="application/x-tex">T_i</annotation></semantics></math>,
+of the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>th
+individual will exceed
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mi>j</mi></msub><annotation encoding="application/x-tex">t_j</annotation></semantics></math>,
+the infinite number of possible instants when the target event could
+occur:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>t</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mo>Pr</mo><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>T</mi><mi>i</mi></msub><mo>&gt;</mo><msub><mi>t</mi><mi>j</mi></msub><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">
 S(t_{ij}) = \Pr[T_i &gt; t_j],
-\]</span></p>
+</annotation></semantics></math></p>
 <p>which is essentially identical to the discrete-time survival function
 in definition and meaning, aside from the different metric for clocking
 time.</p>
@@ -210,16 +201,19 @@ time.</p>
 <li>
 <p>The <strong>continuous-time hazard function</strong> is an
 instantaneous <em>rate</em> assessing the conditional probability that
-the <span class="math inline">\(i\)</span>th individual will experience
-the target event in the next small interval of time, <span class="math inline">\(\Delta t\)</span>, given that they did not
-experience it in any prior interval, divided by the length of that
-interval:</p>
-<p><span class="math display">\[
+the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>th
+individual will experience the target event in the next small interval
+of time,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Δ</mi><mi>t</mi></mrow><annotation encoding="application/x-tex">\Delta t</annotation></semantics></math>,
+given that they did not experience it in any prior interval, divided by
+the length of that interval:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>t</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><munder><mo>lim</mo><mrow><mi>Δ</mi><mi>t</mi><mo>→</mo><mn>0</mn></mrow></munder><mrow><mo stretchy="true" form="prefix">{</mo><mfrac><mrow><mo>Pr</mo><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>T</mi><mi>i</mi></msub><mo>∈</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>t</mi><mi>j</mi></msub><mo>,</mo><msub><mi>t</mi><mi>j</mi></msub><mo>+</mo><mi>Δ</mi><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="false" form="prefix">|</mo><msub><mi>T</mi><mi>i</mi></msub><mo>≥</mo><msub><mi>t</mi><mi>j</mi></msub><mo stretchy="true" form="postfix">]</mo></mrow></mrow><mrow><mi>Δ</mi><mi>t</mi></mrow></mfrac><mo stretchy="true" form="postfix">}</mo></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">
 h(t_{ij}) = \lim_{\Delta t \to 0} \left\{
   \frac{\Pr[T_i \in (t_j, t_j + \Delta t) | T_i \geq t_j]}
   {\Delta t}
 \right\},
-\]</span></p>
+</annotation></semantics></math></p>
 <p>which means that unlike discrete-time hazard probabilities,
 continuous-time hazard rates do not have an upper bound and can exceed
 values of 1.0.</p>
@@ -739,6 +733,15 @@ functions “by hand” using the discrete-time and actuarial methods.</p>
 
 #mwlefoodfi .gt_indent_5 {
   text-indent: 25px;
+}
+
+#mwlefoodfi .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#mwlefoodfi div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
 }
 </style>
 <table class="table gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
@@ -1470,6 +1473,15 @@ is to group the data by estimate values, then summarize.</p>
 #eexombwkke .gt_indent_5 {
   text-indent: 25px;
 }
+
+#eexombwkke .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#eexombwkke div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
 </style>
 <table class="table gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
 <thead><tr class="gt_col_headings">
@@ -2100,25 +2112,27 @@ value rather than going to infinity. Therefore, here we re-tidy the
 <p>In Section 13.4 Singer and Willett (2003) introduce the
 <strong>cumulative hazard function</strong>, which is the <em>integral
 of the hazard function</em> between the integration limits of time 0 and
-time <span class="math inline">\(t\)</span> (i.e., the “accumulation” of
-the hazard over time), given by:</p>
-<p><span class="math display">\[
+time
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>
+(i.e., the “accumulation” of the hazard over time), given by:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>H</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>t</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msubsup><mo>∫</mo><mn>0</mn><mi>t</mi></msubsup><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>t</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mi>d</mi><mi>t</mi><mi>.</mi></mrow><annotation encoding="application/x-tex">
 H(t_{ij}) = \int_0^t h(t_{ij}) d t.
-\]</span></p>
+</annotation></semantics></math></p>
 <p>There are two simple ways to estimate the cumulative hazard
 function:</p>
 <ul>
 <li>
 <p>The <strong>Nelson-Aalen method</strong> accumulates the
 estimated total amount of hazard during all instants in each interval,
-given by the product of the <span class="math inline">\(j\)</span>th
+given by the product of the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>th
 Kaplan-Meier–type hazard estimate and its interval’s width:</p>
-<p><span class="math display">\[
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>H</mi><mo accent="true">̂</mo></mover><mtext mathvariant="normal">NA</mtext></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>t</mi><mi>j</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mover><mi>h</mi><mo accent="true">̂</mo></mover><mtext mathvariant="normal">KM</mtext></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>t</mi><mn>1</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><msub><mtext mathvariant="normal">width</mtext><mn>1</mn></msub><mo>+</mo><msub><mover><mi>h</mi><mo accent="true">̂</mo></mover><mtext mathvariant="normal">KM</mtext></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>t</mi><mn>2</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><msub><mtext mathvariant="normal">width</mtext><mn>2</mn></msub><mo>+</mo><mi>…</mi><mo>+</mo><msub><mover><mi>h</mi><mo accent="true">̂</mo></mover><mtext mathvariant="normal">KM</mtext></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>t</mi><mi>j</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><msub><mtext mathvariant="normal">width</mtext><mi>j</mi></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
 \hat H_\text{NA}(t_j) = \hat h_\text{KM}(t_1) \text{width}_1
   + \hat h_\text{KM}(t_2) \text{width}_2
   + \dots
   + \hat h_\text{KM}(t_j) \text{width}_j.
-\]</span></p>
+</annotation></semantics></math></p>
 </li>
 <li>
 <p>The <strong>negative log survivor function method</strong>
@@ -2126,9 +2140,9 @@ exploits a well-known mathematical relationship between the cumulative
 hazard and survivor functions, which is that the population cumulative
 hazard function is identical to the negative log of the population
 survivor function:</p>
-<p><span class="math display">\[
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>H</mi><mo accent="true">̂</mo></mover><mrow><mo>−</mo><mtext mathvariant="normal">LS</mtext></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>t</mi><mi>j</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mo>−</mo><mo>log</mo><msub><mover><mi>S</mi><mo accent="true">̂</mo></mover><mtext mathvariant="normal">KM</mtext></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>t</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">
 \hat H_{-\text{LS}}(t_j) = -\log \hat S_\text{KM}(t_{ij}).
-\]</span></p>
+</annotation></semantics></math></p>
 </li>
 </ul>
 <p>Here we will use both of these methods to plot cumulative hazard
@@ -2665,7 +2679,7 @@ frames with the kernel-smoothed hazard function data frames.</p>
 <span><span class="va">study_plots</span><span class="op">$</span><span class="va">health_workers</span></span></code></pre></div>
 <p><img src="chapter-13_files/figure-html/unnamed-chunk-25-1.png" width="700"></p>
 </div>
-  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
 
@@ -2676,15 +2690,15 @@ frames with the kernel-smoothed hazard function data frames.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
     </footer>
 </div>
 
-  
 
-  
+
+
 
   </body>
 </html>
